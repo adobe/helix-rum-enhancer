@@ -55,7 +55,11 @@ sampleRUM.targetselector = (element) => {
   return value;
 };
 
-sampleRUM.drain('cwv', ((sendPing) => {
+sampleRUM.drain('cwv', (() => {
+  if (document.querySelector('script[src="https://rum.hlx.page/.rum/web-vitals/dist/web-vitals.iife.js"]')) {
+    // web vitals script has been loaded already
+    return;
+  }
   // use classic script to avoid CORS issues
   const script = document.createElement('script');
   script.src = 'https://rum.hlx.page/.rum/web-vitals/dist/web-vitals.iife.js';
@@ -63,7 +67,7 @@ sampleRUM.drain('cwv', ((sendPing) => {
     const storeCWV = (measurement) => {
       const data = { cwv: {} };
       data.cwv[measurement.name] = measurement.value;
-      sendPing(data);
+      sampleRUM('cwv', data);
     };
     // When loading `web-vitals` using a classic script, all the public
     // methods can be found on the `webVitals` global namespace.
