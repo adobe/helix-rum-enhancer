@@ -12,7 +12,7 @@
 
 ## Usage
 
-This library is meant to be used in conjunction with and loaded by the `sampleRUM` function found in [Helix Project Boilerplate](https://github.com/adobe/helix-project-boilerplate/blob/main/scripts/scripts.js) or (Helix RUM JS)[https://github.com/adobe/helix-rum-js].
+This library is meant to be used in conjunction with and loaded by the `sampleRUM` function found in [Helix Project Boilerplate](https://github.com/adobe/helix-project-boilerplate/blob/main/scripts/scripts.js) or [Helix RUM JS](https://github.com/adobe/helix-rum-js).
 
 It will add following new checkpoints:
 
