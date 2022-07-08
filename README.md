@@ -10,15 +10,16 @@
 [![LGTM Code Quality Grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/adobe/helix-rum-enhancer.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/adobe/helix-rum-enhancer)
 [![semantic-release](https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg)](https://github.com/semantic-release/semantic-release)
 
-## Installation
-
-```bash
-$ npm install @adobe/helix-rum-enhancer
-```
-
 ## Usage
 
-See the [API documentation](docs/API.md).
+This library is meant to be used in conjunction with and loaded by the `sampleRUM` function found in [Helix Project Boilerplate](https://github.com/adobe/helix-project-boilerplate/blob/main/scripts/scripts.js) or (Helix RUM JS)[https://github.com/adobe/helix-rum-js].
+
+It will add following new checkpoints:
+
+- `cwv`: Core Web Vitals Collection
+- `click`: A click anywhere in the document
+- `viewblock`: A Helix block has been scrolled into the viewport
+- `viewmedia`: An image or viedo hosted by Helix Media Bus has been scrolled into the viewport
 
 ## Development
 
