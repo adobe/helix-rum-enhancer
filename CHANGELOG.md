@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/adobe/helix-rum-enhancer/compare/v1.0.1...v1.0.2) (2023-01-12)
+
+
+### Bug Fixes
+
+* use node 18 ([#24](https://github.com/adobe/helix-rum-enhancer/issues/24)) ([340485a](https://github.com/adobe/helix-rum-enhancer/commit/340485a6bab72bb70e24dafa54fff22ca916c41e))
+
 ## [1.0.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.0.0...v1.0.1) (2022-07-08)
 
 
