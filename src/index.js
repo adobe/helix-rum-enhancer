@@ -71,9 +71,12 @@ sampleRUM.drain('cwv', (() => {
     };
     // When loading `web-vitals` using a classic script, all the public
     // methods can be found on the `webVitals` global namespace.
-    window.webVitals.getCLS(storeCWV);
-    window.webVitals.getFID(storeCWV);
-    window.webVitals.getLCP(storeCWV);
+    ['CLS', 'FID', 'LCP', 'INP']
+      .map((metric) => window.webVitals[`get${metric}`])
+      .filter((metric) => typeof metric === 'function')
+      .forEach((name) => {
+        window.webVitals[`get${name}`](storeCWV);
+      });
   };
   document.head.appendChild(script);
 }));
