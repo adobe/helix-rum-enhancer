@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.0.2...v1.1.0) (2023-05-11)
+
+
+### Features
+
+* **cwv:** add INP (Interaction to next paint) as default metric ([b8e2da7](https://github.com/adobe/helix-rum-enhancer/commit/b8e2da7b00887048d9e8874bb896283615cd2072))
+
 ## [1.0.2](https://github.com/adobe/helix-rum-enhancer/compare/v1.0.1...v1.0.2) (2023-01-12)
 
 
