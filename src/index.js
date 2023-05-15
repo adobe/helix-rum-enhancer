@@ -74,8 +74,8 @@ sampleRUM.drain('cwv', (() => {
     ['CLS', 'FID', 'LCP', 'INP']
       .map((metric) => window.webVitals[`get${metric}`])
       .filter((metric) => typeof metric === 'function')
-      .forEach((name) => {
-        window.webVitals[`get${name}`](storeCWV);
+      .forEach((invokeMetric) => {
+        invokeMetric(storeCWV);
       });
   };
   document.head.appendChild(script);
