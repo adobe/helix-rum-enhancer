@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/adobe/helix-rum-enhancer/compare/v1.1.1...v1.1.2) (2023-05-16)
+
+
+### Bug Fixes
+
+* trigger release ([736b3b6](https://github.com/adobe/helix-rum-enhancer/commit/736b3b684c066e62a9a656524a121fd68ede8389))
+
 ## [1.1.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.1.0...v1.1.1) (2023-05-16)
 
 
