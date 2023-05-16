@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.1.0...v1.1.1) (2023-05-16)
+
+
+### Bug Fixes
+
+* **cwv:** window.webVitals[name] is not a function ([a2d46cb](https://github.com/adobe/helix-rum-enhancer/commit/a2d46cbbf977a59bfe5b3fd179930db75bb3e809))
+
 # [1.1.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.0.2...v1.1.0) (2023-05-11)
 
 
