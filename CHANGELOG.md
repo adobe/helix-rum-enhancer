@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.1.4...v1.2.0) (2023-08-18)
+
+
+### Features
+
+* **checkpoints:** introduce new checkpoint `enter` that gets triggered when a page is first loaded (not refreshed) ([16c3381](https://github.com/adobe/helix-rum-enhancer/commit/16c3381ee564de17fbd6ab8d14a717f9773ca5f6)), closes [#62](https://github.com/adobe/helix-rum-enhancer/issues/62)
+
 ## [1.1.4](https://github.com/adobe/helix-rum-enhancer/compare/v1.1.3...v1.1.4) (2023-05-16)
 
 
