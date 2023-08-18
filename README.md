@@ -20,6 +20,7 @@ It will add following new checkpoints:
 - `click`: A click anywhere in the document
 - `viewblock`: A Helix block has been scrolled into the viewport
 - `viewmedia`: An image or viedo hosted by Helix Media Bus has been scrolled into the viewport
+- `enter`: when page loads and the referrer is different than the current page.
 
 ## Development
 
