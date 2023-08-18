@@ -46,6 +46,11 @@ sampleRUM.drain('observe', ((elements) => {
   });
 }));
 
+// enter checkpoint when referrer is not the current page url
+if (!!document.referrer && (document.referrer !== window.location.href)) {
+  sampleRUM('enter', { target: undefined, source: document.referrer });
+}
+
 sampleRUM.targetselector = (element) => {
   let value = element.getAttribute('href') || element.currentSrc || element.getAttribute('src');
   if (value && value.startsWith('https://')) {
