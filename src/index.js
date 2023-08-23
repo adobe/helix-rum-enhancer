@@ -47,7 +47,8 @@ sampleRUM.drain('observe', ((elements) => {
 }));
 
 sampleRUM.targetselector = (element) => {
-  let value = element.getAttribute('href') || element.currentSrc || element.getAttribute('src');
+  let value = element.getAttribute('href') || element.currentSrc || element.getAttribute('src')
+                || element.dataset.action || element.action;
   if (value && value.startsWith('https://')) {
     // resolve relative links
     value = new URL(value, window.location).href;
@@ -85,9 +86,19 @@ sampleRUM.sourceselector = (element) => {
   if (element === document.body || element === document.documentElement || !element) {
     return undefined;
   }
-  if (element.id) {
-    return `#${element.id}`;
+
+  const form = element.closest('form');
+  let formElementSelector = '';
+  if (form && Array.from(form.elements).includes(element)) {
+    formElementSelector = element.tagName === 'INPUT' ? `form input[type='${element.getAttribute('type')}']` : `form ${element.tagName.toLowerCase()}`;
   }
+
+  if (element.id || formElementSelector) {
+    const blockName = element.closest('.block') ? element.closest('.block').getAttribute('data-block-name') : '';
+    const id = element.id ? `#${element.id}` : '';
+    return blockName ? `.${blockName} ${formElementSelector}${id}` : `${formElementSelector}${id}`;
+  }
+
   if (element.getAttribute('data-block-name')) {
     return `.${element.getAttribute('data-block-name')}`;
   }
@@ -96,4 +107,11 @@ sampleRUM.sourceselector = (element) => {
 
 document.addEventListener('click', (event) => {
   sampleRUM('click', { target: sampleRUM.targetselector(event.target), source: sampleRUM.sourceselector(event.target) });
+});
+
+// Track form submissions
+document.querySelectorAll('form').forEach((form) => {
+  form.addEventListener('submit', (event) => {
+    sampleRUM('formsubmit', { target: sampleRUM.targetselector(event.target), source: sampleRUM.sourceselector(event.target) });
+  });
 });
