@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.2.0...v1.3.0) (2023-08-24)
+
+
+### Features
+
+* **forms:** improve form instrumentation ([86ecbf5](https://github.com/adobe/helix-rum-enhancer/commit/86ecbf564fe6c04e1d566ac4eeb446d3e6670171))
+
 # [1.2.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.1.4...v1.2.0) (2023-08-18)
 
 
