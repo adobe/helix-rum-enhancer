@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.3.0...v1.4.0) (2023-09-02)
+
+
+### Features
+
+* **checkpoint:** introduce leave checkpoint ([33abd03](https://github.com/adobe/helix-rum-enhancer/commit/33abd03947b0345200eea1d5857b72a036c09923))
+
 # [1.3.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.2.0...v1.3.0) (2023-08-24)
 
 
