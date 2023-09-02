@@ -87,6 +87,14 @@ sampleRUM.drain('cwv', (() => {
   document.head.appendChild(script);
 }));
 
+sampleRUM.drain('leave', ((event = {}) => {
+  if (sampleRUM.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
+    return;
+  }
+  sampleRUM.left = true;
+  sampleRUM('leave');
+}));
+
 sampleRUM.sourceselector = (element) => {
   if (element === document.body || element === document.documentElement || !element) {
     return undefined;
@@ -120,3 +128,6 @@ document.querySelectorAll('form').forEach((form) => {
     sampleRUM('formsubmit', { target: sampleRUM.targetselector(event.target), source: sampleRUM.sourceselector(event.target) });
   });
 });
+
+window.addEventListener('visibilitychange', ((event) => sampleRUM.leave(event)));
+window.addEventListener('pagehide', ((event) => sampleRUM.leave(event)));
