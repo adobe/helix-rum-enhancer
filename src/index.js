@@ -11,7 +11,7 @@
  */
 const { sampleRUM } = window.hlx.rum;
 
-sampleRUM.baseURL = sampleRUM.baseURL || 'https://rum.hlx.page';
+sampleRUM.baseURL = sampleRUM.baseURL || new URL('https://rum.hlx.page');
 
 sampleRUM.blockobserver = (window.IntersectionObserver) ? new IntersectionObserver((entries) => {
   entries
