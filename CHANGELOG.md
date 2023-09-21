@@ -1,3 +1,11 @@
+# [1.5.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.4.0...v1.5.0) (2023-09-21)
+
+
+### Features
+
+* **index:** configurable base url. Adapt to changes in helix-rum-js ([1bb9792](https://github.com/adobe/helix-rum-enhancer/commit/1bb9792f46441d4b17809570f3a018552389515f))
+* **index:** enable configurable base url ([3adc4a8](https://github.com/adobe/helix-rum-enhancer/commit/3adc4a8308b86571af5014f6463a4543f3fca857))
+
 # [1.4.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.3.0...v1.4.0) (2023-09-02)
 
 
