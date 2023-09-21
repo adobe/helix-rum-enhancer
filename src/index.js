@@ -11,6 +11,8 @@
  */
 const { sampleRUM } = window.hlx.rum;
 
+sampleRUM.baseURL = sampleRUM.baseURL || new URL('https://rum.hlx.page');
+
 sampleRUM.blockobserver = (window.IntersectionObserver) ? new IntersectionObserver((entries) => {
   entries
     .filter((entry) => entry.isIntersecting)
@@ -62,13 +64,14 @@ sampleRUM.targetselector = (element) => {
 };
 
 sampleRUM.drain('cwv', (() => {
-  if (document.querySelector('script[src="https://rum.hlx.page/.rum/web-vitals/dist/web-vitals.iife.js"]')) {
+  const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
+  if (document.querySelector(`script[src="${cwvScript}"]`)) {
     // web vitals script has been loaded already
     return;
   }
   // use classic script to avoid CORS issues
   const script = document.createElement('script');
-  script.src = 'https://rum.hlx.page/.rum/web-vitals/dist/web-vitals.iife.js';
+  script.src = cwvScript;
   script.onload = () => {
     const storeCWV = (measurement) => {
       const data = { cwv: {} };
