@@ -80,7 +80,7 @@ sampleRUM.drain('cwv', (() => {
     };
     // When loading `web-vitals` using a classic script, all the public
     // methods can be found on the `webVitals` global namespace.
-    ['CLS', 'FID', 'LCP', 'INP']
+    ['CLS', 'FID', 'LCP', 'INP', 'TTFB']
       .map((metric) => window.webVitals[`get${metric}`])
       .filter((metric) => typeof metric === 'function')
       .forEach((invokeMetric) => {
