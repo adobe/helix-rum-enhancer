@@ -134,3 +134,12 @@ document.querySelectorAll('form').forEach((form) => {
 
 window.addEventListener('visibilitychange', ((event) => sampleRUM.leave(event)));
 window.addEventListener('pagehide', ((event) => sampleRUM.leave(event)));
+
+const observer = new PerformanceObserver((list) => {
+  list.getEntries()
+    .filter((entry) => (entry.responseStatus < 400) && new URL(entry.name).pathname.match('.*(\\.plain\\.html|\\.json)$'))
+    .forEach((entry) => {
+      sampleRUM('resource', { source: entry.name, target: Math.round(entry.duration) });
+    });
+});
+observer.observe({ type: 'resource', buffered: true });
