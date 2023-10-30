@@ -31,7 +31,7 @@ sampleRUM.mediaobserver = (window.IntersectionObserver) ? new IntersectionObserv
       sampleRUM.mediaobserver.unobserve(entry.target); // observe only once
       const target = sampleRUM.targetselector(entry.target);
       const source = sampleRUM.sourceselector(entry.target);
-      sampleRUM('viewmedia', { target, source });
+      sampleRUM('viewmedia', { target, source, type: entry.target.tagName.toLowerCase()  });
     });
 }, { threshold: 0.25 }) : { observe: () => { } };
 
