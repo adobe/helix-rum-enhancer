@@ -20,7 +20,7 @@ sampleRUM.blockobserver = (window.IntersectionObserver) ? new IntersectionObserv
       sampleRUM.blockobserver.unobserve(entry.target); // observe only once
       const target = sampleRUM.targetselector(entry.target);
       const source = sampleRUM.sourceselector(entry.target);
-      sampleRUM('viewblock', { target, source });
+      sampleRUM('viewblock', { target, source, type: entry.target.tagName.toLowerCase() });
     });
 }, { threshold: 0.25 }) : { observe: () => { } };
 
