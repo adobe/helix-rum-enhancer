@@ -1,3 +1,11 @@
+# [1.7.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.6.0...v1.7.0) (2023-10-31)
+
+
+### Features
+
+* **checkpoint:**  new loadresource checkpoint ([d818efc](https://github.com/adobe/helix-rum-enhancer/commit/d818efc854241119979300387b3dcd4d59c6c8f5))
+* **checkpoint:** introduce new resource checkpoint ([2845a20](https://github.com/adobe/helix-rum-enhancer/commit/2845a202281c09f1c75b4e8a52de000663410b1c))
+
 # [1.6.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.5.0...v1.6.0) (2023-10-18)
 
 
