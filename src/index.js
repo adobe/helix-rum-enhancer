@@ -65,7 +65,7 @@ navigate(document.referrer);
 
 new PerformanceObserver((list) => list
   .getEntries().map((entry) => navigate(document.referrer, entry.type)))
-  .observe({ entryTypes: ['navigation'], buffered: true });
+  .observe({ type: 'navigation', buffered: true });
 
 sampleRUM.targetselector = (element) => {
   let value = element.getAttribute('href') || element.currentSrc || element.getAttribute('src')
