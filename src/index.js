@@ -48,10 +48,24 @@ sampleRUM.drain('observe', ((elements) => {
   });
 }));
 
-// enter checkpoint when referrer is not the current page url
-if (!!document.referrer && (document.referrer !== window.location.href)) {
-  sampleRUM('enter', { target: undefined, source: document.referrer });
-}
+const navigate = (source, type) => {
+  const payload = { source, target: document.visibilityState };
+  // reload: same page, navigate: same origin, enter: everything else
+  if (type === 'reload' || source === window.location.href) {
+    sampleRUM('reload', payload);
+  } else if (type !== 'navigate') {
+    sampleRUM(type, payload); // back, forward, prerender, etc.
+  } else if (source && window.location.origin === new URL(source).origin) {
+    sampleRUM('navigate', payload); // internal navigation
+  } else {
+    sampleRUM('enter', payload); // enter site
+  }
+};
+navigate(document.referrer);
+
+new PerformanceObserver((list) => list
+  .getEntries().map((entry) => navigate(document.referrer, entry.type)))
+  .observe({ type: 'navigation', buffered: true });
 
 sampleRUM.targetselector = (element) => {
   let value = element.getAttribute('href') || element.currentSrc || element.getAttribute('src')
