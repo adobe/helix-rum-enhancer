@@ -1,3 +1,15 @@
+# [1.8.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.7.0...v1.8.0) (2023-11-21)
+
+
+### Bug Fixes
+
+* **navigation:** use correct buffered perf observer ([39ed811](https://github.com/adobe/helix-rum-enhancer/commit/39ed811cdb6ccf5471b30a0d147317c724c4220c))
+
+
+### Features
+
+* **navigate:** refine checkpoints for `enter`, `navigate`, `reload`, `back_forward`, and `prerender`, track `visibilityState` ([70f622a](https://github.com/adobe/helix-rum-enhancer/commit/70f622a62aa93ff96219420b5c5357348b9ef050))
+
 # [1.7.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.6.0...v1.7.0) (2023-10-31)
 
 
