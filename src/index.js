@@ -61,7 +61,6 @@ const navigate = (source, type) => {
     sampleRUM('enter', payload); // enter site
   }
 };
-navigate(document.referrer);
 
 new PerformanceObserver((list) => list
   .getEntries().map((entry) => navigate(document.referrer, entry.type)))
