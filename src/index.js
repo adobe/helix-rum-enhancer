@@ -67,7 +67,7 @@ new PerformanceObserver((list) => list
   .observe({ type: 'navigation', buffered: true });
 
 sampleRUM.targetselector = (element) => {
-  let value = element.getAttribute('href') || element.currentSrc || element.getAttribute('src')
+  let value = element.getAttribute('data-rum-target') || element.getAttribute('href') || element.currentSrc || element.getAttribute('src')
                 || element.dataset.action || element.action;
   if (value && value.startsWith('https://')) {
     // resolve relative links
@@ -115,7 +115,9 @@ sampleRUM.sourceselector = (element) => {
   if (element === document.body || element === document.documentElement || !element) {
     return undefined;
   }
-
+  if (element.getAttribute('data-rum-source')) {
+    return element.getAttribute('data-rum-source');
+  }
   const form = element.closest('form');
   let formElementSelector = '';
   if (form && Array.from(form.elements).includes(element)) {
