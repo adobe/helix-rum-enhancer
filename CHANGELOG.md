@@ -1,3 +1,10 @@
+## [1.8.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.8.0...v1.8.1) (2023-11-29)
+
+
+### Bug Fixes
+
+* **navigate:** do not navigate on load ([7873379](https://github.com/adobe/helix-rum-enhancer/commit/7873379bb89b950a0efeb07ff11a89714474bfb6))
+
 # [1.8.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.7.0...v1.8.0) (2023-11-21)
 
 
