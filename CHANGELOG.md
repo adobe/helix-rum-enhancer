@@ -1,3 +1,10 @@
+# [1.9.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.8.1...v1.9.0) (2023-12-11)
+
+
+### Features
+
+* add support for source/target data attributes ([27739c6](https://github.com/adobe/helix-rum-enhancer/commit/27739c660b41f84df4e20d38efcf00d5335c7f5d))
+
 ## [1.8.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.8.0...v1.8.1) (2023-11-29)
 
 
