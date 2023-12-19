@@ -21,6 +21,7 @@ It will add following new checkpoints:
 - `viewblock`: A Helix block has been scrolled into the viewport
 - `viewmedia`: An image or video hosted by Helix Media Bus has been scrolled into the viewport
 - `enter`: when page loads and the referrer is different than the current page.
+- `assetclick`: A click in the document which can be associated with a proximal image or video in the DOM.
 
 ## Development
 

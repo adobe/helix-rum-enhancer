@@ -136,8 +136,44 @@ sampleRUM.sourceselector = (element) => {
   return sampleRUM.sourceselector(element.parentElement);
 };
 
+function findAssetUrl(nl, fn) {
+  for (const element of nl) {
+    const url = fn(element);
+    if (url) {
+      return (url.startsWith('data:') || url.startsWith('https://')) ? url : new URL(url, window.location).href;
+    }
+  }
+  return undefined;
+}
+
+sampleRUM.nearestAsset = (element) => {
+  if (element === document.body || element === document.documentElement || !element || element.tagName === 'NAV') {
+    return undefined;
+  }
+
+  let url = findAssetUrl(element.querySelectorAll('video > source, img'), (el) => el.src);
+  if (url) {
+    return url;
+  }
+
+  url = findAssetUrl(element.querySelectorAll('[style*="background-image"]'), (el) => {
+    const m = /^url\((.+)\)/.exec(el.style.backgroundImage);
+    return m ? m[1] : undefined;
+  });
+  if (url) {
+    return url;
+  }
+
+  return sampleRUM.nearestAsset(element.parentElement);
+};
+
 document.addEventListener('click', (event) => {
-  sampleRUM('click', { target: sampleRUM.targetselector(event.target), source: sampleRUM.sourceselector(event.target) });
+  const target = sampleRUM.targetselector(event.target);
+  sampleRUM('click', { target, source: sampleRUM.sourceselector(event.target) });
+  const nearestAsset = sampleRUM.nearestAsset(event.target);
+  if (nearestAsset) {
+    sampleRUM('assetclick', { target, source: nearestAsset });
+  }
 });
 
 // Track form submissions
