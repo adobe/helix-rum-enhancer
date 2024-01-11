@@ -24,7 +24,7 @@ const urlSanitizers = {
 const targetselector = (element) => {
   let value = element.getAttribute('data-rum-target') || element.getAttribute('href')
     || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
-  if (value && value.startsWith('https://')) {
+  if (value && !value.startsWith('https://')) {
     // resolve relative links
     value = new URL(value, window.location).href;
   }
