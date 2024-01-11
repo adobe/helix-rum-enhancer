@@ -1,3 +1,10 @@
+## [1.9.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.9.0...v1.9.1) (2024-01-11)
+
+
+### Bug Fixes
+
+* correct prefix check for relative urls in targets. fixes [#102](https://github.com/adobe/helix-rum-enhancer/issues/102) ([3df4132](https://github.com/adobe/helix-rum-enhancer/commit/3df413259cd0e71777328f738b81057f7f4e5520))
+
 # [1.9.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.8.1...v1.9.0) (2023-12-11)
 
 
