@@ -124,8 +124,8 @@ sampleRUM.sourceselector = (element) => {
     formElementSelector = element.tagName === 'INPUT' ? `form input[type='${element.getAttribute('type')}']` : `form ${element.tagName.toLowerCase()}`;
   }
 
+  const blockName = element.closest('.block') ? element.closest('.block').getAttribute('data-block-name') : '';
   if (element.id || formElementSelector) {
-    const blockName = element.closest('.block') ? element.closest('.block').getAttribute('data-block-name') : '';
     const id = element.id ? `#${element.id}` : '';
     return blockName ? `.${blockName} ${formElementSelector}${id}` : `${formElementSelector}${id}`;
   }
@@ -133,6 +133,11 @@ sampleRUM.sourceselector = (element) => {
   if (element.getAttribute('data-block-name')) {
     return `.${element.getAttribute('data-block-name')}`;
   }
+
+  if (Array.from(element.classList).some((className) => className.match(/button|cta/))) {
+    return blockName ? `.${blockName} .button` : '.button';
+  }
+  
   return sampleRUM.sourceselector(element.parentElement);
 };
 
