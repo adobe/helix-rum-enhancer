@@ -1,3 +1,17 @@
+# [2.0.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.9.1...v2.0.0) (2024-01-16)
+
+
+### Features
+
+* prepare compatibility with @adobe/helix-rum-js@2 ([b1cef07](https://github.com/adobe/helix-rum-enhancer/commit/b1cef07ec59c8134056a9aaf25a331016aeffe39))
+* prepare compatibility with @adobe/helix-rum-js@2 ([702a873](https://github.com/adobe/helix-rum-enhancer/commit/702a8731d783850d26b2daae3a839e7ee4192e47))
+
+
+### BREAKING CHANGES
+
+* this version can only be used from helix-rum-js@v2 and up
+* this version can only be used from helix-rum-js@v2 and up
+
 ## [1.9.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.9.0...v1.9.1) (2024-01-11)
 
 
