@@ -67,10 +67,6 @@ function optedIn(checkpoint, data) {
 }
 // Gets configured collection from the config service for the current domain
 function getCollectionConfig() {
-  if (window.location.hostname === 'blog.adobe.com') {
-    return ['loadresource', ...DEFAULT_TRACKING_EVENTS];
-  }
-  // TODO: configured collection should come from config service
   return DEFAULT_TRACKING_EVENTS;
 }
 
@@ -157,18 +153,16 @@ function addEnterLeaveTracking() {
 }
 
 function addLoadResourceTracking() {
-  if (window.location.hostname === 'blog.adobe.com') {
-    const observer = new PerformanceObserver((list) => {
-      list.getEntries()
-        .filter((entry) => !entry.responseStatus || entry.responseStatus < 400)
-        .filter((entry) => window.location.hostname === new URL(entry.name).hostname)
-        .filter((entry) => new URL(entry.name).pathname.match('.*(\\.plain\\.html|\\.json)$'))
-        .forEach((entry) => {
-          sampleRUM('loadresource', { source: entry.name, target: Math.round(entry.duration) });
-        });
-    });
-    observer.observe({ type: 'resource', buffered: true });
-  }
+  const observer = new PerformanceObserver((list) => {
+    list.getEntries()
+      .filter((entry) => !entry.responseStatus || entry.responseStatus < 400)
+      .filter((entry) => window.location.hostname === new URL(entry.name).hostname)
+      .filter((entry) => new URL(entry.name).pathname.match('.*(\\.plain\\.html|\\.json)$'))
+      .forEach((entry) => {
+        sampleRUM('loadresource', { source: entry.name, target: Math.round(entry.duration) });
+      });
+  });
+  observer.observe({ type: 'resource', buffered: true });
 }
 
 function activateBlocksMutationObserver() {
