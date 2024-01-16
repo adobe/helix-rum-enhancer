@@ -11,7 +11,7 @@
  */
 /* eslint-env browser */
 const KNOWN_PROPERTIES = ['weight', 'id', 'referer', 'checkpoint', 't', 'source', 'target', 'cwv', 'CLS', 'FID', 'LCP', 'INP', 'TTFB'];
-const DEFAULT_CHECKPOINTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia'];
+const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia'];
 const SESSION_STORAGE_KEY = 'aem-rum';
 const { sampleRUM, queue, isSelected } = window.hlx.rum;
 
@@ -68,10 +68,10 @@ function optedIn(checkpoint, data) {
 // Gets configured collection from the config service for the current domain
 function getCollectionConfig() {
   if (window.location.hostname === 'blog.adobe.com') {
-    return ['loadresource', ...DEFAULT_CHECKPOINTS];
+    return ['loadresource', ...DEFAULT_TRACKING_EVENTS];
   }
   // TODO: configured collection should come from config service
-  return DEFAULT_CHECKPOINTS;
+  return DEFAULT_TRACKING_EVENTS;
 }
 
 function trackCheckpoint(checkpoint, data, t) {
@@ -260,7 +260,7 @@ function addTrackingFromConfig() {
 function initEnhancer() {
   // eslint-disable-next-line max-len
   const rumStorage = sessionStorage.getItem(SESSION_STORAGE_KEY) ? JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY)) : {};
-  trackCheckpoint('pagesviewed', { source: rumStorage.pages }, 0);
+  sampleRUM('pagesviewed', { source: rumStorage.pages });
   addTrackingFromConfig();
   window.hlx.rum.collector = trackCheckpoint;
   processQueue();

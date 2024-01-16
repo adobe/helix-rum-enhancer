@@ -17,10 +17,13 @@ This library is meant to be used in conjunction with and loaded by the `sampleRU
 It will add following new checkpoints:
 
 - `cwv`: Core Web Vitals Collection
+- `pagesviewed`: number that helps to estimate how many pages are seen in average by a user.
 - `click`: A click anywhere in the document
 - `viewblock`: A Helix block has been scrolled into the viewport
 - `viewmedia`: An image or video hosted by Helix Media Bus has been scrolled into the viewport
-- `enter`: when page loads and the referrer is different than the current page.
+- `reload`, `navigate`, `enter`: depending on how the current page was accessed
+- `formsubmit`: when a form is submitted
+- `leave`: when the user leaves the page
 
 ## Development
 
