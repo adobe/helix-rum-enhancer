@@ -137,7 +137,6 @@ sampleRUM.sourceselector = (element) => {
   if (Array.from(element.classList).some((className) => className.match(/button|cta/))) {
     return blockName ? `.${blockName} .button` : '.button';
   }
-  
   return sampleRUM.sourceselector(element.parentElement);
 };
 
