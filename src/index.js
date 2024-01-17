@@ -53,6 +53,11 @@ const sourceselector = (element) => {
   if (element.getAttribute('data-block-name')) {
     return `.${element.getAttribute('data-block-name')}`;
   }
+
+  if (Array.from(element.classList).some((className) => className.match(/button|cta/))) {
+    return blockName ? `.${blockName} .button` : '.button';
+  }
+
   return sourceselector(element.parentElement);
 };
 
