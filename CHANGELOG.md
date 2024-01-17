@@ -1,3 +1,10 @@
+# [1.11.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.10.0...v1.11.0) (2024-01-17)
+
+
+### Features
+
+* **observer:** enable tracking of JSON loading for all browsers that have a PerformanceObserver implementation ([c049f93](https://github.com/adobe/helix-rum-enhancer/commit/c049f930f0cc1dc548e42bd8e76cd97709a873d7))
+
 # [1.10.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.9.1...v1.10.0) (2024-01-16)
 
 
