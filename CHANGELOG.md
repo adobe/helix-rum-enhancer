@@ -1,3 +1,15 @@
+# [2.1.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.0.0...v2.1.0) (2024-01-22)
+
+
+### Bug Fixes
+
+* **loadresource:** enable loadresource checkpoint for all origins ([0be8de7](https://github.com/adobe/helix-rum-enhancer/commit/0be8de7ee3e57afdd60a2b9af743bedd061e907d))
+
+
+### Features
+
+* **observer:** enable tracking of JSON loading for all browsers that have a PerformanceObserver implementation ([45b5e64](https://github.com/adobe/helix-rum-enhancer/commit/45b5e6428fb9c51e8fc4d477c574d44a361b3ec2))
+
 # [2.0.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.9.1...v2.0.0) (2024-01-16)
 
 
