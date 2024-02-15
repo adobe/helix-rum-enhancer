@@ -109,13 +109,16 @@ function addCWVTracking() {
       };
 
       const featureToggle = () => window.location.hostname === 'blog.adobe.com';
+      const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
 
-      // When loading `web-vitals` using a classic script, all the public
-      // methods can be found on the `webVitals` global namespace.
-      ['CLS', 'FID', 'LCP', 'INP', 'TTFB']
-        .map((metric) => window.webVitals[`on${metric}`])
-        .filter((metricFn) => typeof metricFn === 'function')
-        .forEach((metricFn) => metricFn(storeCWV, { reportAllChanges: featureToggle() }));
+      ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
+        // When loading `web-vitals` using a classic script, all the public
+        // methods can be found on the `webVitals` global namespace.
+        const metricFn = window.webVitals[`on${metric}`];
+        if (typeof metricFn === 'function') {
+          metricFn(storeCWV, isEager(metric) ? { reportAllChanges: featureToggle() } : undefined);
+        }
+      });
     };
     document.head.appendChild(script);
   }, 2000); // wait for delayed
