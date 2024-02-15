@@ -116,7 +116,8 @@ function addCWVTracking() {
         // methods can be found on the `webVitals` global namespace.
         const metricFn = window.webVitals[`on${metric}`];
         if (typeof metricFn === 'function') {
-          metricFn(storeCWV, isEager(metric) ? { reportAllChanges: featureToggle() } : undefined);
+          const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
+          metricFn(storeCWV, opts);
         }
       });
     };
