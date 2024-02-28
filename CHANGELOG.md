@@ -1,3 +1,10 @@
+## [1.11.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.11.0...v1.11.1) (2024-02-28)
+
+
+### Bug Fixes
+
+* **cwv:** report metrics eagerly ([b7a7e3e](https://github.com/adobe/helix-rum-enhancer/commit/b7a7e3e202f8dc4de97994cdf36ece95075082c4))
+
 # [1.11.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.10.0...v1.11.0) (2024-01-17)
 
 
