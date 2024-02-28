@@ -1,3 +1,13 @@
+## [2.1.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.1.0...v2.1.1) (2024-02-28)
+
+
+### Bug Fixes
+
+* **cwv:** only report LCP and CLS eagerly ([9d44949](https://github.com/adobe/helix-rum-enhancer/commit/9d44949701865242ac44255d5080f52b22be2b72))
+* **cwv:** report metrics eagerly ([4cfcad9](https://github.com/adobe/helix-rum-enhancer/commit/4cfcad9e8271a2a3c4571db419e26857b72d0c6d))
+* **cwv:** small change ([542fd6a](https://github.com/adobe/helix-rum-enhancer/commit/542fd6a050fdb911b4fb5faad7f83d0843af4d1e))
+* **cwv:** small change ([3a41b52](https://github.com/adobe/helix-rum-enhancer/commit/3a41b52676484d44585e8b0debe7352fe7a2e5ac))
+
 # [2.1.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.0.0...v2.1.0) (2024-01-22)
 
 
