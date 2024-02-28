@@ -91,14 +91,19 @@ sampleRUM.drain('cwv', (() => {
       data.cwv[measurement.name] = measurement.value;
       sampleRUM('cwv', data);
     };
+
+    const featureToggle = () => window.location.hostname === 'blog.adobe.com';
+    const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
+
     // When loading `web-vitals` using a classic script, all the public
     // methods can be found on the `webVitals` global namespace.
-    ['CLS', 'FID', 'LCP', 'INP', 'TTFB']
-      .map((metric) => window.webVitals[`get${metric}`])
-      .filter((metric) => typeof metric === 'function')
-      .forEach((invokeMetric) => {
-        invokeMetric(storeCWV);
-      });
+    ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
+      const metricFn = window.webVitals[`on${metric}`];
+      if (typeof metricFn === 'function') {
+        const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
+        metricFn(storeCWV, opts);
+      }
+    });
   };
   document.head.appendChild(script);
 }));
