@@ -1,3 +1,10 @@
+# [2.2.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.1.1...v2.2.0) (2024-03-04)
+
+
+### Features
+
+* **sourceselector:** highlight clicks on buttons and CTAs ([2bc8dc5](https://github.com/adobe/helix-rum-enhancer/commit/2bc8dc531ef31e9ae08daebdd428a98a493c0f9e))
+
 ## [2.1.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.1.0...v2.1.1) (2024-02-28)
 
 
