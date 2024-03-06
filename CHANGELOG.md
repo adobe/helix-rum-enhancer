@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.2.0...v2.3.0) (2024-03-06)
+
+
+### Features
+
+* **minirum:** allow different base urls for collection and extra scripts ([c32c7b9](https://github.com/adobe/helix-rum-enhancer/commit/c32c7b9c3f7838ced71e372889fb618b3befe098))
+
 # [2.2.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.1.1...v2.2.0) (2024-03-04)
 
 
