@@ -1,3 +1,10 @@
+## [2.3.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.3.0...v2.3.1) (2024-03-11)
+
+
+### Bug Fixes
+
+* add json type header to beacon ([a1e0807](https://github.com/adobe/helix-rum-enhancer/commit/a1e0807f735a7c8097c588f401efdb9aac08dfc7))
+
 # [2.3.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.2.0...v2.3.0) (2024-03-06)
 
 
