@@ -229,7 +229,7 @@ function addUTMParametersTracking() {
   const utmParams = [...usp.entries()]
     .filter(([key]) => key.startsWith('utm_') && key !== 'utm_id');
   utmParams.forEach(([key, value]) => {
-    sampleRUM('utm-campaign', { source: key, target: value });
+    sampleRUM('utm', { source: key, target: value });
   });
 }
 
