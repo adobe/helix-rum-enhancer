@@ -11,7 +11,7 @@
  */
 /* eslint-env browser */
 const KNOWN_PROPERTIES = ['weight', 'id', 'referer', 'checkpoint', 't', 'source', 'target', 'cwv', 'CLS', 'FID', 'LCP', 'INP', 'TTFB'];
-const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia', 'loadresource'];
+const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia', 'loadresource', 'utm'];
 const SESSION_STORAGE_KEY = 'aem-rum';
 const { sampleRUM, queue, isSelected } = window.hlx.rum;
 
@@ -224,6 +224,14 @@ function addViewMediaTracking(parent) {
   }
 }
 
+function addUTMParametersTracking() {
+  const usp = new URLSearchParams(window.location.search);
+  [...usp.entries()]
+    .filter(([key]) => key.startsWith('utm_'))
+    .filter(([key]) => key !== 'utm_id');
+    .forEach(([source, target]) => sampleRUM('utm', { source, target }));
+}
+
 function addFormTracking(parent) {
   activateBlocksMutationObserver();
   parent.querySelectorAll('form').forEach((form) => {
@@ -254,6 +262,7 @@ function addTrackingFromConfig() {
     form: () => addFormTracking(window.document.body),
     enterleave: () => addEnterLeaveTracking(),
     loadresource: () => addLoadResourceTracking(),
+    utm: () => addUTMParametersTracking(),
     viewblock: () => addViewBlockTracking(window.document.body),
     viewmedia: () => addViewMediaTracking(window.document.body),
   };
