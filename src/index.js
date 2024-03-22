@@ -180,7 +180,8 @@ observer.observe({ type: 'resource', buffered: true });
 
 const usp = new URLSearchParams(window.location.search);
 const utmParams = [...usp.entries()]
-  .filter(([key]) => key.startsWith('utm_') && key !== 'utm_id');
+  .filter(([key]) => key.startsWith('utm_'))
+  .filter(([key]) => key !== 'utm_id');
 utmParams.forEach(([key, value]) => {
   sampleRUM('utm', { source: key, target: value });
 });
