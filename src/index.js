@@ -226,11 +226,10 @@ function addViewMediaTracking(parent) {
 
 function addUTMParametersTracking() {
   const usp = new URLSearchParams(window.location.search);
-  const utmParams = [...usp.entries()]
-    .filter(([key]) => key.startsWith('utm_') && key !== 'utm_id');
-  utmParams.forEach(([key, value]) => {
-    sampleRUM('utm', { source: key, target: value });
-  });
+  [...usp.entries()]
+    .filter(([key]) => key.startsWith('utm_'))
+    .filter(([key]) => key !== 'utm_id');
+    .forEach(([source, target]) => sampleRUM('utm', { source, target }));
 }
 
 function addFormTracking(parent) {
