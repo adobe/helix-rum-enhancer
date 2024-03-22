@@ -1,3 +1,12 @@
+# [2.4.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.3.1...v2.4.0) (2024-03-22)
+
+
+### Features
+
+* track UTM query parameters ([2c237e5](https://github.com/adobe/helix-rum-enhancer/commit/2c237e5361ea2f166a0c37b1b752feda30ae9293)), closes [#137](https://github.com/adobe/helix-rum-enhancer/issues/137)
+* track UTM query parameters ([ed58621](https://github.com/adobe/helix-rum-enhancer/commit/ed586215611c492adb29e5a98cadca3bd140d429))
+* track UTM query parameters ([d1a6552](https://github.com/adobe/helix-rum-enhancer/commit/d1a6552a9b661867c0bfde06bcd066b4a1ed9024))
+
 ## [2.3.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.3.0...v2.3.1) (2024-03-11)
 
 
