@@ -1,3 +1,10 @@
+## [1.13.2](https://github.com/adobe/helix-rum-enhancer/compare/v1.13.1...v1.13.2) (2024-03-27)
+
+
+### Bug Fixes
+
+* remove conflicting variables ([3f871d2](https://github.com/adobe/helix-rum-enhancer/commit/3f871d2e1396ddf0f579056db9bfdb8e72c1b6de))
+
 ## [1.13.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.13.0...v1.13.1) (2024-03-27)
 
 
