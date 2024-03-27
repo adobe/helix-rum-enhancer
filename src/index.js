@@ -92,7 +92,7 @@ sampleRUM.drain('cwv', (() => {
       sampleRUM('cwv', data);
     };
 
-    const featureToggle = () => window.location.hostname === 'blog.adobe.com';
+    const featureToggle = () => ['blog.adobe.com', 'www.revolt.tv'].includes(window.location.hostname);
     const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
 
     // When loading `web-vitals` using a classic script, all the public
