@@ -159,7 +159,7 @@ document.querySelectorAll('form').forEach((form) => {
 window.addEventListener('visibilitychange', ((event) => sampleRUM.leave(event)));
 window.addEventListener('pagehide', ((event) => sampleRUM.leave(event)));
 
-const observer = new PerformanceObserver((list) => {
+new PerformanceObserver((list) => {
   list.getEntries()
     .filter((entry) => !entry.responseStatus || entry.responseStatus < 400)
     .filter((entry) => window.location.hostname === new URL(entry.name).hostname)
@@ -175,11 +175,9 @@ const observer = new PerformanceObserver((list) => {
         sampleRUM('missingresource', { source: entry.name, target: entry.hostname });
       });
   }
-});
-observer.observe({ type: 'resource', buffered: true });
+}).observe({ type: 'resource', buffered: true });
 
-const usp = new URLSearchParams(window.location.search);
-[...usp.entries()]
+[...new URLSearchParams(window.location.search).entries()]
   .filter(([key]) => key.startsWith('utm_'))
   .filter(([key]) => key !== 'utm_id')
   .forEach(([key, value]) => {
