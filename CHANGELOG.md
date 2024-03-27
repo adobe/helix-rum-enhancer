@@ -1,3 +1,10 @@
+## [1.13.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.13.0...v1.13.1) (2024-03-27)
+
+
+### Bug Fixes
+
+* enable eager cwv reporting for revolt ([53ced3b](https://github.com/adobe/helix-rum-enhancer/commit/53ced3b7983d4865c1c9a0cc0ee771cab3559484))
+
 # [1.13.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.12.0...v1.13.0) (2024-03-22)
 
 
