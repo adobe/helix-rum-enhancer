@@ -1,3 +1,10 @@
+## [2.4.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.4.0...v2.4.1) (2024-04-08)
+
+
+### Bug Fixes
+
+* broken code in the utm tracking ([d1695dd](https://github.com/adobe/helix-rum-enhancer/commit/d1695ddf62b316d3cc06c75c444f859a271cff2e))
+
 # [2.4.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.3.1...v2.4.0) (2024-03-22)
 
 
