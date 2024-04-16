@@ -1,3 +1,10 @@
+# [2.5.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.4.1...v2.5.0) (2024-04-16)
+
+
+### Features
+
+* report source and target along with lcp element ([bebb429](https://github.com/adobe/helix-rum-enhancer/commit/bebb4291a1cc5fe07af31f87988c84ba07e57695))
+
 ## [2.4.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.4.0...v2.4.1) (2024-04-08)
 
 
