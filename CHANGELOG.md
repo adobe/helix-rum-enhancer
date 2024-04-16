@@ -1,3 +1,15 @@
+# [1.14.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.13.2...v1.14.0) (2024-04-16)
+
+
+### Bug Fixes
+
+* pr reviews ([8c1a9ae](https://github.com/adobe/helix-rum-enhancer/commit/8c1a9ae8af07baf9d230a428d612f6e9693ca692))
+
+
+### Features
+
+* report source and target along with lcp event ([5846b71](https://github.com/adobe/helix-rum-enhancer/commit/5846b7110d0acda3789274ddf6b5d3ac43d196eb))
+
 ## [1.13.2](https://github.com/adobe/helix-rum-enhancer/compare/v1.13.1...v1.13.2) (2024-03-27)
 
 
