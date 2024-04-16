@@ -89,6 +89,13 @@ sampleRUM.drain('cwv', (() => {
     const storeCWV = (measurement) => {
       const data = { cwv: {} };
       data.cwv[measurement.name] = measurement.value;
+
+      if (measurement.name === 'LCP' && measurement.entries.length > 0) {
+        const { element } = measurement.entries[measurement.entries.length - 1];
+        data.target = sampleRUM.targetselector(element);
+        data.source = sampleRUM.sourceselector(element);
+      }
+
       sampleRUM('cwv', data);
     };
 
