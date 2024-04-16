@@ -1,3 +1,10 @@
+# [2.6.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.5.0...v2.6.0) (2024-04-16)
+
+
+### Features
+
+* **resources:** add missingresource checkpoint behind feature toggle ([a9ba59d](https://github.com/adobe/helix-rum-enhancer/commit/a9ba59dccc4712571530fd785bb9aa6cc277bea8))
+
 # [2.5.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.4.1...v2.5.0) (2024-04-16)
 
 
