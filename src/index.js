@@ -242,7 +242,8 @@ function addUTMParametersTracking() {
   const usp = new URLSearchParams(window.location.search);
   [...usp.entries()]
     .filter(([key]) => key.startsWith('utm_'))
-    .filter(([key]) => key !== 'utm_id')
+    // exclude keys that may leak PII
+    .filter(([key]) => key !== 'utm_id' && key !== 'utm_term')
     .forEach(([source, target]) => sampleRUM('utm', { source, target }));
 }
 
