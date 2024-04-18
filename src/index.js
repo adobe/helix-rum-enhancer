@@ -67,6 +67,7 @@ new PerformanceObserver((list) => list
   .observe({ type: 'navigation', buffered: true });
 
 sampleRUM.targetselector = (element) => {
+  if (!element) return undefined;
   let value = element.getAttribute('data-rum-target') || element.getAttribute('href') || element.currentSrc || element.getAttribute('src')
                 || element.dataset.action || element.action;
   if (value && !value.startsWith('https://')) {
