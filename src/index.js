@@ -67,6 +67,7 @@ new PerformanceObserver((list) => list
   .observe({ type: 'navigation', buffered: true });
 
 sampleRUM.targetselector = (element) => {
+  if (!element) return undefined;
   const getTargetValue = (el) => el.getAttribute('data-rum-target') || el.getAttribute('href')
     || el.currentSrc || el.getAttribute('src')
     || el.dataset.action || el.action;
