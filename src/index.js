@@ -77,6 +77,32 @@ sampleRUM.targetselector = (element) => {
 };
 
 sampleRUM.drain('cwv', (() => {
+  const storeCWV = (measurement) => {
+    const data = { cwv: {} };
+    data.cwv[measurement.name] = measurement.value;
+
+    if (measurement.name === 'LCP' && measurement.entries.length > 0) {
+      const { element } = measurement.entries.pop();
+      data.target = sampleRUM.targetselector(element);
+      data.source = sampleRUM.sourceselector(element) || element.outerHTML.slice(0, 30);
+    }
+    sampleRUM('cwv', data);
+  };
+
+  sampleRUM.perfObservers = sampleRUM.perfObservers || {};
+  const registerPerformanceObserver = (type, cb) => {
+    if (sampleRUM.perfObservers[type]) return;
+    sampleRUM.perfObservers[type] = new PerformanceObserver((list) => {
+      Promise.resolve().then(() => cb(list.getEntries()));
+    });
+    sampleRUM.perfObservers[type].observe({ type, buffered: true });
+  };
+
+  registerPerformanceObserver('largest-contentful-paint', (entries) => {
+    const entry = entries.pop();
+    storeCWV({ name: 'LCP', value: entry.renderTime, entries: [entry] });
+  });
+
   const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
   if (document.querySelector(`script[src="${cwvScript}"]`)) {
     // web vitals script has been loaded already
@@ -86,25 +112,12 @@ sampleRUM.drain('cwv', (() => {
   const script = document.createElement('script');
   script.src = cwvScript;
   script.onload = () => {
-    const storeCWV = (measurement) => {
-      const data = { cwv: {} };
-      data.cwv[measurement.name] = measurement.value;
-
-      if (measurement.name === 'LCP' && measurement.entries.length > 0) {
-        const { element } = measurement.entries.pop();
-        data.target = sampleRUM.targetselector(element);
-        data.source = sampleRUM.sourceselector(element) || element.outerHTML.slice(0, 30);
-      }
-
-      sampleRUM('cwv', data);
-    };
-
-    const featureToggle = () => ['blog.adobe.com', 'www.revolt.tv'].includes(window.location.hostname);
+    const featureToggle = () => ['newsroom.accenture.com', 'blog.adobe.com', 'www.revolt.tv'].includes(window.location.hostname);
     const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
 
     // When loading `web-vitals` using a classic script, all the public
     // methods can be found on the `webVitals` global namespace.
-    ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
+    ['FID', 'INP', 'TTFB', 'CLS'].forEach((metric) => {
       const metricFn = window.webVitals[`on${metric}`];
       if (typeof metricFn === 'function') {
         const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
