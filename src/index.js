@@ -98,14 +98,17 @@ sampleRUM.drain('cwv', (() => {
     sampleRUM.perfObservers[type].observe({ type, buffered: true });
   };
 
-  registerPerformanceObserver('largest-contentful-paint', (entries) => {
-    const entry = entries.pop();
-    storeCWV({ name: 'LCP', value: entry.startTime, entries: [entry] });
-  });
-
   registerPerformanceObserver('navigation', (entries) => {
     const entry = entries.pop();
+    sampleRUM.navEntry = entry;
     storeCWV({ name: 'TTFB', value: entry.responseStart });
+  });
+
+  registerPerformanceObserver('largest-contentful-paint', (entries) => {
+    const entry = entries.pop();
+    const activationStart = (sampleRUM.navEntry && sampleRUM.navEntry.activationStart) || 0;
+    const value = Math.max(entry.startTime - activationStart, 0);
+    storeCWV({ name: 'LCP', value, entries: [entry] });
   });
 
   const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
