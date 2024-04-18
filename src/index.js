@@ -12,7 +12,6 @@
 /* eslint-env browser */
 const KNOWN_PROPERTIES = ['weight', 'id', 'referer', 'checkpoint', 't', 'source', 'target', 'cwv', 'CLS', 'FID', 'LCP', 'INP', 'TTFB'];
 const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia', 'loadresource', 'utm'];
-const SESSION_STORAGE_KEY = 'aem-rum';
 const { sampleRUM, queue, isSelected } = window.hlx.rum;
 
 const urlSanitizers = {
@@ -21,10 +20,15 @@ const urlSanitizers = {
   path: () => window.location.href.replace(/\?.*$/, ''),
 };
 
+const getTargetValue = (element) => element.getAttribute('data-rum-target') || element.getAttribute('href')
+    || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
+
 const targetselector = (element) => {
   if (!element) return undefined;
-  let value = element.getAttribute('data-rum-target') || element.getAttribute('href')
-    || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
+  let value = getTargetValue(element);
+  if (!value && element.tagName !== 'A' && element.closest('a')) {
+    value = getTargetValue(element.closest('a'));
+  }
   if (value && !value.startsWith('https://')) {
     // resolve relative links
     value = new URL(value, window.location).href;
@@ -287,9 +291,6 @@ function addTrackingFromConfig() {
 }
 
 function initEnhancer() {
-  // eslint-disable-next-line max-len
-  const rumStorage = sessionStorage.getItem(SESSION_STORAGE_KEY) ? JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY)) : {};
-  sampleRUM('pagesviewed', { source: rumStorage.pages });
   addTrackingFromConfig();
   window.hlx.rum.collector = trackCheckpoint;
   processQueue();

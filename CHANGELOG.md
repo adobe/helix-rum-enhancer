@@ -1,3 +1,10 @@
+# [2.7.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.6.0...v2.7.0) (2024-04-18)
+
+
+### Features
+
+* add logic to capture target from wrapping anchor tag ([2a733b3](https://github.com/adobe/helix-rum-enhancer/commit/2a733b307d00c1a0613f645a01e325e683734625))
+
 # [2.6.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.5.0...v2.6.0) (2024-04-16)
 
 
