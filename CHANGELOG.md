@@ -1,3 +1,11 @@
+## [2.7.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.1...v2.7.2) (2024-04-18)
+
+
+### Bug Fixes
+
+* exclude utm_term from collection ([732c647](https://github.com/adobe/helix-rum-enhancer/commit/732c64746a238c8726f6a14d2025778880611f86)), closes [#153](https://github.com/adobe/helix-rum-enhancer/issues/153)
+* exclude utm_term from collection ([545a168](https://github.com/adobe/helix-rum-enhancer/commit/545a168da34cf58a3f84be84545d0692827ee98b))
+
 ## [2.7.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.0...v2.7.1) (2024-04-18)
 
 
