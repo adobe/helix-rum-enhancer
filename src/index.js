@@ -21,9 +21,14 @@ const urlSanitizers = {
   path: () => window.location.href.replace(/\?.*$/, ''),
 };
 
-const targetselector = (element) => {
-  let value = element.getAttribute('data-rum-target') || element.getAttribute('href')
+const getTargetValue = (element) => element.getAttribute('data-rum-target') || element.getAttribute('href')
     || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
+
+const targetselector = (element) => {
+  let value = getTargetValue(element);
+  if (!value && element.tagName !== 'A' && element.closest('a')) {
+    value = getTargetValue(element.closest('a'));
+  }
   if (value && !value.startsWith('https://')) {
     // resolve relative links
     value = new URL(value, window.location).href;
