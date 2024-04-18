@@ -67,8 +67,15 @@ new PerformanceObserver((list) => list
   .observe({ type: 'navigation', buffered: true });
 
 sampleRUM.targetselector = (element) => {
-  let value = element.getAttribute('data-rum-target') || element.getAttribute('href') || element.currentSrc || element.getAttribute('src')
-                || element.dataset.action || element.action;
+  const getTargetValue = (el) => el.getAttribute('data-rum-target') || el.getAttribute('href')
+    || el.currentSrc || el.getAttribute('src')
+    || el.dataset.action || el.action;
+
+  let value = getTargetValue(element);
+  if (!value && element.tagName !== 'A' && element.closest('a')) {
+    value = getTargetValue(element.closest('a'));
+  }
+
   if (value && !value.startsWith('https://')) {
     // resolve relative links
     value = new URL(value, window.location).href;
