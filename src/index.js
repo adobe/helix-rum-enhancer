@@ -100,7 +100,7 @@ sampleRUM.drain('cwv', (() => {
 
   registerPerformanceObserver('largest-contentful-paint', (entries) => {
     const entry = entries.pop();
-    storeCWV({ name: 'LCP', value: entry.renderTime, entries: [entry] });
+    storeCWV({ name: 'LCP', value: entry.startTime, entries: [entry] });
   });
 
   registerPerformanceObserver('navigation', (entries) => {
@@ -122,7 +122,7 @@ sampleRUM.drain('cwv', (() => {
 
     // When loading `web-vitals` using a classic script, all the public
     // methods can be found on the `webVitals` global namespace.
-    ['FID', 'INP', 'TTFB', 'CLS'].forEach((metric) => {
+    ['FID', 'INP', 'CLS'].forEach((metric) => {
       const metricFn = window.webVitals[`on${metric}`];
       if (typeof metricFn === 'function') {
         const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
