@@ -12,7 +12,6 @@
 /* eslint-env browser */
 const KNOWN_PROPERTIES = ['weight', 'id', 'referer', 'checkpoint', 't', 'source', 'target', 'cwv', 'CLS', 'FID', 'LCP', 'INP', 'TTFB'];
 const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia', 'loadresource', 'utm'];
-const SESSION_STORAGE_KEY = 'aem-rum';
 const { sampleRUM, queue, isSelected } = window.hlx.rum;
 
 const urlSanitizers = {
@@ -291,9 +290,6 @@ function addTrackingFromConfig() {
 }
 
 function initEnhancer() {
-  // eslint-disable-next-line max-len
-  const rumStorage = sessionStorage.getItem(SESSION_STORAGE_KEY) ? JSON.parse(sessionStorage.getItem(SESSION_STORAGE_KEY)) : {};
-  sampleRUM('pagesviewed', { source: rumStorage.pages });
   addTrackingFromConfig();
   window.hlx.rum.collector = trackCheckpoint;
   processQueue();
