@@ -178,14 +178,11 @@ function addLoadResourceTracking() {
         sampleRUM('loadresource', { source: entry.name, target: Math.round(entry.duration) });
       });
 
-    if (window.origin === 'business.adobe.com') {
-      // feature flagged for now
-      list.getEntries()
-        .filter((entry) => entry.responseStatus === 404)
-        .forEach((entry) => {
-          sampleRUM('missingresource', { source: entry.name, target: entry.hostname });
-        });
-    }
+    list.getEntries()
+      .filter((entry) => entry.responseStatus === 404)
+      .forEach((entry) => {
+        sampleRUM('missingresource', { source: entry.name, target: entry.hostname });
+      });
   });
   observer.observe({ type: 'resource', buffered: true });
 }
