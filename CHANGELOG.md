@@ -1,3 +1,10 @@
+## [1.15.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.15.0...v1.15.1) (2024-04-18)
+
+
+### Bug Fixes
+
+* make targetselector null safe ([#157](https://github.com/adobe/helix-rum-enhancer/issues/157)) ([6f8e117](https://github.com/adobe/helix-rum-enhancer/commit/6f8e11753358e835688d3dfd2d4a0d7f420848a5))
+
 # [1.15.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.14.0...v1.15.0) (2024-04-18)
 
 
