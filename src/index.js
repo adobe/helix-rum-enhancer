@@ -174,14 +174,11 @@ new PerformanceObserver((list) => {
     .forEach((entry) => {
       sampleRUM('loadresource', { source: entry.name, target: Math.round(entry.duration) });
     });
-  if (window.origin === 'business.adobe.com') {
-    // feature flagged for now
-    list.getEntries()
-      .filter((entry) => entry.responseStatus === 404)
-      .forEach((entry) => {
-        sampleRUM('missingresource', { source: entry.name, target: entry.hostname });
-      });
-  }
+  list.getEntries()
+    .filter((entry) => entry.responseStatus === 404)
+    .forEach((entry) => {
+      sampleRUM('missingresource', { source: entry.name, target: entry.hostname });
+    });
 }).observe({ type: 'resource', buffered: true });
 
 [...new URLSearchParams(window.location.search).entries()]
