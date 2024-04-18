@@ -1,3 +1,11 @@
+## [1.15.2](https://github.com/adobe/helix-rum-enhancer/compare/v1.15.1...v1.15.2) (2024-04-18)
+
+
+### Bug Fixes
+
+* **backport:** exclude utm_term from collection ([7a5e5b2](https://github.com/adobe/helix-rum-enhancer/commit/7a5e5b2ecd9eeda336b30163684b5302e7fe3258)), closes [#153](https://github.com/adobe/helix-rum-enhancer/issues/153)
+* **backport:** exclude utm_term from collection [#154](https://github.com/adobe/helix-rum-enhancer/issues/154) ([57d615b](https://github.com/adobe/helix-rum-enhancer/commit/57d615b89580cfe62a1877413ee29603b93371a2)), closes [#153](https://github.com/adobe/helix-rum-enhancer/issues/153)
+
 ## [1.15.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.15.0...v1.15.1) (2024-04-18)
 
 
