@@ -195,6 +195,7 @@ new PerformanceObserver((list) => {
 [...new URLSearchParams(window.location.search).entries()]
   .filter(([key]) => key.startsWith('utm_'))
   .filter(([key]) => key !== 'utm_id')
+  .filter(([key]) => key !== 'utm_term')
   .forEach(([key, value]) => {
     sampleRUM('utm', { source: key, target: value });
   });
