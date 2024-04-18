@@ -103,6 +103,11 @@ sampleRUM.drain('cwv', (() => {
     storeCWV({ name: 'LCP', value: entry.renderTime, entries: [entry] });
   });
 
+  registerPerformanceObserver('navigation', (entries) => {
+    const entry = entries.pop();
+    storeCWV({ name: 'TTFB', value: entry.responseStart });
+  });
+
   const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
   if (document.querySelector(`script[src="${cwvScript}"]`)) {
     // web vitals script has been loaded already
