@@ -1,3 +1,10 @@
+## [1.15.3](https://github.com/adobe/helix-rum-enhancer/compare/v1.15.2...v1.15.3) (2024-04-22)
+
+
+### Bug Fixes
+
+* no lcp target text from missing element ([#162](https://github.com/adobe/helix-rum-enhancer/issues/162)) ([1156663](https://github.com/adobe/helix-rum-enhancer/commit/1156663b0b9c7a4caee742d5f9aaf49be358c5cd))
+
 ## [1.15.2](https://github.com/adobe/helix-rum-enhancer/compare/v1.15.1...v1.15.2) (2024-04-18)
 
 
