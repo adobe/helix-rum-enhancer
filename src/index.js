@@ -119,7 +119,7 @@ function addCWVTracking() {
         if (measurement.name === 'LCP' && measurement.entries.length > 0) {
           const { element } = measurement.entries.pop();
           data.target = targetselector(element);
-          data.source = sourceselector(element) || element.outerHTML.slice(0, 30);
+          data.source = sourceselector(element) || element?.outerHTML.slice(0, 30);
         }
         sampleRUM('cwv', data);
       };
