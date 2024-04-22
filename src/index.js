@@ -98,17 +98,51 @@ sampleRUM.drain('cwv', (() => {
     sampleRUM.perfObservers[type].observe({ type, buffered: true });
   };
 
-  registerPerformanceObserver('navigation', (entries) => {
-    const entry = entries.pop();
-    sampleRUM.navEntry = entry;
-    storeCWV({ name: 'TTFB', value: entry.responseStart });
+  const whenActivated = (cb) => {
+    if (document.prerendering) {
+      document.addEventListener('prerenderingchange', () => cb(), true);
+    } else {
+      cb();
+    }
+  };
+
+  const whenReady = (cb) => {
+    if (document.prerendering) {
+      whenActivated(() => whenReady(cb));
+    } else if (document.readyState !== 'complete') {
+      window.addEventListener('load', () => whenReady(cb), true);
+    } else {
+      // Queue a task so the callback runs after `loadEventEnd`.
+      setTimeout(cb, 0);
+    }
+  };
+
+  const getActivationStart = () => (sampleRUM.navEntry && sampleRUM.navEntry.activationStart) || 0;
+
+  whenReady(() => {
+    registerPerformanceObserver('navigation', (entries) => {
+      const entry = entries.pop();
+      sampleRUM.navEntry = entry;
+      storeCWV({ name: 'TTFB', value: entry.responseStart });
+    });
   });
 
-  registerPerformanceObserver('largest-contentful-paint', (entries) => {
-    const entry = entries.pop();
-    const activationStart = (sampleRUM.navEntry && sampleRUM.navEntry.activationStart) || 0;
-    const value = Math.max(entry.startTime - activationStart, 0);
-    storeCWV({ name: 'LCP', value, entries: [entry] });
+  whenActivated(() => {
+    registerPerformanceObserver('paint', (entries) => {
+      const entry = entries.pop();
+      if (entry.name === 'first-contentful-paint') {
+        const value = Math.max(entry.startTime - getActivationStart(), 0);
+        storeCWV({ name: 'FCP', value, entries: [entry] });
+      }
+    });
+  });
+
+  whenActivated(() => {
+    registerPerformanceObserver('largest-contentful-paint', (entries) => {
+      const entry = entries.pop();
+      const value = Math.max(entry.startTime - getActivationStart(), 0);
+      storeCWV({ name: 'LCP', value, entries: [entry] });
+    });
   });
 
   const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
@@ -120,7 +154,7 @@ sampleRUM.drain('cwv', (() => {
   const script = document.createElement('script');
   script.src = cwvScript;
   script.onload = () => {
-    const featureToggle = () => ['newsroom.accenture.com', 'blog.adobe.com', 'www.revolt.tv'].includes(window.location.hostname);
+    const featureToggle = () => ['blog.adobe.com', 'www.revolt.tv'].includes(window.location.hostname);
     const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
 
     // When loading `web-vitals` using a classic script, all the public
