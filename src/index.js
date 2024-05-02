@@ -12,7 +12,7 @@
 /* eslint-env browser */
 const KNOWN_PROPERTIES = ['weight', 'id', 'referer', 'checkpoint', 't', 'source', 'target', 'cwv', 'CLS', 'FID', 'LCP', 'INP', 'TTFB'];
 const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia', 'loadresource', 'utm'];
-const { sampleRUM, queue, isSelected } = window.hlx.rum;
+const { sampleRUM, queue, isSelected } = window.hlx ? window.hlx.rum : {};
 
 const urlSanitizers = {
   full: () => window.location.href,
@@ -24,46 +24,55 @@ const getTargetValue = (element) => element.getAttribute('data-rum-target') || e
     || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
 
 const targetselector = (element) => {
-  if (!element) return undefined;
-  let value = getTargetValue(element);
-  if (!value && element.tagName !== 'A' && element.closest('a')) {
-    value = getTargetValue(element.closest('a'));
+  try {
+    if (!element) return undefined;
+    let value = getTargetValue(element);
+    if (!value && element.tagName !== 'A' && element.closest('a')) {
+      value = getTargetValue(element.closest('a'));
+    }
+    if (value && !value.startsWith('https://')) {
+      // resolve relative links
+      value = new URL(value, window.location).href;
+    }
+    return value;
+  } catch (error) {
+    // something went wrong
+    return null;
   }
-  if (value && !value.startsWith('https://')) {
-    // resolve relative links
-    value = new URL(value, window.location).href;
-  }
-  return value;
 };
 
 const sourceselector = (element) => {
-  if (element === document.body || element === document.documentElement || !element) {
-    return undefined;
-  }
-  if (element.getAttribute('data-rum-source')) {
-    return element.getAttribute('data-rum-source');
-  }
-  const form = element.closest('form');
-  let formElementSelector = '';
-  if (form && Array.from(form.elements).includes(element)) {
-    formElementSelector = element.tagName === 'INPUT' ? `form input[type='${element.getAttribute('type')}']` : `form ${element.tagName.toLowerCase()}`;
-  }
+  try {
+    if (element === document.body || element === document.documentElement || !element) {
+      return undefined;
+    }
+    if (element.getAttribute('data-rum-source')) {
+      return element.getAttribute('data-rum-source');
+    }
+    const form = element.closest('form');
+    let formElementSelector = '';
+    if (form && Array.from(form.elements).includes(element)) {
+      formElementSelector = element.tagName === 'INPUT' ? `form input[type='${element.getAttribute('type')}']` : `form ${element.tagName.toLowerCase()}`;
+    }
 
-  const blockName = element.closest('.block') ? element.closest('.block').getAttribute('data-block-name') : '';
-  if (element.id || formElementSelector) {
-    const id = element.id ? `#${element.id}` : '';
-    return blockName ? `.${blockName} ${formElementSelector}${id}` : `${formElementSelector}${id}`;
-  }
+    const blockName = element.closest('.block') ? element.closest('.block').getAttribute('data-block-name') : '';
+    if (element.id || formElementSelector) {
+      const id = element.id ? `#${element.id}` : '';
+      return blockName ? `.${blockName} ${formElementSelector}${id}` : `${formElementSelector}${id}`;
+    }
 
-  if (element.getAttribute('data-block-name')) {
-    return `.${element.getAttribute('data-block-name')}`;
-  }
+    if (element.getAttribute('data-block-name')) {
+      return `.${element.getAttribute('data-block-name')}`;
+    }
 
-  if (Array.from(element.classList).some((className) => className.match(/button|cta/))) {
-    return blockName ? `.${blockName} .button` : '.button';
-  }
+    if (Array.from(element.classList).some((className) => className.match(/button|cta/))) {
+      return blockName ? `.${blockName} .button` : '.button';
+    }
 
-  return sourceselector(element.parentElement);
+    return sourceselector(element.parentElement);
+  } catch (error) {
+    return null;
+  }
 };
 
 const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetselector(e.target), source: sourceselector(e.target) });
@@ -105,39 +114,43 @@ function processQueue() {
 
 function addCWVTracking() {
   setTimeout(() => {
-    const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
-    if (document.querySelector(`script[src="${cwvScript}"]`)) {
-      // web vitals script has been loaded already
-      return;
-    }
-    const script = document.createElement('script');
-    script.src = cwvScript;
-    script.onload = () => {
-      const storeCWV = (measurement) => {
-        const data = { cwv: {} };
-        data.cwv[measurement.name] = measurement.value;
-        if (measurement.name === 'LCP' && measurement.entries.length > 0) {
-          const { element } = measurement.entries.pop();
-          data.target = targetselector(element);
-          data.source = sourceselector(element) || (element && element.outerHTML.slice(0, 30));
-        }
-        sampleRUM('cwv', data);
+    try {
+      const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
+      if (document.querySelector(`script[src="${cwvScript}"]`)) {
+        // web vitals script has been loaded already
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = cwvScript;
+      script.onload = () => {
+        const storeCWV = (measurement) => {
+          const data = { cwv: {} };
+          data.cwv[measurement.name] = measurement.value;
+          if (measurement.name === 'LCP' && measurement.entries.length > 0) {
+            const { element } = measurement.entries.pop();
+            data.target = targetselector(element);
+            data.source = sourceselector(element) || (element && element.outerHTML.slice(0, 30));
+          }
+          sampleRUM('cwv', data);
+        };
+
+        const featureToggle = () => window.location.hostname === 'blog.adobe.com';
+        const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
+
+        // When loading `web-vitals` using a classic script, all the public
+        // methods can be found on the `webVitals` global namespace.
+        ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
+          const metricFn = window.webVitals[`on${metric}`];
+          if (typeof metricFn === 'function') {
+            const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
+            metricFn(storeCWV, opts);
+          }
+        });
       };
-
-      const featureToggle = () => window.location.hostname === 'blog.adobe.com';
-      const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
-
-      // When loading `web-vitals` using a classic script, all the public
-      // methods can be found on the `webVitals` global namespace.
-      ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
-        const metricFn = window.webVitals[`on${metric}`];
-        if (typeof metricFn === 'function') {
-          const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
-          metricFn(storeCWV, opts);
-        }
-      });
-    };
-    document.head.appendChild(script);
+      document.head.appendChild(script);
+    } catch (error) {
+      // something went wrong
+    }
   }, 2000); // wait for delayed
 }
 
@@ -163,11 +176,15 @@ function addEnterLeaveTracking() {
     .observe({ type: 'navigation', buffered: true });
 
   const leave = ((event) => {
-    if (leave.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
-      return;
+    try {
+      if (leave.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
+        return;
+      }
+      leave.left = true;
+      sampleRUM('leave');
+    } catch (error) {
+      // something went wrong
     }
-    leave.left = true;
-    sampleRUM('leave');
   });
   window.addEventListener('visibilitychange', ((event) => leave(event)));
   window.addEventListener('pagehide', ((event) => leave(event)));
@@ -175,21 +192,25 @@ function addEnterLeaveTracking() {
 
 function addLoadResourceTracking() {
   const observer = new PerformanceObserver((list) => {
-    list.getEntries()
-      .filter((entry) => !entry.responseStatus || entry.responseStatus < 400)
-      .filter((entry) => window.location.hostname === new URL(entry.name).hostname)
-      .filter((entry) => new URL(entry.name).pathname.match('.*(\\.plain\\.html|\\.json)$'))
-      .forEach((entry) => {
-        sampleRUM('loadresource', { source: entry.name, target: Math.round(entry.duration) });
-      });
-
-    if (window.origin === 'business.adobe.com') {
-      // feature flagged for now
+    try {
       list.getEntries()
-        .filter((entry) => entry.responseStatus === 404)
+        .filter((entry) => !entry.responseStatus || entry.responseStatus < 400)
+        .filter((entry) => window.location.hostname === new URL(entry.name).hostname)
+        .filter((entry) => new URL(entry.name).pathname.match('.*(\\.plain\\.html|\\.json)$'))
         .forEach((entry) => {
-          sampleRUM('missingresource', { source: entry.name, target: entry.hostname });
+          sampleRUM('loadresource', { source: entry.name, target: Math.round(entry.duration) });
         });
+
+      if (window.origin === 'business.adobe.com') {
+        // feature flagged for now
+        list.getEntries()
+          .filter((entry) => entry.responseStatus === 404)
+          .forEach((entry) => {
+            sampleRUM('missingresource', { source: entry.name, target: entry.hostname });
+          });
+      }
+    } catch (error) {
+      // something went wrong
     }
   });
   observer.observe({ type: 'resource', buffered: true });
@@ -213,14 +234,18 @@ function getIntersectionObsever(checkpoint) {
   }
   activateBlocksMutationObserver();
   const observer = new IntersectionObserver((entries) => {
-    entries
-      .filter((entry) => entry.isIntersecting)
-      .forEach((entry) => {
-        observer.unobserve(entry.target); // observe only once
-        const target = targetselector(entry.target);
-        const source = sourceselector(entry.target);
-        sampleRUM(checkpoint, { target, source });
-      });
+    try {
+      entries
+        .filter((entry) => entry.isIntersecting)
+        .forEach((entry) => {
+          observer.unobserve(entry.target); // observe only once
+          const target = targetselector(entry.target);
+          const source = sourceselector(entry.target);
+          sampleRUM(checkpoint, { target, source });
+        });
+    } catch (error) {
+      // something went wrong
+    }
   }, { threshold: 0.25 });
   return observer;
 }
@@ -293,9 +318,15 @@ function addTrackingFromConfig() {
 }
 
 function initEnhancer() {
-  addTrackingFromConfig();
-  window.hlx.rum.collector = trackCheckpoint;
-  processQueue();
+  try {
+    if (sampleRUM) {
+      addTrackingFromConfig();
+      window.hlx.rum.collector = trackCheckpoint;
+      processQueue();
+    }
+  } catch (error) {
+    // something went wrong
+  }
 }
 
 initEnhancer();
