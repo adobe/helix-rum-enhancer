@@ -1,3 +1,10 @@
+## [2.7.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.3...v2.7.4) (2024-05-02)
+
+
+### Bug Fixes
+
+* catch potential exceptions and errors ([99ab83e](https://github.com/adobe/helix-rum-enhancer/commit/99ab83eae7ebc3a2c27df7887a57f58307e6ca61))
+
 ## [2.7.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.2...v2.7.3) (2024-04-22)
 
 
