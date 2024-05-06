@@ -1,3 +1,39 @@
+## [2.7.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.3...v2.7.4) (2024-05-02)
+
+
+### Bug Fixes
+
+* catch potential exceptions and errors ([99ab83e](https://github.com/adobe/helix-rum-enhancer/commit/99ab83eae7ebc3a2c27df7887a57f58307e6ca61))
+
+## [2.7.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.2...v2.7.3) (2024-04-22)
+
+
+### Bug Fixes
+
+* no lcp target text from missing element ([#161](https://github.com/adobe/helix-rum-enhancer/issues/161)) ([0b75e80](https://github.com/adobe/helix-rum-enhancer/commit/0b75e8080b0950dfa0298920e632d61e712563ed))
+
+## [2.7.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.1...v2.7.2) (2024-04-18)
+
+
+### Bug Fixes
+
+* exclude utm_term from collection ([732c647](https://github.com/adobe/helix-rum-enhancer/commit/732c64746a238c8726f6a14d2025778880611f86)), closes [#153](https://github.com/adobe/helix-rum-enhancer/issues/153)
+* exclude utm_term from collection ([545a168](https://github.com/adobe/helix-rum-enhancer/commit/545a168da34cf58a3f84be84545d0692827ee98b))
+
+## [2.7.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.0...v2.7.1) (2024-04-18)
+
+
+### Bug Fixes
+
+* make targetselector null safe ([#156](https://github.com/adobe/helix-rum-enhancer/issues/156)) ([691d40d](https://github.com/adobe/helix-rum-enhancer/commit/691d40d1659d6aaac81f4037e11c243341181b80))
+
+# [2.7.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.6.0...v2.7.0) (2024-04-18)
+
+
+### Features
+
+* add logic to capture target from wrapping anchor tag ([2a733b3](https://github.com/adobe/helix-rum-enhancer/commit/2a733b307d00c1a0613f645a01e325e683734625))
+
 # [2.6.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.5.0...v2.6.0) (2024-04-16)
 
 
