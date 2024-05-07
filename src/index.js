@@ -107,7 +107,6 @@ sampleRUM.drain('cwv', (() => {
       sampleRUM('cwv', data);
     };
 
-    const featureToggle = () => ['blog.adobe.com', 'www.revolt.tv'].includes(window.location.hostname);
     const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
 
     // When loading `web-vitals` using a classic script, all the public
@@ -115,7 +114,7 @@ sampleRUM.drain('cwv', (() => {
     ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
       const metricFn = window.webVitals[`on${metric}`];
       if (typeof metricFn === 'function') {
-        const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
+        const opts = isEager(metric) ? { reportAllChanges: true } : undefined;
         metricFn(storeCWV, opts);
       }
     });
