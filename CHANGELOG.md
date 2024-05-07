@@ -1,3 +1,10 @@
+# [1.17.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.16.0...v1.17.0) (2024-05-07)
+
+
+### Features
+
+* enable reportAll for all projects ([0e295ff](https://github.com/adobe/helix-rum-enhancer/commit/0e295ffd65fa72962b397b85b0355fd066163086))
+
 # [1.16.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.15.3...v1.16.0) (2024-05-06)
 
 
