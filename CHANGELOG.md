@@ -1,3 +1,10 @@
+## [2.7.5](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.4...v2.7.5) (2024-05-14)
+
+
+### Bug Fixes
+
+* in case window.hlx exists but window.hlx.rum is undefined ([581653b](https://github.com/adobe/helix-rum-enhancer/commit/581653b8e4e3e28c0c8de314454025cd8dbf4618))
+
 ## [2.7.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.3...v2.7.4) (2024-05-02)
 
 
