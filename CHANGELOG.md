@@ -1,3 +1,10 @@
+## [1.17.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.17.0...v1.17.1) (2024-05-21)
+
+
+### Bug Fixes
+
+* no type leads to empty checkpoint (1x) ([#168](https://github.com/adobe/helix-rum-enhancer/issues/168)) ([422fd8e](https://github.com/adobe/helix-rum-enhancer/commit/422fd8ed43d0cf842777ffbfae8c64242adbf39e))
+
 # [1.17.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.16.0...v1.17.0) (2024-05-07)
 
 
