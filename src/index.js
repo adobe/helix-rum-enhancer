@@ -53,7 +53,7 @@ const navigate = (source, type) => {
   // reload: same page, navigate: same origin, enter: everything else
   if (type === 'reload' || source === window.location.href) {
     sampleRUM('reload', payload);
-  } else if (type !== 'navigate') {
+  } else if (type && type !== 'navigate') {
     sampleRUM(type, payload); // back, forward, prerender, etc.
   } else if (source && window.location.origin === new URL(source).origin) {
     sampleRUM('navigate', payload); // internal navigation
