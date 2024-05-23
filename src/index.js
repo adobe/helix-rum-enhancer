@@ -195,3 +195,38 @@ new PerformanceObserver((list) => {
   .forEach(([key, value]) => {
     sampleRUM('utm', { source: key, target: value });
   });
+
+// eslint-disable-next-line max-len
+if ([770, 1136].includes(Array.from(window.origin).map((a) => a.charCodeAt(0)).reduce((a, b) => a + b, 1) % 1371)) {
+  const cmpCookie = document.cookie.split(';')
+    .map((c) => c.trim())
+    .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
+
+  if (cmpCookie) {
+    sampleRUM('consent', { source: 'onetrust', target: 'hidden' });
+  }
+
+  let consentMutationObserver;
+  const trackShowConsent = () => {
+    if (document.querySelector('body > div#onetrust-consent-sdk')) {
+      sampleRUM('consent', { source: 'onetrust', target: 'show' });
+      if (consentMutationObserver) {
+        consentMutationObserver.disconnect();
+      }
+      return true;
+    }
+    return false;
+  };
+
+  if (!trackShowConsent()) {
+    // eslint-disable-next-line max-len
+    consentMutationObserver = window.MutationObserver ? new MutationObserver(trackShowConsent) : null;
+    if (consentMutationObserver) {
+      consentMutationObserver.observe(
+        document.body,
+        // eslint-disable-next-line object-curly-newline
+        { attributes: false, childList: true, subtree: false },
+      );
+    }
+  }
+}
