@@ -1,3 +1,10 @@
+## [1.18.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.18.0...v1.18.1) (2024-05-24)
+
+
+### Bug Fixes
+
+* avoid adding the mutation observer if cookie is present ([b93e598](https://github.com/adobe/helix-rum-enhancer/commit/b93e598cfc9de55dfdc4f6b47ca7f5f74b27bf62))
+
 # [1.18.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.17.1...v1.18.0) (2024-05-24)
 
 
