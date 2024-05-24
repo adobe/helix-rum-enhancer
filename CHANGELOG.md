@@ -1,3 +1,10 @@
+# [1.18.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.17.1...v1.18.0) (2024-05-24)
+
+
+### Features
+
+* **checkpoint:** add consent checkpoint to 1.x ([cf72b07](https://github.com/adobe/helix-rum-enhancer/commit/cf72b0762aa9b3d1949fc3c9b9a46879fc394b63))
+
 ## [1.17.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.17.0...v1.17.1) (2024-05-21)
 
 
