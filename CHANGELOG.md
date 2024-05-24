@@ -1,3 +1,10 @@
+# [2.8.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.6...v2.8.0) (2024-05-24)
+
+
+### Features
+
+* **checkpoint:** add consent checkpoint ([6bf3740](https://github.com/adobe/helix-rum-enhancer/commit/6bf3740cdb6e2ac12624f2e1a9c5d6539a3f124f))
+
 ## [2.7.6](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.5...v2.7.6) (2024-05-21)
 
 
