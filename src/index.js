@@ -204,29 +204,29 @@ if ([770, 1136].includes(Array.from(window.origin).map((a) => a.charCodeAt(0)).r
 
   if (cmpCookie) {
     sampleRUM('consent', { source: 'onetrust', target: 'hidden' });
-  }
-
-  let consentMutationObserver;
-  const trackShowConsent = () => {
-    if (document.querySelector('body > div#onetrust-consent-sdk')) {
-      sampleRUM('consent', { source: 'onetrust', target: 'show' });
-      if (consentMutationObserver) {
-        consentMutationObserver.disconnect();
+  } else {
+    let consentMutationObserver;
+    const trackShowConsent = () => {
+      if (document.querySelector('body > div#onetrust-consent-sdk')) {
+        sampleRUM('consent', { source: 'onetrust', target: 'show' });
+        if (consentMutationObserver) {
+          consentMutationObserver.disconnect();
+        }
+        return true;
       }
-      return true;
-    }
-    return false;
-  };
+      return false;
+    };
 
-  if (!trackShowConsent()) {
-    // eslint-disable-next-line max-len
-    consentMutationObserver = window.MutationObserver ? new MutationObserver(trackShowConsent) : null;
-    if (consentMutationObserver) {
-      consentMutationObserver.observe(
-        document.body,
-        // eslint-disable-next-line object-curly-newline
-        { attributes: false, childList: true, subtree: false },
-      );
+    if (!trackShowConsent()) {
+      // eslint-disable-next-line max-len
+      consentMutationObserver = window.MutationObserver ? new MutationObserver(trackShowConsent) : null;
+      if (consentMutationObserver) {
+        consentMutationObserver.observe(
+          document.body,
+          // eslint-disable-next-line object-curly-newline
+          { attributes: false, childList: true, subtree: false },
+        );
+      }
     }
   }
 }
