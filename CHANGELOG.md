@@ -1,3 +1,10 @@
+# [2.9.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.8.0...v2.9.0) (2024-05-24)
+
+
+### Features
+
+* **missingresource:** remove feature flag (2.x) ([0905922](https://github.com/adobe/helix-rum-enhancer/commit/090592240fe2e6b05afc5044a20d11113b8d5f21))
+
 # [2.8.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.7.6...v2.8.0) (2024-05-24)
 
 
