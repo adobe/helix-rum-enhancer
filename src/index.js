@@ -77,6 +77,15 @@ sampleRUM.targetselector = (element) => {
 };
 
 sampleRUM.drain('cwv', (() => {
+  sampleRUM.perfObservers = sampleRUM.perfObservers || {};
+  sampleRUM.bfcacheRestoreTime = -1;
+  sampleRUM.firstHiddenTime = -1;
+  sampleRUM.interactionCountEstimate = 0;
+  sampleRUM.minInteractionId = Infinity;
+  sampleRUM.maxInteractionId = 0;
+  sampleRUM.DEFAULT_INTERACTION_DURATION_THRESHOLD = 40;
+  sampleRUM.MAX_INTERACTIONS_TO_CONSIDER = 10;
+
   const storeCWV = (measurement) => {
     const data = { cwv: {} };
     data.cwv[measurement.name] = measurement.value;
@@ -89,13 +98,67 @@ sampleRUM.drain('cwv', (() => {
     sampleRUM('cwv', data);
   };
 
-  sampleRUM.perfObservers = sampleRUM.perfObservers || {};
-  const registerPerformanceObserver = (type, cb) => {
-    if (sampleRUM.perfObservers[type]) return;
+  const onBFCacheRestore = (cb) => {
+    const listener = (event) => {
+      if (event.persisted) {
+        sampleRUM.bfcacheRestoreTime = event.timeStamp;
+        cb(event);
+      }
+    };
+    window.addEventListener('pageshow', listener, true);
+  };
+
+  const initHiddenTime = () => (document.visibilityState === 'hidden' && !document.prerendering ? 0 : Infinity);
+
+  const onVisibilityUpdate = (event) => {
+    if (document.visibilityState === 'hidden' && sampleRUM.firstHiddenTime > -1) {
+      sampleRUM.firstHiddenTime = event.type === 'visibilitychange' ? event.timeStamp : 0;
+      // eslint-disable-next-line no-use-before-define
+      removeChangeListeners();
+    }
+  };
+  const removeChangeListeners = () => {
+    window.removeEventListener('visibilitychange', onVisibilityUpdate, true);
+    window.removeEventListener('prerenderingchange', onVisibilityUpdate, true);
+  };
+  const addChangeListeners = () => {
+    window.addEventListener('visibilitychange', onVisibilityUpdate, true);
+    window.addEventListener('prerenderingchange', onVisibilityUpdate, true);
+  };
+
+  const getVisibilityWatcher = () => {
+    if (sampleRUM.firstHiddenTime < 0) {
+      sampleRUM.firstHiddenTime = initHiddenTime();
+      addChangeListeners();
+      onBFCacheRestore(() => {
+        setTimeout(() => {
+          sampleRUM.firstHiddenTime = initHiddenTime();
+          addChangeListeners();
+        }, 0);
+      });
+    }
+    return {
+      get firstHiddenTime() {
+        return sampleRUM.firstHiddenTime;
+      },
+    };
+  };
+
+  const getNavigationEntry = () => {
+    const [navigationEntry] = performance?.getEntriesByType?.('navigation') || [];
+    return navigationEntry?.responseStart > 0 && navigationEntry.responseStart < performance.now()
+      ? navigationEntry
+      : null;
+  };
+
+  const registerPerformanceObserver = (type, cb, opts) => {
+    if (!PerformanceObserver.supportedEntryTypes.includes(type)) return null;
+    if (sampleRUM.perfObservers[type]) return sampleRUM.perfObservers[type];
     sampleRUM.perfObservers[type] = new PerformanceObserver((list) => {
       Promise.resolve().then(() => cb(list.getEntries()));
     });
-    sampleRUM.perfObservers[type].observe({ type, buffered: true });
+    sampleRUM.perfObservers[type].observe({ type, buffered: true, ...opts || {} });
+    return sampleRUM.perfObservers[type];
   };
 
   const whenActivated = (cb) => {
@@ -106,10 +169,13 @@ sampleRUM.drain('cwv', (() => {
     }
   };
 
+  // Runs in the next task after the page is done loading and/or prerendering.
   const whenReady = (cb) => {
     if (document.prerendering) {
+      // firefox and safari don't implement the Speculation API
       whenActivated(() => whenReady(cb));
     } else if (document.readyState !== 'complete') {
+      // fallback for the browsers not implementing the Speculation API
       window.addEventListener('load', () => whenReady(cb), true);
     } else {
       // Queue a task so the callback runs after `loadEventEnd`.
@@ -117,57 +183,237 @@ sampleRUM.drain('cwv', (() => {
     }
   };
 
-  const getActivationStart = () => (sampleRUM.navEntry && sampleRUM.navEntry.activationStart) || 0;
-
-  whenReady(() => {
-    registerPerformanceObserver('navigation', (entries) => {
-      const entry = entries.pop();
-      sampleRUM.navEntry = entry;
-      storeCWV({ name: 'TTFB', value: entry.responseStart });
-    });
-  });
-
-  whenActivated(() => {
-    registerPerformanceObserver('paint', (entries) => {
-      const entry = entries.pop();
-      if (entry.name === 'first-contentful-paint') {
-        const value = Math.max(entry.startTime - getActivationStart(), 0);
-        storeCWV({ name: 'FCP', value, entries: [entry] });
-      }
-    });
-  });
-
-  whenActivated(() => {
-    registerPerformanceObserver('largest-contentful-paint', (entries) => {
-      const entry = entries.pop();
-      const value = Math.max(entry.startTime - getActivationStart(), 0);
-      storeCWV({ name: 'LCP', value, entries: [entry] });
-    });
-  });
-
-  const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
-  if (document.querySelector(`script[src="${cwvScript}"]`)) {
-    // web vitals script has been loaded already
-    return;
-  }
-  // use classic script to avoid CORS issues
-  const script = document.createElement('script');
-  script.src = cwvScript;
-  script.onload = () => {
-    const featureToggle = () => ['blog.adobe.com', 'www.revolt.tv'].includes(window.location.hostname);
-    const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
-
-    // When loading `web-vitals` using a classic script, all the public
-    // methods can be found on the `webVitals` global namespace.
-    ['FID', 'INP', 'CLS'].forEach((metric) => {
-      const metricFn = window.webVitals[`on${metric}`];
-      if (typeof metricFn === 'function') {
-        const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
-        metricFn(storeCWV, opts);
-      }
+  const onHidden = (cb) => {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') cb();
     });
   };
-  document.head.appendChild(script);
+
+  const getActivationStart = () => {
+    const navEntry = getNavigationEntry();
+    return (navEntry && navEntry.activationStart) || 0;
+  };
+
+  const doubleRAF = (cb) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => cb()));
+  };
+
+  const runOnce = (cb) => {
+    let called = false;
+    return () => {
+      if (!called) {
+        cb();
+        called = true;
+      }
+    };
+  };
+
+  const initInteractionCountPolyfill = () => {
+    if ('interactionCount' in performance || sampleRUM.perfObservers.event) return;
+    registerPerformanceObserver('event', (entries) => {
+      entries.forEach((e) => {
+        if (e.interactionId) {
+          sampleRUM.minInteractionId = Math.min(sampleRUM.minInteractionId, e.interactionId);
+          sampleRUM.maxInteractionId = Math.max(sampleRUM.maxInteractionId, e.interactionId);
+
+          sampleRUM.interactionCountEstimate = sampleRUM.maxInteractionId
+            ? (sampleRUM.maxInteractionId - sampleRUM.minInteractionId) / 7 + 1
+            : 0;
+        }
+      });
+    }, { durationThreshold: 0 });
+  };
+
+  const getInteractionCount = () => ('interactionCount' in performance ? (performance.interactionCount || 0) : sampleRUM.interactionCountEstimate);
+
+  sampleRUM.onTTFB = (cb) => {
+    const name = 'TTFB';
+    whenReady(() => {
+      const navigationEntry = getNavigationEntry();
+      registerPerformanceObserver('navigation', () => {
+        if (navigationEntry) {
+          const value = Math.max(navigationEntry.responseStart - getActivationStart(), 0);
+          cb({ name, value });
+        }
+      });
+    });
+  };
+
+  sampleRUM.onFCP = (cb) => {
+    const name = 'FCP';
+    whenActivated(() => {
+      const visibilityWatcher = getVisibilityWatcher();
+      const po = registerPerformanceObserver('paint', (entries) => {
+        entries.forEach((entry) => {
+          if (entry.name === 'first-contentful-paint') {
+            po.disconnect();
+            if (entry.startTime < visibilityWatcher.firstHiddenTime) {
+              const value = Math.max(entry.startTime - getActivationStart(), 0);
+              cb({ name, value, entries: [entry] });
+            }
+          }
+        });
+      });
+      onBFCacheRestore((event) => {
+        doubleRAF(() => {
+          const value = performance.now() - event.timeStamp;
+          cb({ name, value });
+        });
+      });
+    });
+  };
+
+  sampleRUM.onLCP = (cb) => {
+    const name = 'LCP';
+    whenActivated(() => {
+      const visibilityWatcher = getVisibilityWatcher();
+      const po = registerPerformanceObserver('largest-contentful-paint', (entries) => {
+        entries.forEach((entry) => {
+          // Only report if the page wasn't hidden prior to LCP.
+          if (entry.startTime < visibilityWatcher.firstHiddenTime) {
+            const value = Math.max(entry.startTime - getActivationStart(), 0);
+            cb({ name, value, entries: [entry] });
+          }
+        });
+      });
+      onHidden(() => {
+        if (po) po.disconnect();
+      });
+      onBFCacheRestore((event) => {
+        doubleRAF(() => {
+          const value = performance.now() - event.timeStamp;
+          cb({ name, value });
+        });
+      });
+    });
+  };
+
+  sampleRUM.onCLS = (cb) => {
+    const name = 'CLS';
+    sampleRUM.onFCP(() => {
+      let value = 0;
+      let totalEntries = [];
+      runOnce(() => {
+        let sessionValue = 0;
+        let sessionEntries = [];
+        registerPerformanceObserver('layout-shift', (entries) => {
+          entries.forEach((entry) => {
+            if (!entry.hadRecentInput) {
+              const firstSessionEntry = sessionEntries[0];
+              const lastSessionEntry = sessionEntries[sessionEntries.length - 1];
+              if (
+                sessionValue
+                && entry.startTime - lastSessionEntry.startTime < 1000
+                && entry.startTime - firstSessionEntry.startTime < 5000
+              ) {
+                sessionValue += entry.value;
+                sessionEntries.push(entry);
+              } else {
+                sessionValue = entry.value;
+                sessionEntries = [entry];
+              }
+            }
+          });
+          if (sessionValue > value) {
+            value = sessionValue;
+            totalEntries = sessionEntries;
+            cb({ name, value, entries: totalEntries });
+          }
+        });
+        onBFCacheRestore(() => {
+          doubleRAF(() => {
+            cb({ name, value });
+          });
+        });
+        setTimeout(() => cb({ name, value }), 0);
+      });
+    });
+  };
+
+  sampleRUM.onINP = (cb) => {
+    const name = 'INP';
+    let value = 0;
+    let inpEntries = [];
+    const longestInteractionList = [];
+    const longestInteractionMap = new Map();
+    let prevInteractionCount = 0;
+
+    const getInteractionCountForNavigation = () => getInteractionCount() - prevInteractionCount;
+
+    const resetInteractions = () => {
+      prevInteractionCount = 0;
+      longestInteractionList.length = 0;
+      longestInteractionMap.clear();
+    };
+
+    const estimateP98LongestInteraction = () => {
+      const candidateInteractionIndex = Math.min(
+        longestInteractionList.length - 1,
+        Math.floor(getInteractionCountForNavigation() / 50),
+      );
+
+      return longestInteractionList[candidateInteractionIndex];
+    };
+
+    whenActivated(() => {
+      initInteractionCountPolyfill();
+      registerPerformanceObserver('event', (entries) => {
+        entries.forEach((entry) => {
+          if (!(entry.interactionId || entry.entryType === 'first-input')) return;
+          const minLongestInteraction = longestInteractionList[longestInteractionList.length - 1];
+          const existingInteraction = longestInteractionMap.get(entry.interactionId);
+          if (
+            existingInteraction
+            || longestInteractionList.length < sampleRUM.MAX_INTERACTIONS_TO_CONSIDER
+            || entry.duration > minLongestInteraction.latency
+          ) {
+            if (existingInteraction) {
+              if (entry.duration > existingInteraction.latency) {
+                existingInteraction.entries = [entry];
+                existingInteraction.latency = entry.duration;
+              } else if (
+                entry.duration === existingInteraction.latency
+                && entry.startTime === existingInteraction.entries[0].startTime
+              ) {
+                existingInteraction.entries.push(entry);
+              }
+            } else {
+              const interaction = {
+                id: entry.interactionId,
+                latency: entry.duration,
+                entries: [entry],
+              };
+              longestInteractionMap.set(interaction.id, interaction);
+              longestInteractionList.push(interaction);
+            }
+            longestInteractionList.sort((a, b) => b.latency - a.latency);
+            if (longestInteractionList.length > sampleRUM.MAX_INTERACTIONS_TO_CONSIDER) {
+              longestInteractionList
+                .splice(sampleRUM.MAX_INTERACTIONS_TO_CONSIDER)
+                .forEach((i) => longestInteractionMap.delete(i.id));
+            }
+          }
+        });
+
+        const inp = estimateP98LongestInteraction();
+        if (inp && inp.latency !== value) {
+          value = inp.latency;
+          inpEntries = inp.entries;
+          cb({ name, value, entries: inpEntries });
+        }
+      });
+      onBFCacheRestore(() => {
+        resetInteractions();
+      });
+    });
+  };
+
+  ['TTFB', 'FCP', 'LCP', 'CLS', 'INP'].forEach((metric) => {
+    const metricFn = sampleRUM[`on${metric}`];
+    if (typeof metricFn === 'function') {
+      metricFn(storeCWV);
+    }
+  });
 }));
 
 sampleRUM.drain('leave', ((event = {}) => {
