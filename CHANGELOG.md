@@ -1,3 +1,10 @@
+## [1.18.2](https://github.com/adobe/helix-rum-enhancer/compare/v1.18.1...v1.18.2) (2024-05-28)
+
+
+### Bug Fixes
+
+* enable feature flag ([0f315ab](https://github.com/adobe/helix-rum-enhancer/commit/0f315ab65011c50473656e556af48224bcb1deb3))
+
 ## [1.18.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.18.0...v1.18.1) (2024-05-24)
 
 
