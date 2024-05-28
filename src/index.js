@@ -197,7 +197,7 @@ new PerformanceObserver((list) => {
   });
 
 // eslint-disable-next-line max-len
-if ([770, 1136].includes(Array.from(window.origin).map((a) => a.charCodeAt(0)).reduce((a, b) => a + b, 1) % 1371)) {
+if ([543, 770, 1136].includes(Array.from(window.origin).map((a) => a.charCodeAt(0)).reduce((a, b) => a + b, 1) % 1371)) {
   const cmpCookie = document.cookie.split(';')
     .map((c) => c.trim())
     .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
