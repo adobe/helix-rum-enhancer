@@ -11,6 +11,15 @@
  */
 const { sampleRUM } = window.hlx.rum;
 
+const fflags = {
+  has: (flag) => this[flag].indexOf(Array.from(window.origin)
+    .map((a) => a.charCodeAt(0))
+    .reduce((a, b) => a + b, 1) % 1371) !== -1,
+  enabled: (flag, callback) => this.has(flag) && callback(),
+  disabled: (flag, callback) => !this.has(flag) && callback(),
+  onetrust: [543, 770, 1136],
+};
+
 sampleRUM.baseURL = sampleRUM.baseURL || new URL('https://rum.hlx.page');
 
 sampleRUM.blockobserver = (window.IntersectionObserver) ? new IntersectionObserver((entries) => {
@@ -196,8 +205,7 @@ new PerformanceObserver((list) => {
     sampleRUM('utm', { source: key, target: value });
   });
 
-// eslint-disable-next-line max-len
-if ([543, 770, 1136].includes(Array.from(window.origin).map((a) => a.charCodeAt(0)).reduce((a, b) => a + b, 1) % 1371)) {
+fflags.enabled('onetrust', () => {
   const cmpCookie = document.cookie.split(';')
     .map((c) => c.trim())
     .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
@@ -229,4 +237,4 @@ if ([543, 770, 1136].includes(Array.from(window.origin).map((a) => a.charCodeAt(
       }
     }
   }
-}
+});
