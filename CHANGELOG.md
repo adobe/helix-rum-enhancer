@@ -1,3 +1,11 @@
+# [1.19.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.18.2...v1.19.0) (2024-05-31)
+
+
+### Features
+
+* **index:** ads reporting for 2.x ([b6c2314](https://github.com/adobe/helix-rum-enhancer/commit/b6c23149b82702ab592c504c1d8b304c248c3ceb))
+* **index:** introduce simple feature flag system ([c75796c](https://github.com/adobe/helix-rum-enhancer/commit/c75796c097189b214f0822207c68be3cd443c183))
+
 ## [1.18.2](https://github.com/adobe/helix-rum-enhancer/compare/v1.18.1...v1.18.2) (2024-05-28)
 
 
