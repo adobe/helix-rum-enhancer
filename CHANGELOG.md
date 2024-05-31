@@ -1,3 +1,10 @@
+# [2.11.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.10.0...v2.11.0) (2024-05-31)
+
+
+### Features
+
+* **index:** report ad clicks and email clicks ([f5b0779](https://github.com/adobe/helix-rum-enhancer/commit/f5b0779e4286962d881b69411efb8045660ff5de))
+
 # [2.10.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.9.0...v2.10.0) (2024-05-31)
 
 
