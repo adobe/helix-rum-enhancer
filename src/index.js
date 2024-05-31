@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Adobe. All rights reserved.
+ * Copyright 2024 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -9,13 +9,23 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-/* eslint-env browser */
 /* eslint wrap-iife: ["error", "inside"] */
 // eslint-disable-next-line func-names
 (function () {
   const KNOWN_PROPERTIES = ['weight', 'id', 'referer', 'checkpoint', 't', 'source', 'target', 'cwv', 'CLS', 'FID', 'LCP', 'INP', 'TTFB'];
   const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia', 'loadresource', 'utm'];
   const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
+
+  const fflags = {
+    has: (flag) => this[flag].indexOf(Array.from(window.origin)
+      .map((a) => a.charCodeAt(0))
+      .reduce((a, b) => a + b, 1) % 1371) !== -1,
+    enabled: (flag, callback) => this.has(flag) && callback(),
+    disabled: (flag, callback) => !this.has(flag) && callback(),
+    onetrust: [543, 770, 1136],
+    ads: [1339],
+    email: [1339],
+  };
 
   const urlSanitizers = {
     full: () => window.location.href,
@@ -90,9 +100,9 @@
   // Gets configured collection from the config service for the current domain
   function getCollectionConfig() {
     // eslint-disable-next-line max-len
-    if ([770, 1136].includes(Array.from(window.origin).map((a) => a.charCodeAt(0)).reduce((a, b) => a + b, 1) % 1371)) {
-      return DEFAULT_TRACKING_EVENTS.concat('consent');
-    }
+    fflags.enabled('onetrust', () => DEFAULT_TRACKING_EVENTS.push('consent'));
+    fflags.enabled('ads', () => DEFAULT_TRACKING_EVENTS.push('paid'));
+    fflags.enabled('email', () => DEFAULT_TRACKING_EVENTS.push('email'));
     return DEFAULT_TRACKING_EVENTS;
   }
 
@@ -280,6 +290,35 @@
       .forEach(([source, target]) => sampleRUM('utm', { source, target }));
   }
 
+  function addAdsParametersTracking() {
+    const networks = {
+      google: /gclid|gclsrc|wbraid|gbraid/,
+      doubleclick: /dclid/,
+      microsoft: /msclkid/,
+      facebook: /fb(cl|ad_|pxl_)id/,
+      twitter: /tw(clid|src|term)/,
+      linkedin: /li_fat_id/,
+      pinterest: /epik/,
+      tiktok: /ttclid/,
+    };
+    const params = Array.from(new URLSearchParams(window.location.search).keys());
+    Object.entries(networks).forEach(([network, regex]) => {
+      params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('paid', { source: network, target: param }));
+    });
+  }
+
+  function addEmailParameterTracking() {
+    const networks = {
+      mailchimp: /mc_(c|e)id/,
+      marketo: /mkt_tok/,
+
+    };
+    const params = Array.from(new URLSearchParams(window.location.search).keys());
+    Object.entries(networks).forEach(([network, regex]) => {
+      params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
+    });
+  }
+
   function addFormTracking(parent) {
     activateBlocksMutationObserver();
     parent.querySelectorAll('form').forEach((form) => {
@@ -349,6 +388,8 @@
       viewblock: () => addViewBlockTracking(window.document.body),
       viewmedia: () => addViewMediaTracking(window.document.body),
       consent: () => addCookieConsentTracking(),
+      paid: () => addAdsParametersTracking(),
+      email: () => addEmailParameterTracking(),
     };
 
     getCollectionConfig().filter((ck) => trackingFunctions[ck])
