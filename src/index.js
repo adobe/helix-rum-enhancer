@@ -21,6 +21,8 @@ const fflags = {
   enabled: (flag, callback) => this.has(flag) && callback(),
   disabled: (flag, callback) => !this.has(flag) && callback(),
   onetrust: [543, 770, 1136],
+  ads: [1339],
+  email: [1339],
 };
 
 const urlSanitizers = {
@@ -97,6 +99,8 @@ function optedIn(checkpoint, data) {
 function getCollectionConfig() {
   // eslint-disable-next-line max-len
   fflags.enabled('onetrust', () => DEFAULT_TRACKING_EVENTS.push('consent'));
+  fflags.enabled('ads', () => DEFAULT_TRACKING_EVENTS.push('paid'));
+  fflags.enabled('email', () => DEFAULT_TRACKING_EVENTS.push('email'));
   return DEFAULT_TRACKING_EVENTS;
 }
 
@@ -284,6 +288,35 @@ function addUTMParametersTracking() {
     .forEach(([source, target]) => sampleRUM('utm', { source, target }));
 }
 
+function addAdsParametersTracking() {
+  const networks = {
+    google: /gclid|gclsrc|wbraid|gbraid/,
+    doubleclick: /dclid/,
+    microsoft: /msclkid/,
+    facebook: /fb(cl|ad_|pxl_)id/,
+    twitter: /tw(clid|src|term)/,
+    linkedin: /li_fat_id/,
+    pinterest: /epik/,
+    tiktok: /ttclid/,
+  };
+  const params = Array.from(new URLSearchParams(window.location.search).keys());
+  Object.entries(networks).forEach(([network, regex]) => {
+    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('paid', { source: network, target: param }));
+  });
+}
+
+function addEmailParameterTracking() {
+  const networks = {
+    mailchimp: /mc_(c|e)id/,
+    marketo: /mkt_tok/,
+
+  };
+  const params = Array.from(new URLSearchParams(window.location.search).keys());
+  Object.entries(networks).forEach(([network, regex]) => {
+    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
+  });
+}
+
 function addFormTracking(parent) {
   activateBlocksMutationObserver();
   parent.querySelectorAll('form').forEach((form) => {
@@ -353,6 +386,8 @@ function addTrackingFromConfig() {
     viewblock: () => addViewBlockTracking(window.document.body),
     viewmedia: () => addViewMediaTracking(window.document.body),
     consent: () => addCookieConsentTracking(),
+    paid: () => addAdsParametersTracking(),
+    email: () => addEmailParameterTracking(),
   };
 
   getCollectionConfig().filter((ck) => trackingFunctions[ck])
