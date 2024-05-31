@@ -14,6 +14,15 @@ const KNOWN_PROPERTIES = ['weight', 'id', 'referer', 'checkpoint', 't', 'source'
 const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia', 'loadresource', 'utm'];
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
 
+const fflags = {
+  has: (flag) => this[flag].indexOf(Array.from(window.origin)
+    .map((a) => a.charCodeAt(0))
+    .reduce((a, b) => a + b, 1) % 1371) !== -1,
+  enabled: (flag, callback) => this.has(flag) && callback(),
+  disabled: (flag, callback) => !this.has(flag) && callback(),
+  onetrust: [543, 770, 1136],
+};
+
 const urlSanitizers = {
   full: () => window.location.href,
   origin: () => window.location.origin,
@@ -87,9 +96,7 @@ function optedIn(checkpoint, data) {
 // Gets configured collection from the config service for the current domain
 function getCollectionConfig() {
   // eslint-disable-next-line max-len
-  if ([770, 1136].includes(Array.from(window.origin).map((a) => a.charCodeAt(0)).reduce((a, b) => a + b, 1) % 1371)) {
-    return DEFAULT_TRACKING_EVENTS.concat('consent');
-  }
+  fflags.enabled('onetrust', () => DEFAULT_TRACKING_EVENTS.push('consent'));
   return DEFAULT_TRACKING_EVENTS;
 }
 
