@@ -1,3 +1,10 @@
+# [2.10.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.9.0...v2.10.0) (2024-05-31)
+
+
+### Features
+
+* **index:** add new feature flag system ([7ef9f20](https://github.com/adobe/helix-rum-enhancer/commit/7ef9f20cd9e3ec07ac06c3924fb4ca33f68a49e1))
+
 # [2.9.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.8.0...v2.9.0) (2024-05-24)
 
 
