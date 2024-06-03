@@ -1,3 +1,10 @@
+## [1.19.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.19.0...v1.19.1) (2024-06-03)
+
+
+### Bug Fixes
+
+* no this in arrow functions ([#182](https://github.com/adobe/helix-rum-enhancer/issues/182)) ([b5922ac](https://github.com/adobe/helix-rum-enhancer/commit/b5922ac6cd2d7dd14a18c309f118fe6622eea913))
+
 # [1.19.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.18.2...v1.19.0) (2024-05-31)
 
 
