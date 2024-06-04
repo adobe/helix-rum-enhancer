@@ -1,3 +1,10 @@
+## [2.11.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.11.1...v2.11.2) (2024-06-04)
+
+
+### Bug Fixes
+
+* avoid CORS ([#183](https://github.com/adobe/helix-rum-enhancer/issues/183)) ([4daf390](https://github.com/adobe/helix-rum-enhancer/commit/4daf3903247b0834b6e4fd15a3ad3738ad6917b5))
+
 ## [2.11.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.11.0...v2.11.1) (2024-06-03)
 
 
