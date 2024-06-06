@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-rum-enhancer",
-  "version": "1.14.0",
+  "version": "1.19.1",
   "description": "Helix RUM Enhancer",
   "main": "src/index.js",
   "type": "module",
@@ -32,7 +32,7 @@
     "@adobe/eslint-config-helix": "2.0.6",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "@semantic-release/npm": "12.0.0",
+    "@semantic-release/npm": "12.0.1",
     "c8": "9.1.0",
     "codecov": "3.8.3",
     "eslint": "8.57.0",
@@ -41,10 +41,10 @@
     "husky": "9.0.11",
     "jsdoc-to-markdown": "8.0.1",
     "junit-report-builder": "3.2.1",
-    "lint-staged": "15.2.2",
+    "lint-staged": "15.2.5",
     "mocha": "10.4.0",
     "mocha-multi-reporters": "1.5.1",
-    "semantic-release": "23.0.8"
+    "semantic-release": "24.0.0"
   },
   "lint-staged": {
     "*.js": "eslint",

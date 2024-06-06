@@ -1,3 +1,89 @@
+## [1.19.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.19.0...v1.19.1) (2024-06-03)
+
+
+### Bug Fixes
+
+* no this in arrow functions ([#182](https://github.com/adobe/helix-rum-enhancer/issues/182)) ([b5922ac](https://github.com/adobe/helix-rum-enhancer/commit/b5922ac6cd2d7dd14a18c309f118fe6622eea913))
+
+# [1.19.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.18.2...v1.19.0) (2024-05-31)
+
+
+### Features
+
+* **index:** ads reporting for 2.x ([b6c2314](https://github.com/adobe/helix-rum-enhancer/commit/b6c23149b82702ab592c504c1d8b304c248c3ceb))
+* **index:** introduce simple feature flag system ([c75796c](https://github.com/adobe/helix-rum-enhancer/commit/c75796c097189b214f0822207c68be3cd443c183))
+
+## [1.18.2](https://github.com/adobe/helix-rum-enhancer/compare/v1.18.1...v1.18.2) (2024-05-28)
+
+
+### Bug Fixes
+
+* enable feature flag ([0f315ab](https://github.com/adobe/helix-rum-enhancer/commit/0f315ab65011c50473656e556af48224bcb1deb3))
+
+## [1.18.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.18.0...v1.18.1) (2024-05-24)
+
+
+### Bug Fixes
+
+* avoid adding the mutation observer if cookie is present ([b93e598](https://github.com/adobe/helix-rum-enhancer/commit/b93e598cfc9de55dfdc4f6b47ca7f5f74b27bf62))
+
+# [1.18.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.17.1...v1.18.0) (2024-05-24)
+
+
+### Features
+
+* **checkpoint:** add consent checkpoint to 1.x ([cf72b07](https://github.com/adobe/helix-rum-enhancer/commit/cf72b0762aa9b3d1949fc3c9b9a46879fc394b63))
+
+## [1.17.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.17.0...v1.17.1) (2024-05-21)
+
+
+### Bug Fixes
+
+* no type leads to empty checkpoint (1x) ([#168](https://github.com/adobe/helix-rum-enhancer/issues/168)) ([422fd8e](https://github.com/adobe/helix-rum-enhancer/commit/422fd8ed43d0cf842777ffbfae8c64242adbf39e))
+
+# [1.17.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.16.0...v1.17.0) (2024-05-07)
+
+
+### Features
+
+* enable reportAll for all projects ([0e295ff](https://github.com/adobe/helix-rum-enhancer/commit/0e295ffd65fa72962b397b85b0355fd066163086))
+
+# [1.16.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.15.3...v1.16.0) (2024-05-06)
+
+
+### Features
+
+* **missingresource:** remove feature flag (1.x) ([0bad440](https://github.com/adobe/helix-rum-enhancer/commit/0bad4407a2190eccb0298ce58b60b571aab3e9b3))
+
+## [1.15.3](https://github.com/adobe/helix-rum-enhancer/compare/v1.15.2...v1.15.3) (2024-04-22)
+
+
+### Bug Fixes
+
+* no lcp target text from missing element ([#162](https://github.com/adobe/helix-rum-enhancer/issues/162)) ([1156663](https://github.com/adobe/helix-rum-enhancer/commit/1156663b0b9c7a4caee742d5f9aaf49be358c5cd))
+
+## [1.15.2](https://github.com/adobe/helix-rum-enhancer/compare/v1.15.1...v1.15.2) (2024-04-18)
+
+
+### Bug Fixes
+
+* **backport:** exclude utm_term from collection ([7a5e5b2](https://github.com/adobe/helix-rum-enhancer/commit/7a5e5b2ecd9eeda336b30163684b5302e7fe3258)), closes [#153](https://github.com/adobe/helix-rum-enhancer/issues/153)
+* **backport:** exclude utm_term from collection [#154](https://github.com/adobe/helix-rum-enhancer/issues/154) ([57d615b](https://github.com/adobe/helix-rum-enhancer/commit/57d615b89580cfe62a1877413ee29603b93371a2)), closes [#153](https://github.com/adobe/helix-rum-enhancer/issues/153)
+
+## [1.15.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.15.0...v1.15.1) (2024-04-18)
+
+
+### Bug Fixes
+
+* make targetselector null safe ([#157](https://github.com/adobe/helix-rum-enhancer/issues/157)) ([6f8e117](https://github.com/adobe/helix-rum-enhancer/commit/6f8e11753358e835688d3dfd2d4a0d7f420848a5))
+
+# [1.15.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.14.0...v1.15.0) (2024-04-18)
+
+
+### Features
+
+* add logic to capture target from wrapping anchor tag ([9f40d95](https://github.com/adobe/helix-rum-enhancer/commit/9f40d951021aa452b0cb8020c8ef1c2f5e68d069))
+
 # [1.14.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.13.2...v1.14.0) (2024-04-16)
 
 
