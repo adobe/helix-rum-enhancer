@@ -20,6 +20,7 @@ const fflags = {
   onetrust: [543, 770, 1136],
   ads: [1339],
   email: [1339],
+  cwv2: [683],
 };
 
 sampleRUM.baseURL = sampleRUM.baseURL || new URL('https://rum.hlx.page');
@@ -95,7 +96,45 @@ sampleRUM.targetselector = (element) => {
   return value;
 };
 
+sampleRUM.storeCWV = (checkpoint) => (measurement) => {
+  const data = { cwv: {} };
+  data.cwv[measurement.name] = measurement.value;
+
+  if (measurement.name === 'LCP' && measurement.entries.length > 0) {
+    const { element: el } = measurement.entries.pop();
+    data.target = sampleRUM.targetselector(el);
+    data.source = sampleRUM.sourceselector(el) || (el && el.outerHTML.slice(0, 30));
+  }
+
+  sampleRUM(checkpoint, data);
+};
+
 sampleRUM.drain('cwv', (() => {
+  const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
+  if (document.querySelector(`script[src="${cwvScript}"]`)) {
+    // web vitals script has been loaded already
+    return;
+  }
+  // use classic script to avoid CORS issues
+  const script = document.createElement('script');
+  script.src = cwvScript;
+  script.onload = () => {
+    const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
+
+    // When loading `web-vitals` using a classic script, all the public
+    // methods can be found on the `webVitals` global namespace.
+    ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
+      const metricFn = window.webVitals[`on${metric}`];
+      if (typeof metricFn === 'function') {
+        const opts = isEager(metric) ? { reportAllChanges: true } : undefined;
+        metricFn(sampleRUM.storeCWV('cwv'), opts);
+      }
+    });
+  };
+  document.head.appendChild(script);
+}));
+
+const cwv2 = () => {
   sampleRUM.webVitals = sampleRUM.webVitals || {};
   const { webVitals } = sampleRUM;
   webVitals.perfObservers = webVitals.perfObservers || {};
@@ -106,19 +145,6 @@ sampleRUM.drain('cwv', (() => {
   webVitals.maxInteractionId = 0;
   webVitals.DEFAULT_INTERACTION_DURATION_THRESHOLD = 40;
   webVitals.MAX_INTERACTIONS_TO_CONSIDER = 10;
-
-  const storeCWV = (measurement) => {
-    const data = { cwv: {} };
-    data.cwv[measurement.name] = measurement.value;
-
-      if (measurement.name === 'LCP' && measurement.entries.length > 0) {
-        const { element: el } = measurement.entries.pop();
-        data.target = sampleRUM.targetselector(el);
-        data.source = sampleRUM.sourceselector(el) || (el && el.outerHTML.slice(0, 30));
-      }
-
-      sampleRUM('cwv', data);
-    };
 
   const onBFCacheRestore = (cb) => {
     const listener = (event) => {
@@ -174,13 +200,18 @@ sampleRUM.drain('cwv', (() => {
   };
 
   const registerPerformanceObserver = (type, cb, opts) => {
-    if (!PerformanceObserver.supportedEntryTypes.includes(type)) return null;
-    if (webVitals.perfObservers[type]) return webVitals.perfObservers[type];
-    webVitals.perfObservers[type] = new PerformanceObserver((list) => {
-      Promise.resolve().then(() => cb(list.getEntries()));
-    });
-    webVitals.perfObservers[type].observe({ type, buffered: true, ...opts || {} });
-    return webVitals.perfObservers[type];
+    try {
+      if (PerformanceObserver.supportedEntryTypes.includes(type)) {
+        const po = new PerformanceObserver((list) => {
+          Promise.resolve().then(() => cb(list.getEntries()));
+        });
+        po.observe({ type, buffered: true, ...opts || {} });
+        return po;
+      }
+    } catch (e) {
+      return null;
+    }
+    return null;
   };
 
   const whenActivated = (cb) => {
@@ -276,12 +307,14 @@ sampleRUM.drain('cwv', (() => {
           }
         });
       });
-      onBFCacheRestore((event) => {
-        doubleRAF(() => {
-          const value = performance.now() - event.timeStamp;
-          cb({ name, value });
+      if (po) {
+        onBFCacheRestore((event) => {
+          doubleRAF(() => {
+            const value = performance.now() - event.timeStamp;
+            cb({ name, value });
+          });
         });
-      });
+      }
     });
   };
 
@@ -301,55 +334,57 @@ sampleRUM.drain('cwv', (() => {
       onHidden(() => {
         if (po) po.disconnect();
       });
-      onBFCacheRestore((event) => {
-        doubleRAF(() => {
-          const value = performance.now() - event.timeStamp;
-          cb({ name, value });
+      if (po) {
+        onBFCacheRestore((event) => {
+          doubleRAF(() => {
+            const value = performance.now() - event.timeStamp;
+            cb({ name, value });
+          });
         });
-      });
+      }
     });
   };
 
   webVitals.onCLS = (cb) => {
     const name = 'CLS';
-    webVitals.onFCP(() => {
-      let value = 0;
-      let totalEntries = [];
-      runOnce(() => {
-        let sessionValue = 0;
-        let sessionEntries = [];
-        registerPerformanceObserver('layout-shift', (entries) => {
-          entries.forEach((entry) => {
-            if (!entry.hadRecentInput) {
-              const firstSessionEntry = sessionEntries[0];
-              const lastSessionEntry = sessionEntries[sessionEntries.length - 1];
-              if (
-                sessionValue
-                && entry.startTime - lastSessionEntry.startTime < 1000
-                && entry.startTime - firstSessionEntry.startTime < 5000
-              ) {
-                sessionValue += entry.value;
-                sessionEntries.push(entry);
-              } else {
-                sessionValue = entry.value;
-                sessionEntries = [entry];
-              }
+    let value = 0;
+    let totalEntries = [];
+    webVitals.onFCP(runOnce(() => {
+      let sessionValue = 0;
+      let sessionEntries = [];
+      const po = registerPerformanceObserver('layout-shift', (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.hadRecentInput) {
+            const firstSessionEntry = sessionEntries[0];
+            const lastSessionEntry = sessionEntries[sessionEntries.length - 1];
+            if (
+              sessionValue
+              && entry.startTime - lastSessionEntry.startTime < 1000
+              && entry.startTime - firstSessionEntry.startTime < 5000
+            ) {
+              sessionValue += entry.value;
+              sessionEntries.push(entry);
+            } else {
+              sessionValue = entry.value;
+              sessionEntries = [entry];
             }
-          });
-          if (sessionValue > value) {
-            value = sessionValue;
-            totalEntries = sessionEntries;
-            cb({ name, value, entries: totalEntries });
           }
         });
+        if (sessionValue > value) {
+          value = sessionValue;
+          totalEntries = sessionEntries;
+          cb({ name, value, entries: totalEntries });
+        }
+      });
+      if (po) {
         onBFCacheRestore(() => {
           doubleRAF(() => {
             cb({ name, value });
           });
         });
         setTimeout(() => cb({ name, value }), 0);
-      });
-    });
+      }
+    }));
   };
 
   webVitals.onINP = (cb) => {
@@ -379,7 +414,7 @@ sampleRUM.drain('cwv', (() => {
 
     whenActivated(() => {
       initInteractionCountPolyfill();
-      registerPerformanceObserver('event', (entries) => {
+      const po = registerPerformanceObserver('event', (entries) => {
         entries.forEach((entry) => {
           if (!(entry.interactionId || entry.entryType === 'first-input')) return;
           const minLongestInteraction = longestInteractionList[longestInteractionList.length - 1];
@@ -424,19 +459,21 @@ sampleRUM.drain('cwv', (() => {
           cb({ name, value, entries: inpEntries });
         }
       });
-      onBFCacheRestore(() => {
-        resetInteractions();
-      });
+      if (po) {
+        onBFCacheRestore(() => {
+          resetInteractions();
+        });
+      }
     });
   };
 
   ['TTFB', 'FCP', 'LCP', 'CLS', 'INP'].forEach((metric) => {
     const metricFn = webVitals[`on${metric}`];
     if (typeof metricFn === 'function') {
-      metricFn(storeCWV);
+      metricFn(sampleRUM.storeCWV('cwv2'));
     }
   });
-}));
+};
 
 sampleRUM.drain('leave', ((event = {}) => {
   if (sampleRUM.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
@@ -573,4 +610,8 @@ fflags.enabled('email', () => {
   Object.entries(networks).forEach(([network, regex]) => {
     params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
   });
+});
+
+fflags.enabled('cwv2', () => {
+  cwv2();
 });
