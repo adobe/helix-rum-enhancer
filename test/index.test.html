@@ -12,23 +12,15 @@
     runTests(async () => {
       describe('HTML Index Tests', () => {
 
-        it('empty test', () => {
-          // empty test
-          console.log('empty test');
-        });
         it('can load rum enhancer as a script', async () => {
           let called = false;
           window.hlx = {
             rum: {
               sampleRUM: (...args) => {
-                console.log('fake sampleRUM', ...args);
+                called = true;
+                console.log('fake sampleRUM', ...args, called);
               }
             }
-          };
-
-          window.hlx.rum.sampleRUM.drain = (...args) => {
-            console.log('fake drain', ...args);
-            called = true;
           };
 
 
@@ -39,6 +31,11 @@
           await new Promise((resolve) => {
             script.onload = resolve;
           });
+          // wait one second for the script to run
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
           expect(called).to.be.true;
         });
 
