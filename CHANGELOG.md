@@ -1,3 +1,10 @@
+## [2.11.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.11.2...v2.11.3) (2024-06-07)
+
+
+### Bug Fixes
+
+* add referer ([#190](https://github.com/adobe/helix-rum-enhancer/issues/190)) ([68b75d6](https://github.com/adobe/helix-rum-enhancer/commit/68b75d6f7bdd808adf2ecd941f5dceb7805de45c))
+
 ## [2.11.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.11.1...v2.11.2) (2024-06-04)
 
 
