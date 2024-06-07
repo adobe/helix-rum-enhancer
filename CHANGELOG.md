@@ -1,3 +1,10 @@
+# [1.20.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.19.1...v1.20.0) (2024-06-07)
+
+
+### Features
+
+* **ads:** enable ads feature flag ([1b9f168](https://github.com/adobe/helix-rum-enhancer/commit/1b9f16839cd6e9389b96018261391f1e824cc109))
+
 ## [1.19.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.19.0...v1.19.1) (2024-06-03)
 
 
