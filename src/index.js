@@ -18,7 +18,7 @@ const fflags = {
   enabled: (flag, callback) => fflags.has(flag) && callback(),
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
   onetrust: [543, 770, 1136],
-  ads: [1339],
+  ads: [1339, 1198],
   email: [1339],
 };
 
