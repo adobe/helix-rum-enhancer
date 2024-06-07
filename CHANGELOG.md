@@ -1,3 +1,10 @@
+# [1.21.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.20.0...v1.21.0) (2024-06-07)
+
+
+### Features
+
+* **ads:** enable ads and email ([fabb7d1](https://github.com/adobe/helix-rum-enhancer/commit/fabb7d1d51b190c9b85c2580d324a4db7a09e311))
+
 # [1.20.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.19.1...v1.20.0) (2024-06-07)
 
 
