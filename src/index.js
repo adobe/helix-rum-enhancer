@@ -109,7 +109,7 @@ function trackCheckpoint(checkpoint, data, t) {
   if (optedIn(checkpoint, data) && isSelected) {
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
-      const body = JSON.stringify({ weight, id, sanitizeURL: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'], checkpoint, t, ...data }, KNOWN_PROPERTIES);
+      const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
       const { href: url, origin} = new URL(`.rum/${weight}`, sampleRUM.collectBaseURL || sampleRUM.baseURL);
       if (window.location.origin === origin) {
         const headers = { type: 'application/json' };
