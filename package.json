@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "web-test-runner --node--resolve --coverage",
-    "test:watch": "web-test-runner --node --watch",
+    "test:watch": "web-test-runner --node-resolve --coverage --watch",
     "lint": "eslint .",
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
     "semantic-release": "semantic-release",
@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.6",
+    "@esm-bundle/chai": "4.3.4-fix.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
     "@semantic-release/npm": "12.0.1",
