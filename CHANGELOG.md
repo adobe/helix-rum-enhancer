@@ -1,3 +1,10 @@
+## [1.21.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.21.0...v1.21.1) (2024-06-10)
+
+
+### Bug Fixes
+
+* **fflags:** use correct domain ([1be1f07](https://github.com/adobe/helix-rum-enhancer/commit/1be1f07fc2db8240b0b76c70c024ab36d8a4cf55))
+
 # [1.21.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.20.0...v1.21.0) (2024-06-07)
 
 
