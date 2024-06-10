@@ -7,7 +7,7 @@
   "scripts": {
     "setup-playwright": "npx playwright install --with-deps chromium firefox webkit",
     "test": "npm run setup-playwright && web-test-runner --node-resolve --coverage --playwright --browsers chromium firefox webkit",
-    "test-ci": "npm run setup-playwright && web-test-runner --node-resolve --coverage --playwright --browsers chromium firefox webkit",
+    "test:ci": "npm run setup-playwright && web-test-runner --node-resolve --coverage --playwright --browsers chromium firefox webkit",
     "test:watch": "web-test-runner --node-resolve --watch --coverage",
     "lint": "eslint .",
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
