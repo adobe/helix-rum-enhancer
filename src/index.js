@@ -11,19 +11,9 @@
  */
 /* eslint-env browser */
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
+import { fflags } from './fflags.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
-
-const fflags = {
-  has: (flag) => fflags[flag].indexOf(Array.from(window.origin)
-    .map((a) => a.charCodeAt(0))
-    .reduce((a, b) => a + b, 1) % 1371) !== -1,
-  enabled: (flag, callback) => fflags.has(flag) && callback(),
-  disabled: (flag, callback) => !fflags.has(flag) && callback(),
-  onetrust: [543, 770, 1136],
-  ads: [1139, 543],
-  email: [1139, 543],
-};
 
 const urlSanitizers = {
   full: () => window.location.href,

@@ -15,7 +15,7 @@
 import { expect } from '@esm-bundle/chai';
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from '../../src/defaults.js';
 
-describe('tests defaults', () => {
+describe('test defaults', () => {
   it('KNOWN_PROPERTIES is an array of string', () => {
     // eslint-disable-next-line no-unused-expressions
     expect(Array.isArray(KNOWN_PROPERTIES)).to.be.true;
