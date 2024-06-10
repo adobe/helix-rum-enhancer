@@ -24,7 +24,8 @@ const banner = `/*
  * governing permissions and limitations under the License.
  */
 
-/* eslint-disable max-classes-per-file */`;
+/* eslint-disable max-classes-per-file, wrap-iife */
+// eslint-disable-next-line func-names`;
 
 const bundles = [
   {
@@ -43,7 +44,7 @@ export default [...bundles.map(({ outputFile, source }) => ({
       exports: 'auto',
       banner,
     },
-  ].filter((m) => m),
+  ],
   plugins: [
     cleanup({
       comments: ['eslint', 'jsdoc', /^\//, /^\*(?!\sc8\s)(?!\n \* Copyright)/],
