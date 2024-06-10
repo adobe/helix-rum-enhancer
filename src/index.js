@@ -13,29 +13,9 @@
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { fflags } from './fflags.js';
 import { urlSanitizers } from './utils.js';
+import { targetselector } from './dom.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
-
-const getTargetValue = (element) => element.getAttribute('data-rum-target') || element.getAttribute('href')
-    || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
-
-const targetselector = (element) => {
-  try {
-    if (!element) return undefined;
-    let value = getTargetValue(element);
-    if (!value && element.tagName !== 'A' && element.closest('a')) {
-      value = getTargetValue(element.closest('a'));
-    }
-    if (value && !value.startsWith('https://')) {
-      // resolve relative links
-      value = new URL(value, window.location).href;
-    }
-    return value;
-  } catch (error) {
-    // something went wrong
-    return null;
-  }
-};
 
 const sourceselector = (element) => {
   try {
