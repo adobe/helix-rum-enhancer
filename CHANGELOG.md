@@ -1,3 +1,10 @@
+# [1.22.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.21.1...v1.22.0) (2024-06-10)
+
+
+### Features
+
+* **paid:** enable `paid` checkpoint for two more domains ([fad1661](https://github.com/adobe/helix-rum-enhancer/commit/fad16619ace1fc75abe772442cc425fc11f32e73))
+
 ## [1.21.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.21.0...v1.21.1) (2024-06-10)
 
 
