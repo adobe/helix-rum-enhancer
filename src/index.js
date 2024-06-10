@@ -12,14 +12,9 @@
 /* eslint-env browser */
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { fflags } from './fflags.js';
+import { urlSanitizers } from './utils.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
-
-const urlSanitizers = {
-  full: () => window.location.href,
-  origin: () => window.location.origin,
-  path: () => window.location.href.replace(/\?.*$/, ''),
-};
 
 const getTargetValue = (element) => element.getAttribute('data-rum-target') || element.getAttribute('href')
     || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;

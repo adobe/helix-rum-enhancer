@@ -16,8 +16,6 @@ import { expect } from '@esm-bundle/chai';
 import { fflags } from '../../src/fflags.js';
 
 describe('test fflags', () => {
-  // write tests for fflags object
-
   it('fflags.has is a function', () => {
     expect(fflags.has).to.be.a('function');
   });
