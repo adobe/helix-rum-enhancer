@@ -5,8 +5,9 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "test": "web-test-runner --node--resolve --coverage",
-    "test:ci": "web-test-runner --node-resolve --coverage --playwright",
+    "setup-playwright": "npx playwright install --with-deps chromium firefox webkit",
+    "test": "npm run setup-playwright && web-test-runner --node-resolve --coverage --playwright --browsers chromium firefox webkit",
+    "test:ci": "npm run setup-playwright && web-test-runner --node-resolve --coverage --playwright --browsers chromium firefox webkit",
     "test:watch": "web-test-runner --node-resolve --coverage --watch",
     "lint": "eslint .",
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
