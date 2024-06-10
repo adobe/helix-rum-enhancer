@@ -18,8 +18,8 @@ const fflags = {
   enabled: (flag, callback) => fflags.has(flag) && callback(),
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
   onetrust: [543, 770, 1136],
-  ads: [1139, 543],
-  email: [1139, 543],
+  ads: [1139, 543, 770, 984],
+  email: [1139, 543, 770, 984],
 };
 
 sampleRUM.baseURL = sampleRUM.baseURL || new URL('https://rum.hlx.page');
