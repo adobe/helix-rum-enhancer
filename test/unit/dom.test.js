@@ -13,7 +13,7 @@
 /* eslint-env mocha */
 
 import { expect } from '@esm-bundle/chai';
-import { getTargetValue, targetselector } from '../../src/dom.js';
+import { getTargetValue, targetSelector } from '../../src/dom.js';
 
 describe('test dom#getTargetValue', () => {
   it('getTargetValue - basics', () => {
@@ -57,47 +57,47 @@ describe('test dom#getTargetValue', () => {
   });
 });
 
-describe('test dom#targetselector', () => {
-  it('targetselector - basics', () => {
-    expect(targetselector).to.be.a('function');
+describe('test dom#targetSelector', () => {
+  it('targetSelector - basics', () => {
+    expect(targetSelector).to.be.a('function');
     // eslint-disable-next-line no-unused-expressions
-    expect(targetselector()).to.be.undefined;
+    expect(targetSelector()).to.be.undefined;
   });
 
-  it('targetselector - select target for link', () => {
+  it('targetSelector - select target for link', () => {
     const a = document.createElement('a');
     a.setAttribute('href', 'https://www.example.com');
-    expect(targetselector(a)).to.be.equal('https://www.example.com');
+    expect(targetSelector(a)).to.be.equal('https://www.example.com');
   });
 
-  it('targetselector - select target for relative link', () => {
+  it('targetSelector - select target for relative link', () => {
     const a = document.createElement('a');
     a.setAttribute('href', '/target.html');
-    expect(targetselector(a)).to.be.equal('http://localhost:8000/target.html');
+    expect(targetSelector(a)).to.be.equal('http://localhost:8000/target.html');
   });
 
-  it('targetselector - select target for span in a link', () => {
+  it('targetSelector - select target for span in a link', () => {
     const a = document.createElement('a');
     a.setAttribute('href', 'https://www.example.com/target.html');
     const span = document.createElement('span');
     span.textContent = 'test';
     a.append(span);
-    expect(targetselector(span)).to.be.equal('https://www.example.com/target.html');
+    expect(targetSelector(span)).to.be.equal('https://www.example.com/target.html');
   });
 
-  it('targetselector - select target for span with data-rum-target in a link', () => {
+  it('targetSelector - select target for span with data-rum-target in a link', () => {
     const a = document.createElement('a');
     a.setAttribute('href', 'https://www.example.com/target.html');
     const span = document.createElement('span');
     span.textContent = 'test';
     span.setAttribute('data-rum-target', 'test');
     a.append(span);
-    expect(targetselector(span)).to.be.equal('http://localhost:8000/test');
+    expect(targetSelector(span)).to.be.equal('http://localhost:8000/test');
   });
 
-  it('targetselector - select target for img', () => {
+  it('targetSelector - select target for img', () => {
     const img = document.createElement('img');
     img.src = 'https://www.example.com/img.jpg';
-    expect(targetselector(img)).to.be.equal('https://www.example.com/img.jpg');
+    expect(targetSelector(img)).to.be.equal('https://www.example.com/img.jpg');
   });
 });

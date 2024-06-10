@@ -13,7 +13,7 @@
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { fflags } from './fflags.js';
 import { urlSanitizers } from './utils.js';
-import { targetselector } from './dom.js';
+import { targetSelector } from './dom.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
 
@@ -51,7 +51,7 @@ const sourceselector = (element) => {
   }
 };
 
-const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetselector(e.target), source: sourceselector(e.target) });
+const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceselector(e.target) });
 // eslint-disable-next-line no-use-before-define
 const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback) : null;
 
@@ -112,7 +112,7 @@ function addCWVTracking() {
           data.cwv[measurement.name] = measurement.value;
           if (measurement.name === 'LCP' && measurement.entries.length > 0) {
             const { element } = measurement.entries.pop();
-            data.target = targetselector(element);
+            data.target = targetSelector(element);
             data.source = sourceselector(element) || (element && element.outerHTML.slice(0, 30));
           }
           sampleRUM('cwv', data);
@@ -218,7 +218,7 @@ function getIntersectionObsever(checkpoint) {
         .filter((entry) => entry.isIntersecting)
         .forEach((entry) => {
           observer.unobserve(entry.target); // observe only once
-          const target = targetselector(entry.target);
+          const target = targetSelector(entry.target);
           const source = sourceselector(entry.target);
           sampleRUM(checkpoint, { target, source });
         });
@@ -344,7 +344,7 @@ function addTrackingFromConfig() {
   const trackingFunctions = {
     click: () => {
       document.addEventListener('click', (event) => {
-        sampleRUM('click', { target: targetselector(event.target), source: sourceselector(event.target) });
+        sampleRUM('click', { target: targetSelector(event.target), source: sourceselector(event.target) });
       });
     },
     cwv: () => addCWVTracking(),

@@ -12,7 +12,7 @@
 export const getTargetValue = (element) => element.getAttribute('data-rum-target') || element.getAttribute('href')
     || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
 
-export const targetselector = (element) => {
+export const targetSelector = (element) => {
   try {
     if (!element) return undefined;
     let value = getTargetValue(element);
