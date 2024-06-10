@@ -21,8 +21,8 @@ const fflags = {
   enabled: (flag, callback) => fflags.has(flag) && callback(),
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
   onetrust: [543, 770, 1136],
-  ads: [1339],
-  email: [1339],
+  ads: [1139, 543],
+  email: [1139, 543],
 };
 
 const urlSanitizers = {
@@ -109,8 +109,8 @@ function trackCheckpoint(checkpoint, data, t) {
   if (optedIn(checkpoint, data) && isSelected) {
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
-      const body = JSON.stringify({ weight, id, sanitizeURL: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'], checkpoint, t, ...data }, KNOWN_PROPERTIES);
-      const { href: url, origin} = new URL(`.rum/${weight}`, sampleRUM.collectBaseURL || sampleRUM.baseURL);
+      const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
+      const { href: url, origin } = new URL(`.rum/${weight}`, sampleRUM.collectBaseURL || sampleRUM.baseURL);
       if (window.location.origin === origin) {
         const headers = { type: 'application/json' };
         navigator.sendBeacon(url, new Blob([body], headers));

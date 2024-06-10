@@ -1,0 +1,47 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+</head>
+
+<body>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('HTML Index Tests', () => {
+
+        it('can load rum enhancer as a script', async () => {
+          let called = false;
+          window.hlx = {
+            rum: {
+              sampleRUM: (...args) => {
+                called = true;
+                console.log('fake sampleRUM', ...args, called);
+              }
+            }
+          };
+
+
+          const script = document.createElement('script');
+          script.src = new URL('/src/index.js', window.location).href;
+          document.head.appendChild(script);
+
+          await new Promise((resolve) => {
+            script.onload = resolve;
+          });
+          // wait one second for the script to run
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          expect(called).to.be.true;
+        });
+
+      });
+    });
+  </script>
+</body>
+
+</html>
