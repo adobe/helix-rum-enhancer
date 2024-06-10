@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Adobe. All rights reserved.
+ * Copyright 2024 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -10,8 +10,8 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env browser */
-const KNOWN_PROPERTIES = ['weight', 'id', 'referer', 'checkpoint', 't', 'source', 'target', 'cwv', 'CLS', 'FID', 'LCP', 'INP', 'TTFB'];
-const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia', 'loadresource', 'utm'];
+import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
+
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
 
 const fflags = {
