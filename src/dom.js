@@ -29,3 +29,37 @@ export const targetSelector = (element) => {
     return null;
   }
 };
+
+export const sourceSelector = (element) => {
+  try {
+    if (!element || element === document.body || element === document.documentElement) {
+      return undefined;
+    }
+    if (element.getAttribute('data-rum-source')) {
+      return element.getAttribute('data-rum-source');
+    }
+    const form = element.closest('form');
+    let formElementSelector = '';
+    if (form && Array.from(form.elements).includes(element)) {
+      formElementSelector = element.tagName === 'INPUT' ? `form input[type='${element.getAttribute('type')}']` : `form ${element.tagName.toLowerCase()}`;
+    }
+
+    const blockName = element.closest('.block') ? element.closest('.block').getAttribute('data-block-name') : '';
+    if (element.id || formElementSelector) {
+      const id = element.id ? `#${element.id}` : '';
+      return blockName ? `.${blockName} ${formElementSelector}${id}` : `${formElementSelector}${id}`;
+    }
+
+    if (element.getAttribute('data-block-name')) {
+      return `.${element.getAttribute('data-block-name')}`;
+    }
+
+    if (Array.from(element.classList).some((className) => className.match(/button|cta/))) {
+      return blockName ? `.${blockName} .button` : '.button';
+    }
+
+    return sourceSelector(element.parentElement);
+  } catch (error) {
+    return null;
+  }
+};

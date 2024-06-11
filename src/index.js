@@ -14,45 +14,11 @@
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { fflags } from './fflags.js';
 import { urlSanitizers } from './utils.js';
-import { targetSelector } from './dom.js';
+import { targetSelector, sourceSelector } from './dom.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
 
-const sourceselector = (element) => {
-  try {
-    if (element === document.body || element === document.documentElement || !element) {
-      return undefined;
-    }
-    if (element.getAttribute('data-rum-source')) {
-      return element.getAttribute('data-rum-source');
-    }
-    const form = element.closest('form');
-    let formElementSelector = '';
-    if (form && Array.from(form.elements).includes(element)) {
-      formElementSelector = element.tagName === 'INPUT' ? `form input[type='${element.getAttribute('type')}']` : `form ${element.tagName.toLowerCase()}`;
-    }
-
-    const blockName = element.closest('.block') ? element.closest('.block').getAttribute('data-block-name') : '';
-    if (element.id || formElementSelector) {
-      const id = element.id ? `#${element.id}` : '';
-      return blockName ? `.${blockName} ${formElementSelector}${id}` : `${formElementSelector}${id}`;
-    }
-
-    if (element.getAttribute('data-block-name')) {
-      return `.${element.getAttribute('data-block-name')}`;
-    }
-
-    if (Array.from(element.classList).some((className) => className.match(/button|cta/))) {
-      return blockName ? `.${blockName} .button` : '.button';
-    }
-
-    return sourceselector(element.parentElement);
-  } catch (error) {
-    return null;
-  }
-};
-
-const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceselector(e.target) });
+const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
 // eslint-disable-next-line no-use-before-define
 const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback) : null;
 
@@ -114,7 +80,7 @@ function addCWVTracking() {
           if (measurement.name === 'LCP' && measurement.entries.length > 0) {
             const { element } = measurement.entries.pop();
             data.target = targetSelector(element);
-            data.source = sourceselector(element) || (element && element.outerHTML.slice(0, 30));
+            data.source = sourceSelector(element) || (element && element.outerHTML.slice(0, 30));
           }
           sampleRUM('cwv', data);
         };
@@ -220,7 +186,7 @@ function getIntersectionObsever(checkpoint) {
         .forEach((entry) => {
           observer.unobserve(entry.target); // observe only once
           const target = targetSelector(entry.target);
-          const source = sourceselector(entry.target);
+          const source = sourceSelector(entry.target);
           sampleRUM(checkpoint, { target, source });
         });
     } catch (error) {
@@ -345,7 +311,7 @@ function addTrackingFromConfig() {
   const trackingFunctions = {
     click: () => {
       document.addEventListener('click', (event) => {
-        sampleRUM('click', { target: targetSelector(event.target), source: sourceselector(event.target) });
+        sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
       });
     },
     cwv: () => addCWVTracking(),
