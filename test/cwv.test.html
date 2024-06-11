@@ -1,0 +1,349 @@
+<html>
+
+<head>
+    <title>Test Runner</title>
+</head>
+
+<body>
+<script type="module">
+  import {runTests} from '@web/test-runner-mocha';
+  import {expect} from '@esm-bundle/chai';
+
+  runTests(async () => {
+    describe('CWV collection tests', () => {
+      it('can load rum enhancer as a script', async () => {
+        let called = false;
+        let measurements = {};
+
+        window.hlx = {
+          rum: {
+            sampleRUM: (checkpoint, data) => {
+              if (checkpoint === 'cwv2') {
+                const [metric, value] = Object.entries(data.cwv)[0];
+                const {source, target} = data;
+                measurements[metric] = {
+                  value,
+                  source,
+                  target
+                }
+              }
+            }
+          }
+        };
+
+        window.hlx.rum.sampleRUM.drain = (...args) => {
+          console.log('fake drain', ...args);
+          called = true;
+        };
+
+        const script = document.createElement('script');
+        script.src = new URL('/src/index.js', window.location).href;
+        document.head.appendChild(script);
+
+        await new Promise((resolve) => {
+          script.onload = resolve;
+        });
+
+
+        // wait one second for the script to run
+        await new Promise((resolve) => {
+          setTimeout(resolve, 1000);
+        });
+
+        expect(measurements.TTFB.value > 0).to.be.true;
+        expect(measurements.FCP.value > 0).to.be.true;
+
+        // LCP is not measured on Safari
+        let useragent = window.navigator.userAgent.toLowerCase();
+        if (useragent.includes('firefox') || useragent.includes('chrome')) {
+          expect(measurements.LCP.value > 0).to.be.true;
+          expect(measurements.LCP.source === '.hero').to.be.true;
+        }
+
+      });
+
+    });
+  });
+</script>
+
+<header class="header-wrapper">
+    <div class="header block" data-block-name="header" data-block-status="loaded">
+        <div class="nav-wrapper">
+            <nav id="nav" aria-expanded="false">
+                <div class="nav-hamburger">
+                    <button type="button" aria-controls="nav" aria-label="Open navigation">
+                        <span class="nav-hamburger-icon"></span>
+                    </button>
+                </div>
+                <div class="section nav-brand" data-section-status="loaded" style="">
+
+                    <div class="default-content-wrapper"><p class=""><a href="/" title="Boilerplate" class="">Boilerplate</a>
+                    </p></div>
+                </div>
+                <div class="section nav-sections" data-section-status="loaded" style="">
+
+                    <div class="default-content-wrapper">
+                        <ul>
+                            <li class="nav-drop" aria-expanded="false">Example Content
+                                <ul>
+                                    <li><a href="/" title="Default Content">Default Content</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-drop" aria-expanded="false">Getting Started
+                                <ul>
+                                    <li><a href="/" title="Build your first site">Build your first site</a></li>
+                                    <li><a href="/" title="Preview and publish content">Preview and publish content</a>
+                                    </li>
+                                    <li><a href="/" title="Organize your content">Organize your content</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-drop" aria-expanded="false">Documentation
+                                <ul>
+                                    <li><a href="/" title="Architecture">Architecture</a></li>
+                                    <li><a href="/" title="Sidekick">Sidekick</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="section nav-tools" data-section-status="loaded" style="">
+
+                    <div class="default-content-wrapper"><p><span class="icon icon-search"><img data-icon-name="search"
+                                                                                                src="https://main--aem-boilerplate--adobe.hlx.page/icons/search.svg"
+                                                                                                alt=""
+                                                                                                loading="lazy"></span>
+                    </p></div>
+                </div>
+            </nav>
+        </div>
+    </div>
+</header>
+<main>
+    <div class="section hero-container" data-section-status="loaded" style="">
+        <div class="hero-wrapper">
+            <div class="hero block" data-block-name="hero" data-block-status="loaded">
+                <div>
+                    <div>
+                        <p>
+                            <picture>
+                                <source type="image/webp"
+                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_1dc0a2d290d791a050feb1e159746f52db392775a.jpeg?width=2000&amp;format=webply&amp;optimize=medium"
+                                        media="(min-width: 600px)">
+                                <source type="image/webp"
+                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_1dc0a2d290d791a050feb1e159746f52db392775a.jpeg?width=750&amp;format=webply&amp;optimize=medium">
+                                <source type="image/jpeg"
+                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_1dc0a2d290d791a050feb1e159746f52db392775a.jpeg?width=2000&amp;format=jpeg&amp;optimize=medium"
+                                        media="(min-width: 600px)">
+                                <img loading="eager" alt="Decorative double Helix"
+                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_1dc0a2d290d791a050feb1e159746f52db392775a.jpeg?width=750&amp;format=jpeg&amp;optimize=medium"
+                                     width="1600" height="886">
+                            </picture>
+                        <h1 id="congrats-you-are-ready-to-go">Congrats, you are ready to go!</h1></p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="section columns-container" data-section-status="loaded" style="">
+
+
+        <div class="default-content-wrapper"><p>
+
+        </p>
+            <p>Your forked repo is set up as an AEM Project and you are ready to start developing.<br>The content you
+                are looking at is served from this <a
+                        href="https://drive.google.com/drive/folders/1MGzOt7ubUh3gu7zhZIPb7R7dyRzG371j?usp=sharing"
+                        title="Google Drive">Google Drive</a><br><br>Adjust the <code>fstab.yaml</code> to point to a
+                folder either in your sharepoint or your gdrive that you shared with AEM. See the full tutorial
+                here:<br><br><a href="https://bit.ly/3aImqUL" title="https://www.aem.live/tutorial">https://www.aem.live/tutorial</a>
+            </p>
+            <h2 id="this-is-another-headline-here-for-more-content">This is another headline here for more content</h2>
+        </div>
+        <div class="columns-wrapper">
+            <div class="columns block columns-2-cols" data-block-name="columns" data-block-status="loaded">
+                <div>
+                    <div>
+                        <p>Columns block</p>
+                        <ul>
+                            <li>One</li>
+                            <li>Two</li>
+                            <li>Three</li>
+                        </ul>
+                        <p class="button-container"><a href="/" title="Live" class="button">Live</a></p>
+                    </div>
+                    <div class="columns-img-col">
+                        <picture>
+                            <source type="image/webp"
+                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_17e9dd0aae03d62b8ebe2159b154d6824ef55732d.png?width=2000&amp;format=webply&amp;optimize=medium"
+                                    media="(min-width: 600px)">
+                            <source type="image/webp"
+                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_17e9dd0aae03d62b8ebe2159b154d6824ef55732d.png?width=750&amp;format=webply&amp;optimize=medium">
+                            <source type="image/png"
+                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_17e9dd0aae03d62b8ebe2159b154d6824ef55732d.png?width=2000&amp;format=png&amp;optimize=medium"
+                                    media="(min-width: 600px)">
+                            <img loading="lazy" alt="green double Helix"
+                                 src="https://main--aem-boilerplate--adobe.hlx.page/media_17e9dd0aae03d62b8ebe2159b154d6824ef55732d.png?width=750&amp;format=png&amp;optimize=medium"
+                                 width="1600" height="1066">
+                        </picture>
+                    </div>
+                </div>
+                <div>
+                    <div class="columns-img-col">
+                        <picture>
+                            <source type="image/webp"
+                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_143cf1a441962c90f082d4f7dba2aeefb07f4e821.png?width=2000&amp;format=webply&amp;optimize=medium"
+                                    media="(min-width: 600px)">
+                            <source type="image/webp"
+                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_143cf1a441962c90f082d4f7dba2aeefb07f4e821.png?width=750&amp;format=webply&amp;optimize=medium">
+                            <source type="image/png"
+                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_143cf1a441962c90f082d4f7dba2aeefb07f4e821.png?width=2000&amp;format=png&amp;optimize=medium"
+                                    media="(min-width: 600px)">
+                            <img loading="lazy" alt="Yellow Double Helix"
+                                 src="https://main--aem-boilerplate--adobe.hlx.page/media_143cf1a441962c90f082d4f7dba2aeefb07f4e821.png?width=750&amp;format=png&amp;optimize=medium"
+                                 width="644" height="470">
+                        </picture>
+                    </div>
+                    <div>
+                        <p>Or you can just view the preview</p>
+                        <p class="button-container"><em><a href="/" title="Preview" class="button secondary">Preview</a></em>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="section highlight cards-container" data-section-status="loaded" style="">
+
+
+        <div class="default-content-wrapper"><h2 id="boilerplate-highlights">Boilerplate Highlights?</h2>
+            <p>Find some of our favorite staff picks below:</p></div>
+        <div class="cards-wrapper">
+            <div class="cards block" data-block-name="cards" data-block-status="loaded">
+                <ul>
+                    <li>
+                        <div class="cards-card-image">
+                            <picture>
+                                <source type="image/webp"
+                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_16582eee85490fbfe6b27c6a92724a81646c2e649.jpeg?width=750&amp;format=webply&amp;optimize=medium">
+                                <img loading="lazy" alt="A fast-moving Tunnel"
+                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_16582eee85490fbfe6b27c6a92724a81646c2e649.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                            </picture>
+                        </div>
+                        <div class="cards-card-body">
+                            <p><strong>Unmatched speed</strong></p>
+                            <p>AEM is the fastest way to publish, create, and serve websites</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="cards-card-image">
+                            <picture>
+                                <source type="image/webp"
+                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_17a5ca5faf60fa6486a1476fce82a3aa606000c81.jpeg?width=750&amp;format=webply&amp;optimize=medium">
+                                <img loading="lazy" alt="An iceberg"
+                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_17a5ca5faf60fa6486a1476fce82a3aa606000c81.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                            </picture>
+                        </div>
+                        <div class="cards-card-body">
+                            <p><strong>Content at scale</strong></p>
+                            <p>AEM allows you to publish more content in shorter time with smaller teams</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="cards-card-image">
+                            <picture>
+                                <source type="image/webp"
+                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_162cf9431ac2dfd17fe7bf4420525bbffb9d0ccfe.jpeg?width=750&amp;format=webply&amp;optimize=medium">
+                                <img loading="lazy" alt="Doors with light in the dark"
+                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_162cf9431ac2dfd17fe7bf4420525bbffb9d0ccfe.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                            </picture>
+                        </div>
+                        <div class="cards-card-body">
+                            <p><strong>Uncertainty eliminated</strong></p>
+                            <p>Preview content at 100% fidelity, get predictable content velocity, and shorten project
+                                durations</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="cards-card-image">
+                            <picture>
+                                <source type="image/webp"
+                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_136fdd3174ff44787179448cc2e0264af1b02ade9.jpeg?width=750&amp;format=webply&amp;optimize=medium">
+                                <img loading="lazy" alt="A group of people around a Table"
+                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_136fdd3174ff44787179448cc2e0264af1b02ade9.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                            </picture>
+                        </div>
+                        <div class="cards-card-body">
+                            <p><strong>Widen the talent pool</strong></p>
+                            <p>Authors on AEM use Microsoft Word, Excel or Google Docs and need no training</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="cards-card-image">
+                            <picture>
+                                <source type="image/webp"
+                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_1cae8484004513f76c6bf5860375bc020d099a6d6.jpeg?width=750&amp;format=webply&amp;optimize=medium">
+                                <img loading="lazy" alt="HTML code in a code editor"
+                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_1cae8484004513f76c6bf5860375bc020d099a6d6.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                            </picture>
+                        </div>
+                        <div class="cards-card-body">
+                            <p><strong>The low-code way to developer productivity</strong></p>
+                            <p>Say goodbye to complex APIs spanning multiple languages. Anyone with a little bit of
+                                HTML, CSS, and JS can build a site on AEM.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="cards-card-image">
+                            <picture>
+                                <source type="image/webp"
+                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_11381226cb58caf1f0792ea27abebbc8569b00aeb.jpeg?width=750&amp;format=webply&amp;optimize=medium">
+                                <img loading="lazy" alt="A rocket and a headless suit"
+                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_11381226cb58caf1f0792ea27abebbc8569b00aeb.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                            </picture>
+                        </div>
+                        <div class="cards-card-body">
+                            <p><strong>Headless is here</strong></p>
+                            <p>Go directly from Microsoft Excel or Google Sheets to the web in mere seconds. Sanitize
+                                and collect form data at extreme scale with AEM Forms.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div class="cards-card-image">
+                            <picture>
+                                <source type="image/webp"
+                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_18fadeb136e84a2efe384b782e8aea6e92de4fc13.jpeg?width=750&amp;format=webply&amp;optimize=medium">
+                                <img loading="lazy" alt="A dial with a hand on it"
+                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_18fadeb136e84a2efe384b782e8aea6e92de4fc13.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                            </picture>
+                        </div>
+                        <div class="cards-card-body">
+                            <p><strong>Peak performance</strong></p>
+                            <p>Use AEM's serverless architecture to meet any traffic need. Use AEM's PageSpeed Insights
+                                Github action to evaluate every Pull-Request for Lighthouse Score.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="section" data-section-status="loaded" style=""></div>
+</main>
+<footer class="footer-wrapper">
+    <div class="footer block" data-block-name="footer" data-block-status="loaded">
+        <div>
+            <div class="section" data-section-status="loaded" style="">
+
+
+                <div class="default-content-wrapper"><p>Copyright © 2023 Adobe. All rights reserved.</p>
+                    <p><a href="https://www.adobe.com/privacy.html" title="Privacy">Privacy</a> / <a
+                            href="https://www.adobe.com/legal/terms.html" title="Terms of Use">Terms of Use</a> / <a
+                            href="https://www.adobe.com/#openPrivacy" title="Cookie preferences">Cookie preferences</a>
+                        / <a href="https://www.adobe.com/privacy/ca-rights.html"
+                             title="Do not sell my personal information">Do not sell my personal information</a> / <a
+                                href="https://www.adobe.com/privacy/opt-out.html#interest-based-ads" title="AdChoices">AdChoices</a>
+                    </p></div>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

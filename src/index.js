@@ -21,8 +21,9 @@ const fflags = {
   onetrust: [543, 770, 1136],
   ads: [1139, 543, 770, 984],
   email: [1139, 543, 770, 984],
-  cwv2: [683],
+  cwv2: [683, 457],
 };
+// 457 for tests
 
 sampleRUM.baseURL = sampleRUM.baseURL || new URL('https://rum.hlx.page');
 
