@@ -254,12 +254,9 @@ const cwv2 = () => {
   };
 
   const whenIdle = (cb) => {
-    // eslint-disable-next-line no-restricted-globals
     const rIC = self.requestIdleCallback || self.setTimeout;
     let handle = -1;
     const callback = runOnce(cb);
-    // If the document is hidden, run the callback immediately, otherwise
-    // race an idle callback with the next `visibilitychange` event.
     if (document.visibilityState === 'hidden') {
       callback();
     } else {
@@ -460,8 +457,6 @@ const cwv2 = () => {
           longestInteractionMap.set(interaction.id, interaction);
           longestInteractionList.push(interaction);
         }
-
-        // Sort the entries by latency (descending) and keep only the top ten.
         longestInteractionList.sort((a, b) => b.latency - a.latency);
         if (longestInteractionList.length > webVitals.MAX_INTERACTIONS_TO_CONSIDER) {
           longestInteractionList
