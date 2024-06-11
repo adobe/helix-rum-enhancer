@@ -23,7 +23,6 @@ export const targetSelector = (element) => {
     // resolve relative links
       value = new URL(value, window.location).href;
     }
-    // eslint-disable-next-line padded-blocks
     return value;
     /* c8 ignore next 3 */
   } catch (error) {
@@ -59,7 +58,6 @@ export const sourceSelector = (element) => {
       return blockName ? `.${blockName} .button` : '.button';
     }
 
-    // eslint-disable-next-line padded-blocks
     return sourceSelector(element.parentElement);
     /* c8 ignore next 3 */
   } catch (error) {

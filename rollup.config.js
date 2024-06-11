@@ -11,6 +11,7 @@
  */
 
 import cleanup from 'rollup-plugin-cleanup';
+import eslint from 'rollup-plugin-eslint-bundle';
 
 const banner = `/*
  * Copyright 2024 Adobe. All rights reserved.
@@ -49,6 +50,11 @@ export default [...bundles.map(({ outputFile, source }) => ({
     cleanup({
       comments: ['eslint', 'jsdoc', /^\//, /^\*(?!\sc8\s)(?!\n \* Copyright)/],
       maxEmptyLines: -1,
+    }),
+    eslint({
+      eslintOptions: {
+        fix: true,
+      },
     }),
   ],
 }))];

@@ -342,5 +342,4 @@ function initEnhancer() {
   }
 }
 
-// eslint-disable-next-line padded-blocks
 initEnhancer();
