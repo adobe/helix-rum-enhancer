@@ -11,7 +11,7 @@
  */
 
 export const urlSanitizers = {
-  full: () => window.location.href,
-  origin: () => window.location.origin,
-  path: () => window.location.href.replace(/\?.*$/, ''),
+  full: (url = window.location.href) => new URL(url).toString(),
+  origin: (url = window.location.href) => new URL(url).origin,
+  path: (url = window.location.href) => new URL(url).pathname,
 };
