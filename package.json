@@ -8,14 +8,14 @@
     "setup-playwright": "npx playwright install --with-deps chromium firefox webkit",
     "test": "npm run setup-playwright && web-test-runner --node-resolve --coverage --playwright --browsers chromium firefox webkit",
     "test:ci": "npm run setup-playwright && web-test-runner --node-resolve --coverage --playwright --browsers chromium firefox webkit",
-    "test:watch": "web-test-runner --node-resolve --coverage --watch",
+    "test:watch": "web-test-runner --node-resolve --playwright --coverage --watch",
     "lint": "eslint .",
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
     "build-bundle": "rollup --config",
     "prepack": "npm run build-bundle",
     "semantic-release": "semantic-release",
     "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH 1.x main",
-    "prepare": "husky install"
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -28,7 +28,6 @@
   },
   "homepage": "https://github.com/adobe/helix-rum-enhancer#readme",
   "mocha": {
-    "require": "test/setup-env.js",
     "recursive": "true",
     "reporter": "mocha-multi-reporters",
     "reporter-options": "configFile=.mocha-multi.json"
@@ -56,6 +55,7 @@
     "mocha-multi-reporters": "1.5.1",
     "rollup": "4.18.0",
     "rollup-plugin-cleanup": "3.2.1",
+    "rollup-plugin-eslint-bundle": "9.0.0",
     "semantic-release": "24.0.0"
   },
   "lint-staged": {

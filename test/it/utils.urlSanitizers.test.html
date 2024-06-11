@@ -1,0 +1,35 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+</head>
+
+<body>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+    import { urlSanitizers } from '../../modules/utils.js';
+
+    runTests(async () => {
+      describe('utils#urlSanitizers', () => {
+        it('urlSanitizers.full', () => {
+          const full = new URL(urlSanitizers.full());
+          expect(full.origin).to.be.equal('http://localhost:8000');
+          expect(full.pathname).to.be.equal('/test/it/utils.urlSanitizers.test.html');
+        });
+
+        it('urlSanitizers.origin', () => {
+          const origin = urlSanitizers.origin();
+          expect(origin).to.be.equal('http://localhost:8000');
+        });
+
+        it('urlSanitizers.path', () => {
+          const path = urlSanitizers.path();
+          expect(path).to.be.equal('/test/it/utils.urlSanitizers.test.html');
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>
