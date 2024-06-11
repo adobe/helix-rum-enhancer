@@ -1,3 +1,31 @@
+# [1.22.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.21.1...v1.22.0) (2024-06-10)
+
+
+### Features
+
+* **paid:** enable `paid` checkpoint for two more domains ([fad1661](https://github.com/adobe/helix-rum-enhancer/commit/fad16619ace1fc75abe772442cc425fc11f32e73))
+
+## [1.21.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.21.0...v1.21.1) (2024-06-10)
+
+
+### Bug Fixes
+
+* **fflags:** use correct domain ([1be1f07](https://github.com/adobe/helix-rum-enhancer/commit/1be1f07fc2db8240b0b76c70c024ab36d8a4cf55))
+
+# [1.21.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.20.0...v1.21.0) (2024-06-07)
+
+
+### Features
+
+* **ads:** enable ads and email ([fabb7d1](https://github.com/adobe/helix-rum-enhancer/commit/fabb7d1d51b190c9b85c2580d324a4db7a09e311))
+
+# [1.20.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.19.1...v1.20.0) (2024-06-07)
+
+
+### Features
+
+* **ads:** enable ads feature flag ([1b9f168](https://github.com/adobe/helix-rum-enhancer/commit/1b9f16839cd6e9389b96018261391f1e824cc109))
+
 ## [1.19.1](https://github.com/adobe/helix-rum-enhancer/compare/v1.19.0...v1.19.1) (2024-06-03)
 
 
