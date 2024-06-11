@@ -14,13 +14,13 @@
       describe('utils#urlSanitizers', () => {
         it('urlSanitizers.full', () => {
           const full = new URL(urlSanitizers.full());
-          expect(full.origin).to.be.equal('http://localhost:8000');
+          expect(full.origin).to.be.equal(window.location.origin);
           expect(full.pathname).to.be.equal('/test/it/utils.urlSanitizers.test.html');
         });
 
         it('urlSanitizers.origin', () => {
           const origin = urlSanitizers.origin();
-          expect(origin).to.be.equal('http://localhost:8000');
+          expect(origin).to.be.equal(window.location.origin);
         });
 
         it('urlSanitizers.path', () => {
