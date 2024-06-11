@@ -26,8 +26,6 @@ It will add following new checkpoints:
 
 ## Development
 
-DO NOT edit the `src/index.js`, sources are under the `modules` folder (will be changing soon). Just run `npm run prepack` to re-generate it.
-
 ### Build
 
 ```bash
