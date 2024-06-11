@@ -9,6 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+/* eslint-disable no-restricted-globals */
 const { sampleRUM } = window.hlx.rum;
 
 const fflags = {
@@ -153,7 +154,7 @@ const cwv2 = () => {
         cb(event);
       }
     };
-    window.addEventListener('pageshow', listener, true);
+    addEventListener('pageshow', listener, true);
   };
 
   const initHiddenTime = () => (document.visibilityState === 'hidden' && !document.prerendering ? 0 : Infinity);
@@ -166,12 +167,12 @@ const cwv2 = () => {
     }
   };
   const removeChangeListeners = () => {
-    window.removeEventListener('visibilitychange', onVisibilityUpdate, true);
-    window.removeEventListener('prerenderingchange', onVisibilityUpdate, true);
+    removeEventListener('visibilitychange', onVisibilityUpdate, true);
+    removeEventListener('prerenderingchange', onVisibilityUpdate, true);
   };
   const addChangeListeners = () => {
-    window.addEventListener('visibilitychange', onVisibilityUpdate, true);
-    window.addEventListener('prerenderingchange', onVisibilityUpdate, true);
+    addEventListener('visibilitychange', onVisibilityUpdate, true);
+    addEventListener('prerenderingchange', onVisibilityUpdate, true);
   };
 
   const getVisibilityWatcher = () => {
@@ -229,26 +230,11 @@ const cwv2 = () => {
       whenActivated(() => whenReady(cb));
     } else if (document.readyState !== 'complete') {
       // fallback for the browsers not implementing the Speculation API
-      window.addEventListener('load', () => whenReady(cb), true);
+      addEventListener('load', () => whenReady(cb), true);
     } else {
       // Queue a task so the callback runs after `loadEventEnd`.
       setTimeout(cb, 0);
     }
-  };
-
-  const onHidden = (cb) => {
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'hidden') cb();
-    });
-  };
-
-  const getActivationStart = () => {
-    const navEntry = getNavigationEntry();
-    return (navEntry && navEntry.activationStart) || 0;
-  };
-
-  const doubleRAF = (cb) => {
-    requestAnimationFrame(() => requestAnimationFrame(() => cb()));
   };
 
   const runOnce = (cb) => {
@@ -259,6 +245,37 @@ const cwv2 = () => {
         called = true;
       }
     };
+  };
+
+  const onHidden = (cb) => {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') cb();
+    });
+  };
+
+  const whenIdle = (cb) => {
+    // eslint-disable-next-line no-restricted-globals
+    const rIC = self.requestIdleCallback || self.setTimeout;
+    let handle = -1;
+    const callback = runOnce(cb);
+    // If the document is hidden, run the callback immediately, otherwise
+    // race an idle callback with the next `visibilitychange` event.
+    if (document.visibilityState === 'hidden') {
+      callback();
+    } else {
+      handle = rIC(callback);
+      onHidden(callback);
+    }
+    return handle;
+  };
+
+  const getActivationStart = () => {
+    const navEntry = getNavigationEntry();
+    return (navEntry && navEntry.activationStart) || 0;
+  };
+
+  const doubleRAF = (cb) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => cb()));
   };
 
   const initInteractionCountPolyfill = () => {
@@ -331,14 +348,21 @@ const cwv2 = () => {
           }
         });
       });
-      onHidden(() => {
-        if (po) po.disconnect();
+      const stopListening = runOnce(() => {
+        if (po) {
+          console.log('cwv2 lcp disconnedted')
+          po.disconnect();
+        }
+      });
+      onHidden(stopListening);
+      ['keydown', 'click'].forEach((type) => {
+        addEventListener(type, () => whenIdle(stopListening), true);
       });
       if (po) {
         onBFCacheRestore((event) => {
           doubleRAF(() => {
             const value = performance.now() - event.timeStamp;
-            cb({ name, value });
+            cb({ name, entries: [], value });
           });
         });
       }
@@ -378,6 +402,7 @@ const cwv2 = () => {
       });
       if (po) {
         onBFCacheRestore(() => {
+          value = 0;
           doubleRAF(() => {
             cb({ name, value });
           });
@@ -412,46 +437,46 @@ const cwv2 = () => {
       return longestInteractionList[candidateInteractionIndex];
     };
 
-    whenActivated(() => {
-      initInteractionCountPolyfill();
-      const po = registerPerformanceObserver('event', (entries) => {
-        entries.forEach((entry) => {
-          if (!(entry.interactionId || entry.entryType === 'first-input')) return;
-          const minLongestInteraction = longestInteractionList[longestInteractionList.length - 1];
-          const existingInteraction = longestInteractionMap.get(entry.interactionId);
-          if (
-            existingInteraction
-            || longestInteractionList.length < webVitals.MAX_INTERACTIONS_TO_CONSIDER
-            || entry.duration > minLongestInteraction.latency
+    const processInteractionEntry = (entry) => {
+      if (!(entry.interactionId || entry.entryType === 'first-input')) return;
+      const minLongestInteraction = longestInteractionList[longestInteractionList.length - 1];
+      const existingInteraction = longestInteractionMap.get(entry.interactionId);
+      if (existingInteraction
+        || longestInteractionList.length < webVitals.MAX_INTERACTIONS_TO_CONSIDER
+        || entry.duration > minLongestInteraction.latency) {
+        if (existingInteraction) {
+          if (entry.duration > existingInteraction.latency) {
+            existingInteraction.entries = [entry];
+            existingInteraction.latency = entry.duration;
+          } else if (
+            entry.duration === existingInteraction.latency
+            && entry.startTime === existingInteraction.entries[0].startTime
           ) {
-            if (existingInteraction) {
-              if (entry.duration > existingInteraction.latency) {
-                existingInteraction.entries = [entry];
-                existingInteraction.latency = entry.duration;
-              } else if (
-                entry.duration === existingInteraction.latency
-                && entry.startTime === existingInteraction.entries[0].startTime
-              ) {
-                existingInteraction.entries.push(entry);
-              }
-            } else {
-              const interaction = {
-                id: entry.interactionId,
-                latency: entry.duration,
-                entries: [entry],
-              };
-              longestInteractionMap.set(interaction.id, interaction);
-              longestInteractionList.push(interaction);
-            }
-            longestInteractionList.sort((a, b) => b.latency - a.latency);
-            if (longestInteractionList.length > webVitals.MAX_INTERACTIONS_TO_CONSIDER) {
-              longestInteractionList
-                .splice(webVitals.MAX_INTERACTIONS_TO_CONSIDER)
-                .forEach((i) => longestInteractionMap.delete(i.id));
-            }
+            existingInteraction.entries.push(entry);
           }
-        });
+        } else {
+          const interaction = {
+            id: entry.interactionId || '',
+            latency: entry.duration,
+            entries: [entry],
+          };
+          longestInteractionMap.set(interaction.id, interaction);
+          longestInteractionList.push(interaction);
+        }
 
+        // Sort the entries by latency (descending) and keep only the top ten.
+        longestInteractionList.sort((a, b) => b.latency - a.latency);
+        if (longestInteractionList.length > webVitals.MAX_INTERACTIONS_TO_CONSIDER) {
+          longestInteractionList
+            .splice(webVitals.MAX_INTERACTIONS_TO_CONSIDER)
+            .forEach((i) => longestInteractionMap.delete(i.id));
+        }
+      }
+    };
+
+    const handleEntries = (entries) => {
+      whenIdle(() => {
+        entries.forEach(processInteractionEntry);
         const inp = estimateP98LongestInteraction();
         if (inp && inp.latency !== value) {
           value = inp.latency;
@@ -459,7 +484,20 @@ const cwv2 = () => {
           cb({ name, value, entries: inpEntries });
         }
       });
+    };
+
+    whenActivated(() => {
+      initInteractionCountPolyfill();
+      const po = registerPerformanceObserver(
+        'event',
+        handleEntries,
+        { durationThreshold: webVitals.DEFAULT_INTERACTION_DURATION_THRESHOLD },
+      );
       if (po) {
+        po.observe({ type: 'first-input', buffered: true });
+        onHidden(() => {
+          handleEntries(po.takeRecords());
+        });
         onBFCacheRestore(() => {
           resetInteractions();
         });
