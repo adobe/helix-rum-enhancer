@@ -13,7 +13,7 @@
 /* eslint-env mocha */
 
 import { expect } from '@esm-bundle/chai';
-import { getTargetValue, targetSelector, sourceSelector } from '../../src/dom.js';
+import { getTargetValue, targetSelector, sourceSelector } from '../../modules/dom.js';
 
 describe('test dom#getTargetValue', () => {
   it('getTargetValue - basics', () => {

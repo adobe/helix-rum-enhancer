@@ -30,8 +30,8 @@ const banner = `/*
 
 const bundles = [
   {
-    source: 'src/index.js',
-    outputFile: 'dist/rum-enhancer',
+    source: 'modules/index.js',
+    outputFile: 'src/index',
   },
 ];
 

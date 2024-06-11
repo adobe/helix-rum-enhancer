@@ -13,7 +13,7 @@
 /* eslint-env mocha */
 
 import { expect } from '@esm-bundle/chai';
-import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from '../../src/defaults.js';
+import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from '../../modules/defaults.js';
 
 describe('test defaults', () => {
   it('KNOWN_PROPERTIES is an array of string', () => {

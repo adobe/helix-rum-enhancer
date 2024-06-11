@@ -13,7 +13,7 @@
 /* eslint-env mocha */
 
 import { expect } from '@esm-bundle/chai';
-import { urlSanitizers } from '../../src/utils.js';
+import { urlSanitizers } from '../../modules/utils.js';
 
 describe('test utils#urlSanitizers', () => {
   it('urlSanitizers.full', () => {

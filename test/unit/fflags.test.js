@@ -13,7 +13,7 @@
 /* eslint-env mocha */
 
 import { expect } from '@esm-bundle/chai';
-import { fflags } from '../../src/fflags.js';
+import { fflags } from '../../modules/fflags.js';
 
 describe('test fflags', () => {
   it('fflags.has is a function', () => {
