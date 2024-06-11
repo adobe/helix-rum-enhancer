@@ -27,9 +27,9 @@
             }
           };
 
-
           const script = document.createElement('script');
           script.src = new URL('/src/index.js', window.location).href;
+          script.type = 'module';
           document.head.appendChild(script);
 
           await new Promise((resolve) => {
