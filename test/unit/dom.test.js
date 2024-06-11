@@ -73,7 +73,7 @@ describe('test dom#targetSelector', () => {
   it('targetSelector - select target for relative link', () => {
     const a = document.createElement('a');
     a.setAttribute('href', '/target.html');
-    expect(targetSelector(a)).to.be.equal('http://localhost:8000/target.html');
+    expect(targetSelector(a)).to.be.equal(`${window.location.origin}/target.html`);
   });
 
   it('targetSelector - select target for span in a link', () => {
@@ -92,7 +92,7 @@ describe('test dom#targetSelector', () => {
     span.textContent = 'test';
     span.setAttribute('data-rum-target', 'test');
     a.append(span);
-    expect(targetSelector(span)).to.be.equal('http://localhost:8000/test');
+    expect(targetSelector(span)).to.be.equal(`${window.location.origin}/test`);
   });
 
   it('targetSelector - select target for img', () => {
