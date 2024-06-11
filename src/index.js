@@ -10,6 +10,7 @@
  * governing permissions and limitations under the License.
  */
 /* eslint-env browser */
+
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { fflags } from './fflags.js';
 import { urlSanitizers } from './utils.js';
