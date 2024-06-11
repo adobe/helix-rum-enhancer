@@ -1,3 +1,15 @@
+# [2.13.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.12.0...v2.13.0) (2024-06-11)
+
+
+### Bug Fixes
+
+* proper linted output ([f2548ee](https://github.com/adobe/helix-rum-enhancer/commit/f2548eeda287e5a8abf75a9dc2156643640406eb))
+
+
+### Features
+
+* **bundle:** first step to build enhancer as a bundle ([56255db](https://github.com/adobe/helix-rum-enhancer/commit/56255db63e4d9fcd5f9dd685ee942ebda3052130))
+
 # [2.12.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.11.4...v2.12.0) (2024-06-10)
 
 
