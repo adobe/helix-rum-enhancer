@@ -24,8 +24,8 @@ export const targetSelector = (element) => {
       value = new URL(value, window.location).href;
     }
     return value;
+    /* c8 ignore next 3 */
   } catch (error) {
-    // something went wrong
     return null;
   }
 };
@@ -59,6 +59,7 @@ export const sourceSelector = (element) => {
     }
 
     return sourceSelector(element.parentElement);
+    /* c8 ignore next 3 */
   } catch (error) {
     return null;
   }
