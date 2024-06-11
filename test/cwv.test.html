@@ -9,6 +9,8 @@
   import {runTests} from '@web/test-runner-mocha';
   import {expect} from '@esm-bundle/chai';
 
+  const waitFor = (ms) => new Promise((r) => setTimeout(r, ms));
+
   runTests(async () => {
     describe('CWV collection tests', () => {
       it('can load rum enhancer as a script', async () => {
@@ -44,24 +46,31 @@
           script.onload = resolve;
         });
 
+        // wait for half a second for the script to run
+        await waitFor(500);
 
-        // wait one second for the script to run
-        await new Promise((resolve) => {
-          setTimeout(resolve, 1000);
-        });
+        document.querySelector('.hero').click();
 
+        // wait for another half a second for the script to run
+        await waitFor(500);
+
+        let useragent = window.navigator.userAgent.toLowerCase();
+
+        // Assert
         expect(measurements.TTFB.value > 0).to.be.true;
         expect(measurements.FCP.value > 0).to.be.true;
 
+        // CLS is only measured in chrome
+        if (useragent.includes('chrome')) {
+          expect(measurements.CLS.value > 0).to.be.true;
+        }
+
         // LCP is not measured on Safari
-        let useragent = window.navigator.userAgent.toLowerCase();
         if (useragent.includes('firefox') || useragent.includes('chrome')) {
           expect(measurements.LCP.value > 0).to.be.true;
           expect(measurements.LCP.source === '.hero').to.be.true;
         }
-
       });
-
     });
   });
 </script>
