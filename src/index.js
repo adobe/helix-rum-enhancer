@@ -349,10 +349,7 @@ const cwv2 = () => {
         });
       });
       const stopListening = runOnce(() => {
-        if (po) {
-          console.log('cwv2 lcp disconnedted')
-          po.disconnect();
-        }
+        if (po) po.disconnect();
       });
       onHidden(stopListening);
       ['keydown', 'click'].forEach((type) => {
