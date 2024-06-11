@@ -1,3 +1,10 @@
+## [2.14.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.14.0...v2.14.1) (2024-06-11)
+
+
+### Bug Fixes
+
+* re-release after switching build infra ([95a8000](https://github.com/adobe/helix-rum-enhancer/commit/95a800050557cbdec7f70fac1f4784b512ba27de))
+
 # [2.14.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.13.0...v2.14.0) (2024-06-11)
 
 
