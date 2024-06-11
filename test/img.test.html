@@ -1,0 +1,60 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+</head>
+
+<body>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('HTML IMG Tests', () => {
+
+        it('rum enhancer reports image, even if added later', async () => {
+          let called = false;
+          const imagesSeen = [];
+          window.hlx = {
+            rum: {
+              sampleRUM: (checkpoint, data) => {
+                called = true;
+                if (checkpoint === 'viewmedia') {
+                  imagesSeen.push(data.target);
+                  console.log('viewmedia', data.target);
+                }
+              }
+            }
+          };
+
+
+          const script = document.createElement('script');
+          script.src = new URL('/src/index.js', window.location).href;
+          document.head.appendChild(script);
+
+          await new Promise((resolve) => {
+            script.onload = resolve;
+          });
+
+          // wait one second for the script to run
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          expect(called).to.be.true;
+          expect(imagesSeen).to.deep.equal(['https://www.example.com/loadstart.jpg']);
+
+          const anotherImage = document.createElement('img');
+          anotherImage.src = 'https://www.example.com/loadlater.jpg';
+          document.body.appendChild(anotherImage);
+          // at the moment, this is not being tracked because it is not
+          // happening in a block. We only have mutation observers on blocks
+        });
+
+      });
+    });
+  </script>
+  <img src="https://www.example.com/loadstart.jpg" alt="example image">
+</body>
+
+</html>

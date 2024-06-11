@@ -274,7 +274,7 @@ function addViewBlockTracking(element) {
 function addViewMediaTracking(parent) {
   const mediaobserver = getIntersectionObsever('viewmedia');
   if (mediaobserver) {
-    parent.querySelectorAll('picture > img, video, audio, iframe').forEach((m) => {
+    parent.querySelectorAll('img, video, audio, iframe').forEach((m) => {
       if (!m.closest('div .block') || m.closest('div[data-block-status="loaded"]')) {
         mediaobserver.observe(m);
       }
