@@ -67,6 +67,11 @@ describe('test utils#urlSanitizers', () => {
     expect(urlSanitizers.path('https://wwww.sample.com/index.html')).to.be.equal('https://wwww.sample.com/index.html');
     expect(urlSanitizers.path('https://wwww.sample.com/path/')).to.be.equal('https://wwww.sample.com/path/');
     expect(urlSanitizers.path('https://wwww.sample.com/path/page.html')).to.be.equal('https://wwww.sample.com/path/page.html');
+    expect(urlSanitizers.path('https://wwww.sample.com')).to.be.equal('https://wwww.sample.com/');
+    expect(urlSanitizers.path('https://wwww.sample.com/')).to.be.equal('https://wwww.sample.com/');
+    expect(urlSanitizers.path('https://wwww.sample.com/index.html')).to.be.equal('https://wwww.sample.com/index.html');
+    expect(urlSanitizers.path('https://wwww.sample.com/path/')).to.be.equal('https://wwww.sample.com/path/');
+    expect(urlSanitizers.path('https://wwww.sample.com/path/page.html')).to.be.equal('https://wwww.sample.com/path/page.html');
 
     expect(urlSanitizers.path('https://wwww.sample.com/path/page.html')).to.be.equal('https://wwww.sample.com/path/page.html');
 

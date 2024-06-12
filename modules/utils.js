@@ -17,7 +17,25 @@ function cleanURL(url) {
   return u.toString();
 }
 export const urlSanitizers = {
+  /**
+   * Returns the sanitized url: the origin and the path (no query params or hash)
+   * If no url is provided, it defaults to window.location.href.
+   * @param {string} url (default: window.location.href) The url to sanitize
+   * @returns {string} The sanitized url
+   */
   full: (url = window.location.href) => cleanURL(url),
+  /**
+   * Returns the origin of the provided url.
+   * If no url is provided, it defaults to window.location.href.
+   * @param {string} url (default: window.location.href) The url to sanitize
+   * @returns {string} The sanitized url
+   */
   origin: (url = window.location.href) => new URL(url).origin,
+  /**
+   * Returns the sanitized url: the origin and the path (no query params or hash)
+   * If no url is provided, it defaults to window.location.href.
+   * @param {string} url (default: window.location.href) The url to sanitize
+   * @returns {string} The sanitized url
+   */
   path: (url = window.location.href) => cleanURL(url),
 };
