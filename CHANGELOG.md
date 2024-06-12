@@ -1,3 +1,10 @@
+## [2.14.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.14.1...v2.14.2) (2024-06-12)
+
+
+### Bug Fixes
+
+* restore original path behavior ([#201](https://github.com/adobe/helix-rum-enhancer/issues/201)) ([f70df99](https://github.com/adobe/helix-rum-enhancer/commit/f70df992da778f5700d9bdc8b4f114ddf272ea77))
+
 ## [2.14.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.14.0...v2.14.1) (2024-06-11)
 
 
