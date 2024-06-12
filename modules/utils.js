@@ -22,6 +22,7 @@ export const urlSanitizers = {
    * If no url is provided, it defaults to window.location.href.
    * @param {string} url (default: window.location.href) The url to sanitize
    * @returns {string} The sanitized url
+   * @deprecated
    */
   full: (url = window.location.href) => cleanURL(url),
   /**
