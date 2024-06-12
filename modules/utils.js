@@ -10,8 +10,14 @@
  * governing permissions and limitations under the License.
  */
 
+function cleanURL(url) {
+  const u = new URL(url);
+  u.search = '';
+  u.hash = '';
+  return u.toString();
+}
 export const urlSanitizers = {
-  full: (url = window.location.href) => new URL(url).toString(),
+  full: (url = window.location.href) => cleanURL(url),
   origin: (url = window.location.href) => new URL(url).origin,
-  path: (url = window.location.href) => new URL(url).pathname,
+  path: (url = window.location.href) => cleanURL(url),
 };
