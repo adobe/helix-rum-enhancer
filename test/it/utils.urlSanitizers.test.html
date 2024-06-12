@@ -16,6 +16,8 @@
           const full = new URL(urlSanitizers.full());
           expect(full.origin).to.be.equal(window.location.origin);
           expect(full.pathname).to.be.equal('/test/it/utils.urlSanitizers.test.html');
+          // tests have a search param, so we expect it to be present
+          expect(full.search).to.not.be.equal('');
         });
 
         it('urlSanitizers.origin', () => {
@@ -24,8 +26,10 @@
         });
 
         it('urlSanitizers.path', () => {
-          const path = urlSanitizers.path();
-          expect(path).to.be.equal('/test/it/utils.urlSanitizers.test.html');
+          const path = new URL(urlSanitizers.path());
+          expect(path.origin).to.be.equal(window.location.origin);
+          expect(path.pathname).to.be.equal('/test/it/utils.urlSanitizers.test.html');
+          expect(path.search).to.be.equal('');
         });
       });
     });
