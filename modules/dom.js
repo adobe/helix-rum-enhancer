@@ -54,8 +54,25 @@ export const sourceSelector = (element) => {
       return `.${element.getAttribute('data-block-name')}`;
     }
 
-    if (Array.from(element.classList).some((className) => className.match(/button|cta/))) {
-      return blockName ? `.${blockName} .button` : '.button';
+    const classes = Array.from(element.classList);
+    if (element.tagName.toLowerCase() === 'button'
+      || element.type === 'button'
+      || classes.some((className) => className.match(/button|cta/))) {
+      const label = element.tagName.toLowerCase();
+      const firstClass = classes.length > 0 ? `.${classes[0]}` : '';
+      const labelWithClass = `${element.tagName.toLowerCase()}${firstClass}`;
+
+      let parent = element.parentElement;
+
+      if (!parent) return labelWithClass;
+
+      if (parent.id) return `#${parent.id} ${label}`;
+
+      while (parent.tagName !== 'BODY' && !parent.id) parent = parent.parentElement;
+
+      if (parent.id) return `#${parent.id} ${labelWithClass}`;
+
+      return blockName ? `.${blockName} ${labelWithClass}` : labelWithClass;
     }
 
     return sourceSelector(element.parentElement);

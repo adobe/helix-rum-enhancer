@@ -1,0 +1,68 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+</head>
+
+<body>
+  <div id="test">
+    <div class="button-group">
+      <div class="banner-actions-container">
+        <button id="reject-all-handler">Decline All</button>
+        <button id="accept-btn-handler">Accept All</button>
+      </div>
+      <div id="close-btn-container">
+        <button class="close-btn-handler banner-close-button close-icon"></button>
+      </div>
+      <button class="orphan-btn-handler some-button"></button>
+    </div>
+    <div id="cta-container">
+      <input type="button" class="cta cta-1">
+    </div>
+  </div>
+  <div>
+    <button class="orphan button with many classes"></button>
+  </div>
+  <div>
+    <button class="a-btn"></button>
+  </div>
+  <div id="a-btn-container">
+    <button class="a-btn-2"></button>
+  </div>
+  <div>
+    <input type="button" class="an-input"></button>
+  </div>
+  <div id="an-input-container">
+    <input type="button" class="an-input-2"></button>
+  </div>
+
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+    import { sourceSelector } from '../../modules/dom.js';
+
+    runTests(async () => {
+      describe('dom#sourceSelector', () => {
+        it('sourceSelector - buttons', () => {
+          expect(sourceSelector(document.querySelector('#reject-all-handler'))).to.be.equal('#reject-all-handler');
+          expect(sourceSelector(document.querySelector('#accept-btn-handler'))).to.be.equal('#accept-btn-handler');
+
+          expect(sourceSelector(document.querySelector('.close-btn-handler'))).to.be.equal('#close-btn-container button');
+          expect(sourceSelector(document.querySelector('.orphan-btn-handler'))).to.be.equal('#test button.orphan-btn-handler');
+
+          expect(sourceSelector(document.querySelector('.cta-1'))).to.be.equal('#cta-container input');
+
+          expect(sourceSelector(document.querySelector('.orphan'))).to.be.equal('button.orphan');
+
+          expect(sourceSelector(document.querySelector('.a-btn'))).to.be.equal('button.a-btn');
+          expect(sourceSelector(document.querySelector('.a-btn-2'))).to.be.equal('#a-btn-container button');
+
+          expect(sourceSelector(document.querySelector('.an-input'))).to.be.equal('input.an-input');
+          expect(sourceSelector(document.querySelector('.an-input-2'))).to.be.equal('#an-input-container input');
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

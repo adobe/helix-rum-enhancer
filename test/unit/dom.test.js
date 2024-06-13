@@ -142,12 +142,12 @@ describe('test dom#sourceSelector', () => {
   it('sourceSelector - select source for button', () => {
     const button = document.createElement('button');
     button.classList.add('button');
-    expect(sourceSelector(button)).to.be.equal('.button');
+    expect(sourceSelector(button)).to.be.equal('button.button');
   });
 
   it('sourceSelector - select source for cta', () => {
     const div = document.createElement('div');
     div.classList.add('cta');
-    expect(sourceSelector(div)).to.be.equal('.button');
+    expect(sourceSelector(div)).to.be.equal('div.cta');
   });
 });
