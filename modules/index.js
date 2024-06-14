@@ -278,6 +278,15 @@ function addCookieConsentTracking() {
       if (consentMutationObserver) {
         consentMutationObserver.disconnect();
       }
+      Array.from(document.querySelectorAll('body > div#onetrust-consent-sdk button'))
+        .forEach((button) => button.addEventListener('click', (c) => {
+          const actions = {
+            'onetrust-accept-all-handler': 'accept',
+            'onetrust-reject-all-handler': 'reject',
+            none: 'dismiss',
+          };
+          sampleRUM('consent', { source: 'onetrust', target: actions[c.target.id || 'none'] });
+        }));
       return true;
     }
     return false;
