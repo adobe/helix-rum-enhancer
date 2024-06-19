@@ -23,7 +23,7 @@ const fflags = {
   email: [1139, 543, 770, 984],
   cwv2: [683, 457],
 };
-// 457 for tests
+// 457 is the magic number for the localhost used in tests
 
 sampleRUM.baseURL = sampleRUM.baseURL || new URL('https://rum.hlx.page');
 
@@ -139,7 +139,6 @@ sampleRUM.drain('cwv', (() => {
 const cwv2 = () => {
   sampleRUM.webVitals = sampleRUM.webVitals || {};
   const { webVitals } = sampleRUM;
-  webVitals.perfObservers = webVitals.perfObservers || {};
   webVitals.bfcacheRestoreTime = -1;
   webVitals.firstHiddenTime = -1;
   webVitals.interactionCountEstimate = 0;
@@ -277,7 +276,7 @@ const cwv2 = () => {
   };
 
   const initInteractionCountPolyfill = () => {
-    if ('interactionCount' in performance || webVitals.perfObservers.event) return;
+    if ('interactionCount' in performance) return;
     registerPerformanceObserver('event', (entries) => {
       entries.forEach((e) => {
         if (e.interactionId) {

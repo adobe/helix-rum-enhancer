@@ -12,7 +12,7 @@
   const waitFor = (ms) => new Promise((r) => setTimeout(r, ms));
 
   runTests(async () => {
-    describe('CWV collection tests', () => {
+    describe('CWV collection tests for bf-cache restore', () => {
       it('can load rum enhancer as a script', async () => {
         let called = false;
         let measurements = {};
@@ -46,6 +46,11 @@
           script.onload = resolve;
         });
 
+        // mimics bf-cache restore
+        const pageshowEvent = new Event('pageshow', { bubbles: true, cancelable: true });
+        pageshowEvent.persisted = true;
+        dispatchEvent(pageshowEvent);
+
         // wait for half a second for the script to run
         await waitFor(500);
 
@@ -68,7 +73,8 @@
         // LCP is not measured on Safari
         if (useragent.includes('firefox') || useragent.includes('chrome')) {
           expect(measurements.LCP.value > 0).to.be.true;
-          expect(measurements.LCP.source === '.hero').to.be.true;
+          // when page restored from bfcache, we dont know what was the LCP source before
+          expect(measurements.LCP.source).to.be.undefined;
         }
       });
     });
@@ -86,7 +92,8 @@
                 </div>
                 <div class="section nav-brand" data-section-status="loaded" style="">
 
-                    <div class="default-content-wrapper"><p class=""><a href="/" title="Boilerplate" class="">Boilerplate</a>
+                    <div class="default-content-wrapper"><p class=""><a href="/test/static" title="Boilerplate"
+                                                                        class="">Boilerplate</a>
                     </p></div>
                 </div>
                 <div class="section nav-sections" data-section-status="loaded" style="">
@@ -95,21 +102,24 @@
                         <ul>
                             <li class="nav-drop" aria-expanded="false">Example Content
                                 <ul>
-                                    <li><a href="/" title="Default Content">Default Content</a></li>
+                                    <li><a href="/test/static" title="Default Content">Default Content</a></li>
                                 </ul>
                             </li>
                             <li class="nav-drop" aria-expanded="false">Getting Started
                                 <ul>
-                                    <li><a href="/" title="Build your first site">Build your first site</a></li>
-                                    <li><a href="/" title="Preview and publish content">Preview and publish content</a>
+                                    <li><a href="/test/static" title="Build your first site">Build your first site</a>
                                     </li>
-                                    <li><a href="/" title="Organize your content">Organize your content</a></li>
+                                    <li><a href="/test/static" title="Preview and publish content">Preview and publish
+                                        content</a>
+                                    </li>
+                                    <li><a href="/test/static" title="Organize your content">Organize your content</a>
+                                    </li>
                                 </ul>
                             </li>
                             <li class="nav-drop" aria-expanded="false">Documentation
                                 <ul>
-                                    <li><a href="/" title="Architecture">Architecture</a></li>
-                                    <li><a href="/" title="Sidekick">Sidekick</a></li>
+                                    <li><a href="/test/static" title="Architecture">Architecture</a></li>
+                                    <li><a href="/test/static" title="Sidekick">Sidekick</a></li>
                                 </ul>
                             </li>
                         </ul>
@@ -135,16 +145,8 @@
                     <div>
                         <p>
                             <picture>
-                                <source type="image/webp"
-                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_1dc0a2d290d791a050feb1e159746f52db392775a.jpeg?width=2000&amp;format=webply&amp;optimize=medium"
-                                        media="(min-width: 600px)">
-                                <source type="image/webp"
-                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_1dc0a2d290d791a050feb1e159746f52db392775a.jpeg?width=750&amp;format=webply&amp;optimize=medium">
-                                <source type="image/jpeg"
-                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_1dc0a2d290d791a050feb1e159746f52db392775a.jpeg?width=2000&amp;format=jpeg&amp;optimize=medium"
-                                        media="(min-width: 600px)">
                                 <img loading="eager" alt="Decorative double Helix"
-                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_1dc0a2d290d791a050feb1e159746f52db392775a.jpeg?width=750&amp;format=jpeg&amp;optimize=medium"
+                                     src="../../static/media_1dc0a2d290d791a050feb1e159746f52db392775a.jpeg"
                                      width="1600" height="886">
                             </picture>
                         <h1 id="congrats-you-are-ready-to-go">Congrats, you are ready to go!</h1></p></div>
@@ -177,20 +179,12 @@
                             <li>Two</li>
                             <li>Three</li>
                         </ul>
-                        <p class="button-container"><a href="/" title="Live" class="button">Live</a></p>
+                        <p class="button-container"><a href="/test/static" title="Live" class="button">Live</a></p>
                     </div>
                     <div class="columns-img-col">
                         <picture>
-                            <source type="image/webp"
-                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_17e9dd0aae03d62b8ebe2159b154d6824ef55732d.png?width=2000&amp;format=webply&amp;optimize=medium"
-                                    media="(min-width: 600px)">
-                            <source type="image/webp"
-                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_17e9dd0aae03d62b8ebe2159b154d6824ef55732d.png?width=750&amp;format=webply&amp;optimize=medium">
-                            <source type="image/png"
-                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_17e9dd0aae03d62b8ebe2159b154d6824ef55732d.png?width=2000&amp;format=png&amp;optimize=medium"
-                                    media="(min-width: 600px)">
                             <img loading="lazy" alt="green double Helix"
-                                 src="https://main--aem-boilerplate--adobe.hlx.page/media_17e9dd0aae03d62b8ebe2159b154d6824ef55732d.png?width=750&amp;format=png&amp;optimize=medium"
+                                 src="../../static/media_17e9dd0aae03d62b8ebe2159b154d6824ef55732d.png?width=750&amp;format=png&amp;optimize=medium"
                                  width="1600" height="1066">
                         </picture>
                     </div>
@@ -198,22 +192,14 @@
                 <div>
                     <div class="columns-img-col">
                         <picture>
-                            <source type="image/webp"
-                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_143cf1a441962c90f082d4f7dba2aeefb07f4e821.png?width=2000&amp;format=webply&amp;optimize=medium"
-                                    media="(min-width: 600px)">
-                            <source type="image/webp"
-                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_143cf1a441962c90f082d4f7dba2aeefb07f4e821.png?width=750&amp;format=webply&amp;optimize=medium">
-                            <source type="image/png"
-                                    srcset="https://main--aem-boilerplate--adobe.hlx.page/media_143cf1a441962c90f082d4f7dba2aeefb07f4e821.png?width=2000&amp;format=png&amp;optimize=medium"
-                                    media="(min-width: 600px)">
                             <img loading="lazy" alt="Yellow Double Helix"
-                                 src="https://main--aem-boilerplate--adobe.hlx.page/media_143cf1a441962c90f082d4f7dba2aeefb07f4e821.png?width=750&amp;format=png&amp;optimize=medium"
+                                 src="../../static/media_143cf1a441962c90f082d4f7dba2aeefb07f4e821.png?width=750&amp;format=png&amp;optimize=medium"
                                  width="644" height="470">
                         </picture>
                     </div>
                     <div>
                         <p>Or you can just view the preview</p>
-                        <p class="button-container"><em><a href="/" title="Preview" class="button secondary">Preview</a></em>
+                        <p class="button-container"><em><a href="/test/static" title="Preview" class="button secondary">Preview</a></em>
                         </p>
                     </div>
                 </div>
@@ -231,10 +217,8 @@
                     <li>
                         <div class="cards-card-image">
                             <picture>
-                                <source type="image/webp"
-                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_16582eee85490fbfe6b27c6a92724a81646c2e649.jpeg?width=750&amp;format=webply&amp;optimize=medium">
                                 <img loading="lazy" alt="A fast-moving Tunnel"
-                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_16582eee85490fbfe6b27c6a92724a81646c2e649.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                                     src="../../static/media_16582eee85490fbfe6b27c6a92724a81646c2e649.jpeg">
                             </picture>
                         </div>
                         <div class="cards-card-body">
@@ -245,10 +229,8 @@
                     <li>
                         <div class="cards-card-image">
                             <picture>
-                                <source type="image/webp"
-                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_17a5ca5faf60fa6486a1476fce82a3aa606000c81.jpeg?width=750&amp;format=webply&amp;optimize=medium">
                                 <img loading="lazy" alt="An iceberg"
-                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_17a5ca5faf60fa6486a1476fce82a3aa606000c81.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                                     src="../../static/media_17a5ca5faf60fa6486a1476fce82a3aa606000c81.jpeg">
                             </picture>
                         </div>
                         <div class="cards-card-body">
@@ -259,10 +241,8 @@
                     <li>
                         <div class="cards-card-image">
                             <picture>
-                                <source type="image/webp"
-                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_162cf9431ac2dfd17fe7bf4420525bbffb9d0ccfe.jpeg?width=750&amp;format=webply&amp;optimize=medium">
                                 <img loading="lazy" alt="Doors with light in the dark"
-                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_162cf9431ac2dfd17fe7bf4420525bbffb9d0ccfe.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                                     src="../../static/media_162cf9431ac2dfd17fe7bf4420525bbffb9d0ccfe.jpeg">
                             </picture>
                         </div>
                         <div class="cards-card-body">
@@ -274,10 +254,8 @@
                     <li>
                         <div class="cards-card-image">
                             <picture>
-                                <source type="image/webp"
-                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_136fdd3174ff44787179448cc2e0264af1b02ade9.jpeg?width=750&amp;format=webply&amp;optimize=medium">
                                 <img loading="lazy" alt="A group of people around a Table"
-                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_136fdd3174ff44787179448cc2e0264af1b02ade9.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                                     src="../../static/media_136fdd3174ff44787179448cc2e0264af1b02ade9.jpeg">
                             </picture>
                         </div>
                         <div class="cards-card-body">
@@ -288,10 +266,8 @@
                     <li>
                         <div class="cards-card-image">
                             <picture>
-                                <source type="image/webp"
-                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_1cae8484004513f76c6bf5860375bc020d099a6d6.jpeg?width=750&amp;format=webply&amp;optimize=medium">
                                 <img loading="lazy" alt="HTML code in a code editor"
-                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_1cae8484004513f76c6bf5860375bc020d099a6d6.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                                     src="../../static/media_1cae8484004513f76c6bf5860375bc020d099a6d6.jpeg">
                             </picture>
                         </div>
                         <div class="cards-card-body">
@@ -303,10 +279,8 @@
                     <li>
                         <div class="cards-card-image">
                             <picture>
-                                <source type="image/webp"
-                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_11381226cb58caf1f0792ea27abebbc8569b00aeb.jpeg?width=750&amp;format=webply&amp;optimize=medium">
                                 <img loading="lazy" alt="A rocket and a headless suit"
-                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_11381226cb58caf1f0792ea27abebbc8569b00aeb.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                                     src="../../static/media_11381226cb58caf1f0792ea27abebbc8569b00aeb.jpeg">
                             </picture>
                         </div>
                         <div class="cards-card-body">
@@ -318,10 +292,8 @@
                     <li>
                         <div class="cards-card-image">
                             <picture>
-                                <source type="image/webp"
-                                        srcset="https://main--aem-boilerplate--adobe.hlx.page/media_18fadeb136e84a2efe384b782e8aea6e92de4fc13.jpeg?width=750&amp;format=webply&amp;optimize=medium">
                                 <img loading="lazy" alt="A dial with a hand on it"
-                                     src="https://main--aem-boilerplate--adobe.hlx.page/media_18fadeb136e84a2efe384b782e8aea6e92de4fc13.jpeg?width=750&amp;format=jpeg&amp;optimize=medium">
+                                     src="../../static/media_18fadeb136e84a2efe384b782e8aea6e92de4fc13.jpeg">
                             </picture>
                         </div>
                         <div class="cards-card-body">
