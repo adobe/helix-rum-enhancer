@@ -38,7 +38,7 @@ export const urlSanitizers = {
 };
 
 /**
- * Returns boolean if the current page is running a React app by checking React artifacts in the DOM.
+ * Determines if the current page is running a React application by inspecting React-related elements in the DOM.
  * @returns {bool} 
  */
 export const isReactApp = () => {
