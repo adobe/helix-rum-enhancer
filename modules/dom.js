@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import { isReactApp } from "./utils";
+import { isReactApp } from './utils.js';
 
 export const getTargetValue = (element) => element.getAttribute('data-rum-target') || element.getAttribute('href')
     || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
