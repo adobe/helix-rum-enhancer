@@ -13,7 +13,7 @@
 
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { fflags } from './fflags.js';
-import { urlSanitizers } from './utils.js';
+import { urlSanitizers, getReactContainers, isReactApp } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
@@ -214,6 +214,32 @@ function addViewMediaTracking(parent) {
   }
 }
 
+function addReactMediaTracking(parent) {
+  const reactDivs = getReactContainers(parent);
+  const mediaobserver = getIntersectionObsever('viewmedia');
+  const observer = new MutationObserver((mutationsList) => {
+    for (const mutation of mutationsList) {
+      if (mutation.type === 'childList') {
+        for (const node of mutation.addedNodes) {
+          // improve performance by poking with querySelector first
+          if (node.querySelector && document.querySelector('img, video, audio, iframe')) {
+            node?.querySelectorAll('img, video, audio, iframe')?.forEach((m) => {
+              const element = m;
+              if (!element.dataset.withObserver) {
+                element.dataset.withObserver = 'true';
+                mediaobserver.observe(element);
+              }
+            });
+          }
+        }
+      }
+    }
+  });
+  reactDivs.forEach((div) => {
+    observer.observe(div, { childList: true, subtree: true });
+  });
+}
+
 function addUTMParametersTracking() {
   const usp = new URLSearchParams(window.location.search);
   [...usp.entries()]
@@ -320,7 +346,8 @@ function addTrackingFromConfig() {
     loadresource: () => addLoadResourceTracking(),
     utm: () => addUTMParametersTracking(),
     viewblock: () => addViewBlockTracking(window.document.body),
-    viewmedia: () => addViewMediaTracking(window.document.body),
+    viewmedia: () => (isReactApp() ? addReactMediaTracking(window.document.body)
+      : addViewMediaTracking(window.document.body)),
     consent: () => addCookieConsentTracking(),
     paid: () => addAdsParametersTracking(),
     email: () => addEmailParameterTracking(),
