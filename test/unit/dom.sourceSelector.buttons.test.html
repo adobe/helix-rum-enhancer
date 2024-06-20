@@ -35,6 +35,16 @@
   <div id="an-input-container">
     <input type="button" class="an-input-2"></button>
   </div>
+  <div id="an-a-container">
+    <a href="page.html" class="cta"></a>
+  </div>
+  <div id="an-a-container-2">
+    <a href="page.html" class="button"></a>
+  </div>
+
+  <div class="with-classes a-block block" data-block-name="a-block">
+    <span class="cta">Button in a block</span>
+  </div>
 
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
@@ -59,6 +69,11 @@
 
           expect(sourceSelector(document.querySelector('.an-input'))).to.be.equal('input.an-input');
           expect(sourceSelector(document.querySelector('.an-input-2'))).to.be.equal('#an-input-container input');
+
+          expect(sourceSelector(document.querySelector('a.cta'))).to.be.equal('#an-a-container a');
+          expect(sourceSelector(document.querySelector('a.button'))).to.be.equal('#an-a-container-2 a');
+
+          expect(sourceSelector(document.querySelector('span.cta'))).to.be.equal('.a-block span.cta');
         });
       });
     });

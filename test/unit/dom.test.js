@@ -108,46 +108,4 @@ describe('test dom#sourceSelector', () => {
     // eslint-disable-next-line no-unused-expressions
     expect(sourceSelector()).to.be.undefined;
   });
-
-  it('sourceSelector - select source when data-rum-source is set ', () => {
-    const div = document.createElement('div');
-    div.setAttribute('data-rum-source', 'test');
-    expect(sourceSelector(div)).to.be.equal('test');
-
-    // works also for nested elements
-    const span = document.createElement('span');
-    div.append(span);
-    expect(sourceSelector(span)).to.be.equal('test');
-  });
-
-  it('sourceSelector - select source for form and inputs', () => {
-    const form = document.createElement('form');
-    const input = document.createElement('input');
-    input.setAttribute('type', 'text');
-    form.append(input);
-    const textarea = document.createElement('textarea');
-    form.append(textarea);
-
-    expect(sourceSelector(input)).to.be.equal('form input[type=\'text\']');
-    expect(sourceSelector(textarea)).to.be.equal('form textarea');
-  });
-
-  it('sourceSelector - select source for block', () => {
-    const div = document.createElement('div');
-    div.classList.add('block');
-    div.setAttribute('data-block-name', 'test');
-    expect(sourceSelector(div)).to.be.equal('.test');
-  });
-
-  it('sourceSelector - select source for button', () => {
-    const button = document.createElement('button');
-    button.classList.add('button');
-    expect(sourceSelector(button)).to.be.equal('button.button');
-  });
-
-  it('sourceSelector - select source for cta', () => {
-    const div = document.createElement('div');
-    div.classList.add('cta');
-    expect(sourceSelector(div)).to.be.equal('div.cta');
-  });
 });

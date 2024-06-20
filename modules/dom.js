@@ -55,27 +55,24 @@ export const sourceSelector = (element) => {
     }
 
     const classes = Array.from(element.classList);
+    const label = element.tagName.toLowerCase();
+    const firstClass = classes.length > 0 ? `.${classes[0]}` : '';
+    const labelWithClass = `${element.tagName.toLowerCase()}${firstClass}`;
     if (element.tagName.toLowerCase() === 'button'
       || element.type === 'button'
       || classes.some((className) => className.match(/button|cta/))) {
-      const label = element.tagName.toLowerCase();
-      const firstClass = classes.length > 0 ? `.${classes[0]}` : '';
-      const labelWithClass = `${element.tagName.toLowerCase()}${firstClass}`;
-
       let parent = element.parentElement;
-
       if (!parent) return labelWithClass;
-
       if (parent.id) return `#${parent.id} ${label}`;
-
       while (parent.tagName !== 'BODY' && !parent.id) parent = parent.parentElement;
-
       if (parent.id) return `#${parent.id} ${labelWithClass}`;
-
       return blockName ? `.${blockName} ${labelWithClass}` : labelWithClass;
     }
 
-    return sourceSelector(element.parentElement);
+    const parent = sourceSelector(element.parentElement);
+    if (parent) return parent;
+
+    return labelWithClass;
     /* c8 ignore next 3 */
   } catch (error) {
     return null;
