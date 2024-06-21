@@ -20,7 +20,6 @@
             rum: {
               sampleRUM: (checkpoint, data) => {
                 called = true;
-                console.log(checkpoint)
                 if (checkpoint === 'viewmedia') {
                   imagesSeen.push(data.target);
                   console.log('viewmedia', data.target);
@@ -41,18 +40,16 @@
           });
 
           await new Promise((resolve) => {
-            setTimeout(resolve, 900);
+            setTimeout(resolve, 700); //webkit friendly delay
           });
-
           expect(called).to.be.true;
           expect(imagesSeen).to.deep.equal(['https://www.example.com/loadstart.jpg']);
 
           reactDiv.innerHTML = '<div><img src="https://www.example.com/loadlater.jpg" alt="example image"></div>';
 
           await new Promise((resolve) => {
-            setTimeout(resolve, 900);
+            setTimeout(resolve, 700); //webkit friendly delay
           });
-
           expect(called).to.be.true;
           expect(imagesSeen).to.deep.equal(['https://www.example.com/loadstart.jpg','https://www.example.com/loadlater.jpg']);
         });

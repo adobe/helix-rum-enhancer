@@ -222,10 +222,11 @@ function addReactMediaTracking(parent) {
       if (mutation.type === 'childList') {
         for (const node of mutation.addedNodes) {
           // improve performance by poking with querySelector first
-          if (node.querySelector && document.querySelector('img, video, audio, iframe')) {
+          if (node.querySelector && node.querySelector('img, video, audio, iframe')) {
             node?.querySelectorAll('img, video, audio, iframe')?.forEach((m) => {
               const element = m;
               if (!element.dataset.withObserver) {
+                // not so nice as we leave trace in the host's DOM
                 element.dataset.withObserver = 'true';
                 mediaobserver.observe(element);
               }
