@@ -1,0 +1,66 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+</head>
+
+<body>
+  <script type="module">
+    window.React = {};
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('HTML IMG React Tests', () => {
+
+        it('rum enhancer reports image, even if added later', async () => {
+          let called = false;
+          const imagesSeen = [];
+          window.hlx = {
+            rum: {
+              sampleRUM: (checkpoint, data) => {
+                called = true;
+                if (checkpoint === 'viewmedia') {
+                  imagesSeen.push(data.target);
+                  console.log('viewmedia', data.target);
+                }
+              }
+            }
+          };
+
+          const script = document.createElement('script');
+          script.src = new URL('/modules/index.js', window.location).href;
+          script.type = 'module';
+          document.head.appendChild(script);
+
+          const reactDiv = document.getElementById('react');
+
+          await new Promise((resolve) => {
+            script.onload = resolve;
+          });
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 700); //webkit friendly delay
+          });
+          expect(called).to.be.true;
+          expect(imagesSeen).to.deep.equal(['https://www.example.com/loadstart.jpg']);
+
+          reactDiv.innerHTML = '<div><img src="https://www.example.com/loadlater.jpg" alt="example image"></div>';
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 700); //webkit friendly delay
+          });
+          expect(called).to.be.true;
+          expect(imagesSeen).to.deep.equal(['https://www.example.com/loadstart.jpg','https://www.example.com/loadlater.jpg']);
+        });
+
+      });
+    });
+  </script>
+  <div id="react" data-reactroot="yes">
+    <img src="https://www.example.com/loadstart.jpg" alt="example image">
+   </div>
+  
+</body>
+
+</html>
