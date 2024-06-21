@@ -42,8 +42,11 @@ export const urlSanitizers = {
  * @param {DOMElement} container The DOM element to search for React containers
  * @returns {Array} Array of DOM elements (if more than one) used to bootstrap React
  */
-export const getReactContainers = (container) => container.querySelector('[data-reactroot], [data-reactid]')
-    || Array.from(container.querySelectorAll('*')).filter((e) => e._reactRootContainer !== undefined || Object.keys(e).some((k) => k.startsWith('__reactContainer')));
+export const getReactContainers = (container) => {
+  const reactElement = container.querySelector('[data-reactroot], [data-reactid]');
+  if (reactElement) return [reactElement];
+  return Array.from(container.querySelectorAll('*')).filter((e) => e._reactRootContainer !== undefined || Object.keys(e).some((k) => k.startsWith('__reactContainer')));
+};
 
 /**
  * Determines if the current page is running a React application

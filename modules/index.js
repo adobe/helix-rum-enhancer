@@ -346,8 +346,10 @@ function addTrackingFromConfig() {
     loadresource: () => addLoadResourceTracking(),
     utm: () => addUTMParametersTracking(),
     viewblock: () => addViewBlockTracking(window.document.body),
-    viewmedia: () => (isReactApp() ? addReactMediaTracking(window.document.body)
-      : addViewMediaTracking(window.document.body)),
+    viewmedia: () => {
+      addViewMediaTracking(window.document.body);
+      if (isReactApp()) addReactMediaTracking(window.document.body);
+    },
     consent: () => addCookieConsentTracking(),
     paid: () => addAdsParametersTracking(),
     email: () => addEmailParameterTracking(),
