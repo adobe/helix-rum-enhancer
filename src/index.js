@@ -18,7 +18,6 @@ const fflags = {
   enabled: (flag, callback) => fflags.has(flag) && callback(),
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
   onetrust: [543, 770, 1136],
-  ads: [1139, 543, 770, 984],
   email: [1139, 543, 770, 984],
 };
 
@@ -241,7 +240,8 @@ fflags.enabled('onetrust', () => {
   }
 });
 
-fflags.enabled('ads', () => {
+// paid checkpoint
+(() => {
   const networks = {
     google: /gclid|gclsrc|wbraid|gbraid/,
     doubleclick: /dclid/,
@@ -256,7 +256,7 @@ fflags.enabled('ads', () => {
   Object.entries(networks).forEach(([network, regex]) => {
     params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('paid', { source: network, target: param }));
   });
-});
+})();
 
 fflags.enabled('email', () => {
   const networks = {
