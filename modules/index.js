@@ -31,7 +31,6 @@ function optedIn(checkpoint, data) {
 function getCollectionConfig() {
   // eslint-disable-next-line max-len
   fflags.enabled('onetrust', () => DEFAULT_TRACKING_EVENTS.push('consent'));
-  fflags.enabled('ads', () => DEFAULT_TRACKING_EVENTS.push('paid'));
   fflags.enabled('email', () => DEFAULT_TRACKING_EVENTS.push('email'));
   return DEFAULT_TRACKING_EVENTS;
 }
