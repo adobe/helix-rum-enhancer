@@ -18,7 +18,6 @@ const fflags = {
   enabled: (flag, callback) => fflags.has(flag) && callback(),
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
   onetrust: [543, 770, 1136],
-  email: [1139, 543, 770, 984],
 };
 
 sampleRUM.baseURL = sampleRUM.baseURL || new URL('https://rum.hlx.page');
@@ -258,7 +257,8 @@ fflags.enabled('onetrust', () => {
   });
 })();
 
-fflags.enabled('email', () => {
+// email checkpoint
+(() => {
   const networks = {
     mailchimp: /mc_(c|e)id/,
     marketo: /mkt_tok/,
@@ -268,4 +268,4 @@ fflags.enabled('email', () => {
   Object.entries(networks).forEach(([network, regex]) => {
     params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
   });
-});
+})();
