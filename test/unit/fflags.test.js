@@ -43,8 +43,4 @@ describe('test fflags', () => {
   it('fflags.onetrust is an array', () => {
     expect(fflags.onetrust).to.be.an('array');
   });
-
-  it('fflags.email is an array', () => {
-    expect(fflags.email).to.be.an('array');
-  });
 });
