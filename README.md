@@ -24,6 +24,45 @@ It will add following new checkpoints:
 - `formsubmit`: when a form is submitted
 - `leave`: when the user leaves the page
 
+### The `source` parameter and the `sourceSelector`
+
+The `source` parameter is a string that can be used to identify the source of the event. It can be used to identify the source of the event, e.g. a button, a link, a form, etc.
+It represents an idealized CSS selector that is both human-readable and specific enough to identify the source of the event in the document, even when not having access to the
+orginal document. It is idealized because it pretends the DOM would use modern HTML with concise semantics, even if the actual document uses `class` values for things that would
+be better represented by semantic HTML elements.
+
+The `sourceSelector` function is a function that takes a DOM element and returns a descriptive `source` parameter. If the element has a `data-rum-source` attribute, its value is used as the `source` parameter. Otherwise, the function tries to generate a `source` parameter based on the element's tag name, class names, and text content.
+
+The structure of the `source` parameter is as follows:
+
+```
+<context> <element>#<identifier>
+```
+All three parts are optional
+
+`context` is
+- `form` for form elements
+- `dialog` for dialog elements, or parent containers that are fixed positioned and have a positive high z-index
+- `.block-name` for Helix blocks
+
+`element` is
+- `button` for buttons, or links that look like buttons (e.g. with a class `button` or `btn` or `cta`)
+- `img` for images
+- `video` for videos
+- `a` for links that are not buttons
+- `input[type="text"]` for input elements (all types are supported)
+- `select`, `textarea`, etc. for other form elements
+
+`identifier` is
+- the `id` attribute of the element, if provided
+
+Even if an `identifier` is provided, having a `context` and `element` is recommended, as it makes the `source` parameter more readable and easier to understand.
+
+
+#### Examples
+
+- ``
+
 ## Development
 
 ### Build
