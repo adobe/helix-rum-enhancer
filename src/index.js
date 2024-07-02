@@ -111,8 +111,8 @@ sampleRUM.drain('cwv', (() => {
 
       if (measurement.name === 'LCP' && measurement.entries.length > 0) {
         const { element: el } = measurement.entries.pop();
-        data.target = sampleRUM.targetselector(el);
-        data.source = sampleRUM.sourceselector(el) || (el && el.outerHTML.slice(0, 30));
+        data.target = sampleRUM.targetselector(el) || '';
+        data.source = sampleRUM.sourceselector(el) || (el && el.outerHTML.slice(0, 30)) || '';
       }
 
       sampleRUM('cwv', data);
