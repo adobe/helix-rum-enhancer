@@ -9,6 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+/* eslint-disable no-restricted-globals */
 const { sampleRUM } = window.hlx.rum;
 
 const fflags = {
@@ -19,7 +20,9 @@ const fflags = {
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
   onetrust: [543, 770, 1136],
   email: [1139, 543, 770, 984],
+  cwv2: [683, 457],
 };
+// 457 is the magic number for the localhost used in tests
 
 sampleRUM.baseURL = sampleRUM.baseURL || new URL('https://rum.hlx.page');
 
@@ -94,6 +97,19 @@ sampleRUM.targetselector = (element) => {
   return value;
 };
 
+sampleRUM.storeCWV = (checkpoint) => (measurement) => {
+  const data = { cwv: {} };
+  data.cwv[measurement.name] = measurement.value;
+
+  if (measurement.name === 'LCP' && measurement.entries.length > 0) {
+    const { element: el } = measurement.entries.pop();
+    data.target = sampleRUM.targetselector(el);
+    data.source = sampleRUM.sourceselector(el) || (el && el.outerHTML.slice(0, 30));
+  }
+
+  sampleRUM(checkpoint, data);
+};
+
 sampleRUM.drain('cwv', (() => {
   const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
   if (document.querySelector(`script[src="${cwvScript}"]`)) {
@@ -104,19 +120,6 @@ sampleRUM.drain('cwv', (() => {
   const script = document.createElement('script');
   script.src = cwvScript;
   script.onload = () => {
-    const storeCWV = (measurement) => {
-      const data = { cwv: {} };
-      data.cwv[measurement.name] = measurement.value;
-
-      if (measurement.name === 'LCP' && measurement.entries.length > 0) {
-        const { element: el } = measurement.entries.pop();
-        data.target = sampleRUM.targetselector(el);
-        data.source = sampleRUM.sourceselector(el) || (el && el.outerHTML.slice(0, 30));
-      }
-
-      sampleRUM('cwv', data);
-    };
-
     const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
 
     // When loading `web-vitals` using a classic script, all the public
@@ -125,12 +128,381 @@ sampleRUM.drain('cwv', (() => {
       const metricFn = window.webVitals[`on${metric}`];
       if (typeof metricFn === 'function') {
         const opts = isEager(metric) ? { reportAllChanges: true } : undefined;
-        metricFn(storeCWV, opts);
+        metricFn(sampleRUM.storeCWV('cwv'), opts);
       }
     });
   };
   document.head.appendChild(script);
 }));
+
+const cwv2 = () => {
+  sampleRUM.webVitals = sampleRUM.webVitals || {};
+  const { webVitals } = sampleRUM;
+  webVitals.bfcacheRestoreTime = -1;
+  webVitals.firstHiddenTime = -1;
+  webVitals.interactionCountEstimate = 0;
+  webVitals.minInteractionId = Infinity;
+  webVitals.maxInteractionId = 0;
+  webVitals.DEFAULT_INTERACTION_DURATION_THRESHOLD = 40;
+  webVitals.MAX_INTERACTIONS_TO_CONSIDER = 10;
+
+  const onBFCacheRestore = (cb) => {
+    const listener = (event) => {
+      if (event.persisted) {
+        webVitals.bfcacheRestoreTime = event.timeStamp;
+        cb(event);
+      }
+    };
+    addEventListener('pageshow', listener, true);
+  };
+
+  const initHiddenTime = () => (document.visibilityState === 'hidden' && !document.prerendering ? 0 : Infinity);
+
+  const onVisibilityUpdate = (event) => {
+    if (document.visibilityState === 'hidden' && webVitals.firstHiddenTime > -1) {
+      webVitals.firstHiddenTime = event.type === 'visibilitychange' ? event.timeStamp : 0;
+      // eslint-disable-next-line no-use-before-define
+      removeChangeListeners();
+    }
+  };
+  const removeChangeListeners = () => {
+    removeEventListener('visibilitychange', onVisibilityUpdate, true);
+    removeEventListener('prerenderingchange', onVisibilityUpdate, true);
+  };
+  const addChangeListeners = () => {
+    addEventListener('visibilitychange', onVisibilityUpdate, true);
+    addEventListener('prerenderingchange', onVisibilityUpdate, true);
+  };
+
+  const getVisibilityWatcher = () => {
+    if (webVitals.firstHiddenTime < 0) {
+      webVitals.firstHiddenTime = initHiddenTime();
+      addChangeListeners();
+      onBFCacheRestore(() => {
+        setTimeout(() => {
+          webVitals.firstHiddenTime = initHiddenTime();
+          addChangeListeners();
+        }, 0);
+      });
+    }
+    return {
+      get firstHiddenTime() {
+        return webVitals.firstHiddenTime;
+      },
+    };
+  };
+
+  const getNavigationEntry = () => {
+    const navigationEntry = performance && performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+    return navigationEntry?.responseStart > 0 && navigationEntry.responseStart < performance.now()
+      ? navigationEntry
+      : null;
+  };
+
+  const registerPerformanceObserver = (type, cb, opts) => {
+    try {
+      if (PerformanceObserver.supportedEntryTypes.includes(type)) {
+        const po = new PerformanceObserver((list) => {
+          Promise.resolve().then(() => cb(list.getEntries()));
+        });
+        po.observe({ type, buffered: true, ...opts || {} });
+        return po;
+      }
+    } catch (e) {
+      return null;
+    }
+    return null;
+  };
+
+  const whenActivated = (cb) => {
+    if (document.prerendering) {
+      document.addEventListener('prerenderingchange', () => cb(), true);
+    } else {
+      cb();
+    }
+  };
+
+  // Runs in the next task after the page is done loading and/or prerendering.
+  const whenReady = (cb) => {
+    if (document.prerendering) {
+      // firefox and safari don't implement the Speculation API
+      whenActivated(() => whenReady(cb));
+    } else if (document.readyState !== 'complete') {
+      // fallback for the browsers not implementing the Speculation API
+      addEventListener('load', () => whenReady(cb), true);
+    } else {
+      // Queue a task so the callback runs after `loadEventEnd`.
+      setTimeout(cb, 0);
+    }
+  };
+
+  const runOnce = (cb) => {
+    let called = false;
+    return () => {
+      if (!called) {
+        cb();
+        called = true;
+      }
+    };
+  };
+
+  const onHidden = (cb) => {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') cb();
+    });
+  };
+
+  const whenIdle = (cb) => {
+    const rIC = self.requestIdleCallback || self.setTimeout;
+    let handle = -1;
+    const callback = runOnce(cb);
+    if (document.visibilityState === 'hidden') {
+      callback();
+    } else {
+      handle = rIC(callback);
+      onHidden(callback);
+    }
+    return handle;
+  };
+
+  const getActivationStart = () => {
+    const navEntry = getNavigationEntry();
+    return (navEntry && navEntry.activationStart) || 0;
+  };
+
+  const doubleRAF = (cb) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => cb()));
+  };
+
+  const initInteractionCountPolyfill = () => {
+    if ('interactionCount' in performance) return;
+    registerPerformanceObserver('event', (entries) => {
+      entries.forEach((e) => {
+        if (e.interactionId) {
+          webVitals.minInteractionId = Math.min(webVitals.minInteractionId, e.interactionId);
+          webVitals.maxInteractionId = Math.max(webVitals.maxInteractionId, e.interactionId);
+
+          webVitals.interactionCountEstimate = webVitals.maxInteractionId
+            ? (webVitals.maxInteractionId - webVitals.minInteractionId) / 7 + 1
+            : 0;
+        }
+      });
+    }, { durationThreshold: 0 });
+  };
+
+  const getInteractionCount = () => ('interactionCount' in performance ? (performance.interactionCount || 0) : webVitals.interactionCountEstimate);
+
+  webVitals.onTTFB = (cb) => {
+    const name = 'TTFB';
+    whenReady(() => {
+      const navigationEntry = getNavigationEntry();
+      registerPerformanceObserver('navigation', () => {
+        if (navigationEntry) {
+          const value = Math.max(navigationEntry.responseStart - getActivationStart(), 0);
+          cb({ name, value });
+        }
+      });
+    });
+  };
+
+  webVitals.onFCP = (cb) => {
+    const name = 'FCP';
+    whenActivated(() => {
+      const visibilityWatcher = getVisibilityWatcher();
+      const po = registerPerformanceObserver('paint', (entries) => {
+        entries.forEach((entry) => {
+          if (entry.name === 'first-contentful-paint') {
+            po.disconnect();
+            if (entry.startTime < visibilityWatcher.firstHiddenTime) {
+              const value = Math.max(entry.startTime - getActivationStart(), 0);
+              cb({ name, value, entries: [entry] });
+            }
+          }
+        });
+      });
+      if (po) {
+        onBFCacheRestore((event) => {
+          doubleRAF(() => {
+            const value = performance.now() - event.timeStamp;
+            cb({ name, value });
+          });
+        });
+      }
+    });
+  };
+
+  webVitals.onLCP = (cb) => {
+    const name = 'LCP';
+    whenActivated(() => {
+      const visibilityWatcher = getVisibilityWatcher();
+      const po = registerPerformanceObserver('largest-contentful-paint', (entries) => {
+        entries.forEach((entry) => {
+          // Only report if the page wasn't hidden prior to LCP.
+          if (entry.startTime < visibilityWatcher.firstHiddenTime) {
+            const value = Math.max(entry.startTime - getActivationStart(), 0);
+            cb({ name, value, entries: [entry] });
+          }
+        });
+      });
+      const stopListening = runOnce(() => {
+        if (po) po.disconnect();
+      });
+      onHidden(stopListening);
+      ['keydown', 'click'].forEach((type) => {
+        addEventListener(type, () => whenIdle(stopListening), true);
+      });
+      if (po) {
+        onBFCacheRestore((event) => {
+          doubleRAF(() => {
+            const value = performance.now() - event.timeStamp;
+            cb({ name, entries: [], value });
+          });
+        });
+      }
+    });
+  };
+
+  webVitals.onCLS = (cb) => {
+    const name = 'CLS';
+    let value = 0;
+    let totalEntries = [];
+    webVitals.onFCP(runOnce(() => {
+      let sessionValue = 0;
+      let sessionEntries = [];
+      const po = registerPerformanceObserver('layout-shift', (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.hadRecentInput) {
+            const firstSessionEntry = sessionEntries[0];
+            const lastSessionEntry = sessionEntries[sessionEntries.length - 1];
+            if (
+              sessionValue
+              && entry.startTime - lastSessionEntry.startTime < 1000
+              && entry.startTime - firstSessionEntry.startTime < 5000
+            ) {
+              sessionValue += entry.value;
+              sessionEntries.push(entry);
+            } else {
+              sessionValue = entry.value;
+              sessionEntries = [entry];
+            }
+          }
+        });
+        if (sessionValue > value) {
+          value = sessionValue;
+          totalEntries = sessionEntries;
+          cb({ name, value, entries: totalEntries });
+        }
+      });
+      if (po) {
+        onBFCacheRestore(() => {
+          value = 0;
+          doubleRAF(() => {
+            cb({ name, value });
+          });
+        });
+        setTimeout(() => cb({ name, value }), 0);
+      }
+    }));
+  };
+
+  webVitals.onINP = (cb) => {
+    const name = 'INP';
+    let value = 0;
+    let inpEntries = [];
+    const longestInteractionList = [];
+    const longestInteractionMap = new Map();
+    let prevInteractionCount = 0;
+
+    const getInteractionCountForNavigation = () => getInteractionCount() - prevInteractionCount;
+
+    const resetInteractions = () => {
+      prevInteractionCount = 0;
+      longestInteractionList.length = 0;
+      longestInteractionMap.clear();
+    };
+
+    const estimateP98LongestInteraction = () => {
+      const candidateInteractionIndex = Math.min(
+        longestInteractionList.length - 1,
+        Math.floor(getInteractionCountForNavigation() / 50),
+      );
+
+      return longestInteractionList[candidateInteractionIndex];
+    };
+
+    const processInteractionEntry = (entry) => {
+      if (!(entry.interactionId || entry.entryType === 'first-input')) return;
+      const minLongestInteraction = longestInteractionList[longestInteractionList.length - 1];
+      const existingInteraction = longestInteractionMap.get(entry.interactionId);
+      if (existingInteraction
+        || longestInteractionList.length < webVitals.MAX_INTERACTIONS_TO_CONSIDER
+        || entry.duration > minLongestInteraction.latency) {
+        if (existingInteraction) {
+          if (entry.duration > existingInteraction.latency) {
+            existingInteraction.entries = [entry];
+            existingInteraction.latency = entry.duration;
+          } else if (
+            entry.duration === existingInteraction.latency
+            && entry.startTime === existingInteraction.entries[0].startTime
+          ) {
+            existingInteraction.entries.push(entry);
+          }
+        } else {
+          const interaction = {
+            id: entry.interactionId || '',
+            latency: entry.duration,
+            entries: [entry],
+          };
+          longestInteractionMap.set(interaction.id, interaction);
+          longestInteractionList.push(interaction);
+        }
+        longestInteractionList.sort((a, b) => b.latency - a.latency);
+        if (longestInteractionList.length > webVitals.MAX_INTERACTIONS_TO_CONSIDER) {
+          longestInteractionList
+            .splice(webVitals.MAX_INTERACTIONS_TO_CONSIDER)
+            .forEach((i) => longestInteractionMap.delete(i.id));
+        }
+      }
+    };
+
+    const handleEntries = (entries) => {
+      whenIdle(() => {
+        entries.forEach(processInteractionEntry);
+        const inp = estimateP98LongestInteraction();
+        if (inp && inp.latency !== value) {
+          value = inp.latency;
+          inpEntries = inp.entries;
+          cb({ name, value, entries: inpEntries });
+        }
+      });
+    };
+
+    whenActivated(() => {
+      initInteractionCountPolyfill();
+      const po = registerPerformanceObserver(
+        'event',
+        handleEntries,
+        { durationThreshold: webVitals.DEFAULT_INTERACTION_DURATION_THRESHOLD },
+      );
+      if (po) {
+        po.observe({ type: 'first-input', buffered: true });
+        onHidden(() => {
+          handleEntries(po.takeRecords());
+        });
+        onBFCacheRestore(() => {
+          resetInteractions();
+        });
+      }
+    });
+  };
+
+  ['TTFB', 'FCP', 'LCP', 'CLS', 'INP'].forEach((metric) => {
+    const metricFn = webVitals[`on${metric}`];
+    if (typeof metricFn === 'function') {
+      metricFn(sampleRUM.storeCWV('cwv2'));
+    }
+  });
+};
 
 sampleRUM.drain('leave', ((event = {}) => {
   if (sampleRUM.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
@@ -268,4 +640,8 @@ fflags.enabled('email', () => {
   Object.entries(networks).forEach(([network, regex]) => {
     params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
   });
+});
+
+fflags.enabled('cwv2', () => {
+  cwv2();
 });
