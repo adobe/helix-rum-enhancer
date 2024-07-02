@@ -261,9 +261,7 @@ fflags.enabled('onetrust', () => {
 
   const knownAdNetworksSection = matchParams(adNetworks, searchParams).map((network) => `paid=${network}`);
   const knownEmailNetworksSection = matchParams(emailNetworks, searchParams).map((network) => `email=${network}`);
-  const utmSection = searchParams.filter(([key]) => key.startsWith('utm_'))
-    .filter(([key]) => key !== 'utm_id')
-    .filter(([key]) => key !== 'utm_term')
+  const utmSection = searchParams.filter(([key]) => ['utm_medium', 'utm_source'].includes(key))
     .map(([key, value]) => `${key}=${value}`);
 
   const target = [knownAdNetworksSection, knownEmailNetworksSection, utmSection].join('&');
