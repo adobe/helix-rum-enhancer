@@ -13,7 +13,8 @@
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
     "semantic-release": "semantic-release",
     "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH 1.x main",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "generate-bloom-filter": "node test/generateAcquisitionBloomFilters.js"
   },
   "repository": {
     "type": "git",

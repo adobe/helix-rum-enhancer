@@ -11,10 +11,12 @@
  */
 const { sampleRUM } = window.hlx.rum;
 
+const basicHash = (string, modulo) => Array.from(string)
+  .map((a) => a.charCodeAt(0))
+  .reduce((a, b) => a + b, 1) % modulo;
+
 const fflags = {
-  has: (flag) => fflags[flag].indexOf(Array.from(window.origin)
-    .map((a) => a.charCodeAt(0))
-    .reduce((a, b) => a + b, 1) % 1371) !== -1,
+  has: (flag) => fflags[flag].indexOf(basicHash(window.origin, 1371)) !== -1,
   enabled: (flag, callback) => fflags.has(flag) && callback(),
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
   onetrust: [543, 770, 1136],
@@ -269,3 +271,48 @@ fflags.enabled('email', () => {
     params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
   });
 });
+
+// acquisition checkpoint
+(() => {
+  const sanitize = (str) => (str || '').toLowerCase().replace(/[^a-zA-Z0-9]/, '');
+  const toBinary = (s) => Array.from(s, (c) => parseInt(c, 16).toString(2).padStart(4, '0')).join('');
+  const moduli = [239, 241, 251]; // prime numbers smaller than 256
+  const knownVendors = toBinary('fbdef75ff9f4dedbfdeaba8f21e7884aebf67cfde6eefeea3b8ff32c6fb68a40'); // known vendors bloom filter
+  const categories = {
+    affiliate: ['aff', 'affiliate', 'affiliatemarketing'],
+    audio: ['spotify'],
+    brand: ['brand'],
+    display: ['advertorial', 'banner', 'cpa', 'cpc', 'cpm', 'cpv', 'discover', 'display', 'fbads', 'goppc', 'highimpact', 'inred', 'nps', 'paid', 'paiddisplay', 'placement', 'post', 'poster', 'pp', 'ppc'],
+    email: ['em', 'email', 'mail', 'newsletter'],
+    local: ['yext'],
+    owned: ['owned'],
+    qr: ['qr', 'qrcode'],
+    search: ['direct', 'google', 'googleflights', 'paidsearch', 'paidsearchnb', 'sea', 'sem'],
+    sms: ['sms'],
+    social: ['facebook', 'gnews', 'instagramfeed', 'instagramreels', 'instagramstories', 'line', 'linkedin', 'metasearch', 'organicsocialown', 'paidsocial', 'social', 'sociallinkedin', 'socialpaid'],
+    video: ['native', 'paidvideo', 'pvid', 'video', 'youtube'],
+    web: ['webapp'],
+  };
+  const sources = {
+    paid: ['affiliate', 'audio', 'display', 'local', 'search', 'social', 'video'],
+    owned: ['brand', 'email', 'owned', 'qr', 'sms', 'web'],
+  };
+  // these 'vendors' appear differently in the utmsource field. They are mapped to a single value:
+  const vendorMappings = [
+    { regex: /newsshowcase|aci|google|googleads|gads|google-ads|google_search|google_deman|aw|adwords|dv360|gdn|doubleclick|dbm|gmb/i, result: 'google' },
+    { regex: /instagram|ig/i, result: 'instagram' },
+    { regex: /face|fb|meta/i, result: 'facebook' },
+    { regex: /email/i, result: 'email' },
+    { regex: /bing/i, result: 'bing' },
+    { regex: /amazon|ctv/i, result: 'amazon' },
+    { regex: /qr/i, result: 'qrcode' },
+    { regex: /youtube|yt/i, result: 'youtube' },
+  ];
+  const utmMedium = sanitize(new URLSearchParams(window.location.search).get('utm_medium'));
+  const utmSource = sanitize(new URLSearchParams(window.location.search).get('utm_source'));
+  const preVendor = vendorMappings.find(({ regex }) => regex.test(utmSource))?.result || utmSource;
+  const category = Object.keys(categories).find((key) => (categories[key] || []).includes(utmMedium)) || '';
+  const source = Object.keys(sources).find((key) => (sources[key] || []).includes(category)) || '';
+  const vendor = moduli.every((modulo) => knownVendors.charAt(basicHash(preVendor, modulo)) === '1') ? preVendor : '';
+  sampleRUM('acquisition', { source: `${source}:${category}:${vendor}` });
+})();
