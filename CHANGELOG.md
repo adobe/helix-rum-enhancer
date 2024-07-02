@@ -1,3 +1,10 @@
+# [2.16.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.15.0...v2.16.0) (2024-07-02)
+
+
+### Features
+
+* enable paid checkpoint for all ([#219](https://github.com/adobe/helix-rum-enhancer/issues/219)) ([5348744](https://github.com/adobe/helix-rum-enhancer/commit/5348744de770c024b2c9fe17962307e39293bf36))
+
 # [2.15.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.14.2...v2.15.0) (2024-07-01)
 
 
