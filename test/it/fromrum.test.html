@@ -34,6 +34,12 @@
     import { expect } from '@esm-bundle/chai';
 
     runTests(async () => {
+      beforeEach(() => {
+        const usp = new URLSearchParams(window.location.search);
+        usp.append('utm_medium', 'test');
+        window.history.replaceState({}, '', `${window.location.pathname}?${usp.toString()}`);
+      });
+
       describe('HTML Integration Tests', () => {
 
         it('Can load rum enhancer through a (prepared) helix-rum-js', async () => {
@@ -41,11 +47,12 @@
             setTimeout(resolve, 3000);
           });
 
-          expect(window.called).to.have.lengthOf(4);
-          expect(window.called[0].checkpoint).to.equal('top');
-          expect(window.called[1].checkpoint).to.equal('enter');
-          expect(window.called[2].checkpoint).to.equal('viewmedia');
-          expect(window.called[3].checkpoint).to.equal('cwv');
+          expect(window.called).to.have.lengthOf(5);
+          expect(window.called.some((call) => call.checkpoint === 'top')).to.be.true;
+          expect(window.called.some((call) => call.checkpoint === 'utm')).to.be.true;
+          expect(window.called.some((call) => call.checkpoint === 'enter')).to.be.true;
+          expect(window.called.some((call) => call.checkpoint === 'viewmedia')).to.be.true;
+          expect(window.called.some((call) => call.checkpoint === 'cwv')).to.be.true;
         });
 
       });
