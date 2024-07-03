@@ -26,7 +26,12 @@ export default {
   ],
   middleware: [
     async function emulateRUM(context, next) {
-      if (context.url.startsWith('/.rum')) {
+      if (context.url.startsWith('/src/index.map.js')) {
+        await next();
+        context.body = context.body
+          .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon');
+        return true;
+      } else if (context.url.startsWith('/.rum')) {
         if (context.url.startsWith('/.rum/@adobe/helix-rum-js@%5E2/dist/')
           || context.url.startsWith('/.rum/@adobe/helix-rum-js@^2/dist/')
         ) {
@@ -34,7 +39,7 @@ export default {
           await next();
           context.body = context.body
             .replace(/const weight.*/, 'const weight = 1;')
-            .replace('navigator.sendBeacon', 'fakeSendBeacon')
+            .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon')
             .replace('.rum/@adobe/helix-rum-enhancer@^2/src/index.js', 'src/index.map.js');
           return true;
         } else if (context.url.startsWith('/.rum/web-vitals')) {
