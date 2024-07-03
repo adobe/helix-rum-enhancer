@@ -10,10 +10,13 @@
  * governing permissions and limitations under the License.
  */
 import { fromRollup, rollupAdapter, rollupBundlePlugin } from '@web/dev-server-rollup';
+import rollupBabel from '@rollup/plugin-babel';
 
+const babel = fromRollup(rollupBabel);
 export default {
   coverageConfig: {
     report: true,
+    reporters: ['lcov', 'text-summary', 'cobertura'],
     reportDir: 'coverage',
     exclude: [
       'test/fixtures/**',
@@ -29,21 +32,27 @@ export default {
       {
         rollupConfig: {
           input: ['modules/index.js'],
-          output: {
-            sourcemap: 'inline',
-          },
         },
       },
     ),
+    babel({
+      plugins: ['babel-plugin-istanbul'],
+    }),
   ],
   middleware: [
     async function emulateRUM(context, next) {
       if (context.url.startsWith('/.rum')) {
-        if (context.url.startsWith('/.rum/@adobe/helix-rum-enhancer@%5E2/src/')) {
+        if (context.url.startsWith('/.rum/@adobe/helix-rum-enhancer@%5E2/src/')
+          || context.url.startsWith('/.rum/@adobe/helix-rum-enhancer@^2/src/')) {
           console.log('rum enhancer has been replaced');
-          context.url = context.url.replace('/.rum/@adobe/helix-rum-enhancer@%5E2/src/', '/modules/');
+          context.url = context.url
+            .replace('/.rum/@adobe/helix-rum-enhancer@%5E2/src/', '/modules/')
+            .replace('/.rum/@adobe/helix-rum-enhancer@^2/src/', '/modules/');
+
           return next();
-        } else if (context.url.startsWith('/.rum/@adobe/helix-rum-js@%5E2/dist/')) {
+        } else if (context.url.startsWith('/.rum/@adobe/helix-rum-js@%5E2/dist/')
+          || context.url.startsWith('/.rum/@adobe/helix-rum-js@^2/dist/')
+        ) {
           context.url = '/node_modules/@adobe/helix-rum-js/dist/rum-standalone.js';
           await next();
           context.body = context.body
