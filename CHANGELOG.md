@@ -1,3 +1,10 @@
+# [2.17.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.16.0...v2.17.0) (2024-07-03)
+
+
+### Features
+
+* **email:** rollout for all customers 2.x ([#222](https://github.com/adobe/helix-rum-enhancer/issues/222)) ([bb71ae6](https://github.com/adobe/helix-rum-enhancer/commit/bb71ae656fbb8c34ca5de3436f950a9e10e8f188))
+
 # [2.16.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.15.0...v2.16.0) (2024-07-02)
 
 
