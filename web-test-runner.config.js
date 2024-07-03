@@ -9,10 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import { fromRollup, rollupAdapter, rollupBundlePlugin } from '@web/dev-server-rollup';
-import rollupBabel from '@rollup/plugin-babel';
+import { rollupBundlePlugin } from '@web/dev-server-rollup';
 
-const babel = fromRollup(rollupBabel);
 export default {
   coverageConfig: {
     report: true,
@@ -21,6 +19,7 @@ export default {
     exclude: [
       'test/fixtures/**',
       'node_modules/**',
+      '.rum/**',
     ],
   },
   files: [
@@ -32,32 +31,31 @@ export default {
       {
         rollupConfig: {
           input: ['modules/index.js'],
+          output: {
+            file: '.rum/@adobe/helix-rum-enhancer@^2/src/index.js',
+            format: 'iife',
+            sourcemap: 'inline',
+          },
         },
       },
     ),
-    babel({
-      plugins: ['babel-plugin-istanbul'],
-    }),
   ],
   middleware: [
     async function emulateRUM(context, next) {
       if (context.url.startsWith('/.rum')) {
-        if (context.url.startsWith('/.rum/@adobe/helix-rum-enhancer@%5E2/src/')
-          || context.url.startsWith('/.rum/@adobe/helix-rum-enhancer@^2/src/')) {
-          console.log('rum enhancer has been replaced');
-          context.url = context.url
-            .replace('/.rum/@adobe/helix-rum-enhancer@%5E2/src/', '/modules/')
-            .replace('/.rum/@adobe/helix-rum-enhancer@^2/src/', '/modules/');
-
-          return next();
-        } else if (context.url.startsWith('/.rum/@adobe/helix-rum-js@%5E2/dist/')
+        if (context.url.startsWith('/.rum/@adobe/helix-rum-js@%5E2/dist/')
           || context.url.startsWith('/.rum/@adobe/helix-rum-js@^2/dist/')
         ) {
           context.url = '/node_modules/@adobe/helix-rum-js/dist/rum-standalone.js';
           await next();
           context.body = context.body
             .replace(/const weight.*/, 'const weight = 1;')
-            .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon');
+            .replace('navigator.sendBeacon', 'fakeSendBeacon')
+            .replace('.rum/@adobe/helix-rum-enhancer@^2/src/index.js', 'src/index.map.js');
+          return true;
+        } else if (context.url.startsWith('/.rum/web-vitals')) {
+          context.url = '/node_modules/web-vitals/dist/web-vitals.iife.js';
+          await next();
           return true;
         } else if (context.url === '/.rum/1') {
           // return a 201 response and do nothing
