@@ -33,16 +33,16 @@
       describe('dom#sourceSelector', () => {
         it('sourceSelector - generic', () => {
           expect(sourceSelector(document.querySelector('a.one'))).to.be.equal('a.one');
-          expect(sourceSelector(document.querySelector('body > div:first-of-type'))).to.be.equal('div');
-          expect(sourceSelector(document.querySelector('div.with-one-class'))).to.be.equal('div.with-one-class');
-          expect(sourceSelector(document.querySelector('div.with-classes'))).to.be.equal('div.with-classes');
+          expect(sourceSelector(document.querySelector('body > div:first-of-type'))).to.be.equal('"a div"');
+          expect(sourceSelector(document.querySelector('div.with-one-class'))).to.be.equal('.with-one-class');
+          expect(sourceSelector(document.querySelector('div.with-classes'))).to.be.equal('.with-classes');
           expect(sourceSelector(document.querySelector('div.multi-1'))).to.be.equal('has-priority');
           expect(sourceSelector(document.querySelector('div.multi-2'))).to.be.equal('has-priority-too');
           expect(sourceSelector(document.querySelector('div.multi-3'))).to.be.equal('#id-has-priority');
 
-          expect(sourceSelector(document.querySelector('input[type="text"'))).to.be.equal('form input[type=\'text\']');
-          expect(sourceSelector(document.querySelector('input[type="checkbox"'))).to.be.equal('form input[type=\'checkbox\']');
-          expect(sourceSelector(document.querySelector('textarea'))).to.be.equal('form textarea');
+          expect(sourceSelector(document.querySelector('input[type="text"'))).to.be.equal('form input[type=\'text\'].a-text');
+          expect(sourceSelector(document.querySelector('input[type="checkbox"'))).to.be.equal('form input[type=\'checkbox\'].a-checkbox');
+          expect(sourceSelector(document.querySelector('textarea'))).to.be.equal('form textarea.a-textarea');
 
           expect(sourceSelector(document.querySelector('.a-block'))).to.be.equal('.a-block');
           expect(sourceSelector(document.querySelector('#a-div-in-block'))).to.be.equal('.a-block #a-div-in-block');

@@ -30,6 +30,58 @@ export const targetSelector = (element) => {
   }
 };
 
+function walk(element, checkFn) {
+  if (!element || element === document.body || element === document.documentElement) {
+    return undefined;
+  }
+  const checkValue = checkFn(element);
+  return checkValue || walk(element.parentElement, checkFn);
+}
+
+function isFakeDialog(element) {
+  // doing it well
+  if (element.tagName === 'DIALOG') return true;
+  // making the best of it
+  if (element.getAttribute('role') === 'dialog') return true;
+  if (element.getAttribute('role') === 'alertdialog') return true;
+  if (element.getAttribute('aria-modal') === 'true') return true;
+  // doing it wrong
+  const computedStyle = window.getComputedStyle(element);
+  return (computedStyle && computedStyle.position === 'fixed' && computedStyle.zIndex > 100);
+}
+
+function isFakeButton(element) {
+  if (element.tagName === 'BUTTON') return true;
+  if (element.tagName === 'INPUT' && element.getAttribute('type') === 'button') return true;
+  if (element.tagName === 'A') {
+    const classes = Array.from(element.classList);
+    return classes.some((className) => className.match(/button|cta/));
+  }
+  return element.getAttribute('role') === 'button';
+}
+
+function getSourceContext(element) {
+  if (element.closest('form')) return 'form';
+  if (element.closest('.block')) return `.${element.closest('.block').getAttribute('data-block-name')}`;
+  if (walk(element, isFakeDialog)) return 'dialog';
+  if (element.closest('nav')) return 'nav';
+  if (element.closest('header')) return 'header';
+  if (element.closest('footer')) return 'footer';
+  if (element.closest('aside')) return 'aside';
+  return (walk(element, (e) => e.id && `#${e.id}`));
+}
+
+function getSourceElement(element) {
+  if (element.closest('form') && Array.from(element.closest('form').elements).includes(element)) return element.tagName.toLowerCase() + (element.tagName === 'INPUT' ? `[type='${element.getAttribute('type')}']` : '');
+  if (walk(element, isFakeButton)) return 'button';
+  return element.tagName.toLowerCase().match(/^(a|img|video)$/) && element.tagName.toLowerCase();
+}
+
+function getSourceIdentifier(element) {
+  if (element.id) return `#${element.id}`;
+  if (element.getAttribute('data-block-name')) return `.${element.getAttribute('data-block-name')}`;
+  return (element.classList.length > 0 && `.${element.classList[0]}`);
+}
 export const sourceSelector = (element) => {
   try {
     if (!element || element === document.body || element === document.documentElement) {
@@ -38,41 +90,10 @@ export const sourceSelector = (element) => {
     if (element.getAttribute('data-rum-source')) {
       return element.getAttribute('data-rum-source');
     }
-    const form = element.closest('form');
-    let formElementSelector = '';
-    if (form && Array.from(form.elements).includes(element)) {
-      formElementSelector = element.tagName === 'INPUT' ? `form input[type='${element.getAttribute('type')}']` : `form ${element.tagName.toLowerCase()}`;
-    }
-
-    const blockName = element.closest('.block') ? element.closest('.block').getAttribute('data-block-name') : '';
-    if (element.id || formElementSelector) {
-      const id = element.id ? `#${element.id}` : '';
-      return blockName ? `.${blockName} ${formElementSelector}${id}` : `${formElementSelector}${id}`;
-    }
-
-    if (element.getAttribute('data-block-name')) {
-      return `.${element.getAttribute('data-block-name')}`;
-    }
-
-    const classes = Array.from(element.classList);
-    const label = element.tagName.toLowerCase();
-    const firstClass = classes.length > 0 ? `.${classes[0]}` : '';
-    const labelWithClass = `${element.tagName.toLowerCase()}${firstClass}`;
-    if (element.tagName.toLowerCase() === 'button'
-      || element.type === 'button'
-      || classes.some((className) => className.match(/button|cta/))) {
-      let parent = element.parentElement;
-      if (!parent) return labelWithClass;
-      if (parent.id) return `#${parent.id} ${label}`;
-      while (parent.tagName !== 'BODY' && !parent.id) parent = parent.parentElement;
-      if (parent.id) return `#${parent.id} ${labelWithClass}`;
-      return blockName ? `.${blockName} ${labelWithClass}` : labelWithClass;
-    }
-
-    const parent = sourceSelector(element.parentElement);
-    if (parent) return parent;
-
-    return labelWithClass;
+    const context = getSourceContext(element.parentElement) || '';
+    const elementName = getSourceElement(element) || '';
+    const identifier = getSourceIdentifier(element) || '';
+    return `${context} ${elementName}${identifier}`.trim() || `"${element.textContent.substring(0, 10)}"`;
     /* c8 ignore next 3 */
   } catch (error) {
     return null;
