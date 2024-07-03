@@ -10,6 +10,12 @@
  * governing permissions and limitations under the License.
  */
 export default {
+  testFramework: {
+    type: 'mocha',
+    config: {
+      timeout: 10000,
+    },
+  },
   coverageConfig: {
     report: true,
     reporters: ['lcov', 'text-summary', 'cobertura'],

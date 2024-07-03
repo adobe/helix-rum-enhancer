@@ -12,14 +12,22 @@
     // and navigator.sendBeacon has been replaced with
     // a call to fakeSendBeacon
     window.fakeSendBeacon = function (url, payload) {
-      console.log('sendBeacon', url, payload);
-      window.called.push(JSON.parse(payload));
+      // if payload is a string, we assume it's a JSON string
+      if (typeof payload === 'string') {
+        window.called.push(JSON.parse(payload));
+      } else {
+        // it's a blob
+        payload.text().then((text) => {
+          window.called.push(JSON.parse(text));
+        });
+      }
     };
   </script>
   <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
 </head>
 
 <body>
+  <img src="/test/it/img.test.html">
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { sendMouse } from '@web/test-runner-commands';
@@ -30,11 +38,14 @@
 
         it('Can load rum enhancer through a (prepared) helix-rum-js', async () => {
           await new Promise((resolve) => {
-            setTimeout(resolve, 1000);
+            setTimeout(resolve, 3000);
           });
 
-          expect(window.called).to.have.lengthOf(1);
-          console.log('called', window.called);
+          expect(window.called).to.have.lengthOf(4);
+          expect(window.called[0].checkpoint).to.equal('top');
+          expect(window.called[1].checkpoint).to.equal('enter');
+          expect(window.called[2].checkpoint).to.equal('viewmedia');
+          expect(window.called[3].checkpoint).to.equal('cwv');
         });
 
       });
