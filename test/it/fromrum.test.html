@@ -1,0 +1,43 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    // we log what's being sent to the "server"
+    window.called = [];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = function (url, payload) {
+      console.log('sendBeacon', url, payload);
+      window.called.push(JSON.parse(payload));
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendMouse } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('HTML Integration Tests', () => {
+
+        it('Can load rum enhancer through a (prepared) helix-rum-js', async () => {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          expect(window.called).to.have.lengthOf(1);
+          console.log('called', window.called);
+        });
+
+      });
+    });
+  </script>
+</body>

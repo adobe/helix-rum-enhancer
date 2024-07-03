@@ -9,6 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { fromRollup, rollupAdapter, rollupBundlePlugin } from '@web/dev-server-rollup';
+
 export default {
   coverageConfig: {
     report: true,
@@ -21,5 +23,40 @@ export default {
   files: [
     'test/**/*.test.{html,js}',
     'test/*.test.{html,js}',
+  ],
+  plugins: [
+    rollupBundlePlugin(
+      {
+        rollupConfig: {
+          input: ['modules/index.js'],
+          output: {
+            sourcemap: 'inline',
+          },
+        },
+      },
+    ),
+  ],
+  middleware: [
+    async function emulateRUM(context, next) {
+      if (context.url.startsWith('/.rum')) {
+        if (context.url.startsWith('/.rum/@adobe/helix-rum-enhancer@%5E2/src/')) {
+          console.log('rum enhancer has been replaced');
+          context.url = context.url.replace('/.rum/@adobe/helix-rum-enhancer@%5E2/src/', '/modules/');
+          return next();
+        } else if (context.url.startsWith('/.rum/@adobe/helix-rum-js@%5E2/dist/')) {
+          context.url = '/node_modules/@adobe/helix-rum-js/dist/rum-standalone.js';
+          await next();
+          context.body = context.body
+            .replace(/const weight.*/, 'const weight = 1;')
+            .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon');
+          return true;
+        } else if (context.url === '/.rum/1') {
+          // return a 201 response and do nothing
+          context.status = 201;
+          return true;
+        }
+      }
+      return next();
+    },
   ],
 };
