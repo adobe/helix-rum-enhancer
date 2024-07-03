@@ -1,3 +1,32 @@
+# [2.17.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.16.0...v2.17.0) (2024-07-03)
+
+
+### Features
+
+* **email:** rollout for all customers 2.x ([#222](https://github.com/adobe/helix-rum-enhancer/issues/222)) ([bb71ae6](https://github.com/adobe/helix-rum-enhancer/commit/bb71ae656fbb8c34ca5de3436f950a9e10e8f188))
+
+# [2.16.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.15.0...v2.16.0) (2024-07-02)
+
+
+### Features
+
+* enable paid checkpoint for all ([#219](https://github.com/adobe/helix-rum-enhancer/issues/219)) ([5348744](https://github.com/adobe/helix-rum-enhancer/commit/5348744de770c024b2c9fe17962307e39293bf36))
+
+# [2.15.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.14.2...v2.15.0) (2024-07-01)
+
+
+### Bug Fixes
+
+* use correct token for release ([094f37e](https://github.com/adobe/helix-rum-enhancer/commit/094f37ef2de8ddf5d64ea38c9071c9b1bec6119a))
+
+
+### Features
+
+* add more logic to button selector ([#205](https://github.com/adobe/helix-rum-enhancer/issues/205)) ([c9a5629](https://github.com/adobe/helix-rum-enhancer/commit/c9a5629e7e690397a5f46cbf8db08570f0c4d250))
+* clean up and trigger release ([bfc8d24](https://github.com/adobe/helix-rum-enhancer/commit/bfc8d241cd19b33975ac37be5167783b99fbe54c))
+* switch release token ([0e5b3b0](https://github.com/adobe/helix-rum-enhancer/commit/0e5b3b03d0b96a32118340e7b6f004da8660f0aa))
+* trigger release ([bf26949](https://github.com/adobe/helix-rum-enhancer/commit/bf269492cb330c55d22fd0eeed4aad4cfdac57a3))
+
 ## [2.14.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.14.1...v2.14.2) (2024-06-12)
 
 

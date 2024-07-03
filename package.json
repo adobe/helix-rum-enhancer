@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-rum-enhancer",
-  "version": "2.14.2",
+  "version": "2.17.0",
   "description": "Helix RUM Enhancer",
   "main": "src/index.js",
   "type": "module",
@@ -51,7 +51,7 @@
     "jsdoc-to-markdown": "8.0.1",
     "junit-report-builder": "3.2.1",
     "lint-staged": "15.2.7",
-    "mocha": "10.4.0",
+    "mocha": "10.5.2",
     "mocha-multi-reporters": "1.5.1",
     "rollup": "4.18.0",
     "rollup-plugin-cleanup": "3.2.1",
