@@ -55,6 +55,8 @@ All three parts are optional
 
 `identifier` is
 - the `id` attribute of the element, if provided
+- the first `.class` if there are any
+- else omitted
 
 Even if an `identifier` is provided, having a `context` and `element` is recommended, as it makes the `source` parameter more readable and easier to understand.
 
