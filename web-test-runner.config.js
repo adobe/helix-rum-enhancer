@@ -9,8 +9,6 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-import { rollupBundlePlugin } from '@web/dev-server-rollup';
-
 export default {
   coverageConfig: {
     report: true,
@@ -25,20 +23,6 @@ export default {
   files: [
     'test/**/*.test.{html,js}',
     'test/*.test.{html,js}',
-  ],
-  plugins: [
-    rollupBundlePlugin(
-      {
-        rollupConfig: {
-          input: ['modules/index.js'],
-          output: {
-            file: '.rum/@adobe/helix-rum-enhancer@^2/src/index.js',
-            format: 'iife',
-            sourcemap: 'inline',
-          },
-        },
-      },
-    ),
   ],
   middleware: [
     async function emulateRUM(context, next) {
