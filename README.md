@@ -44,6 +44,7 @@ All three parts are optional
 - `form` for form elements
 - `dialog` for dialog elements, or parent containers that are fixed positioned and have a positive high z-index
 - `.block-name` for Helix blocks
+- `header`, `footer`, `nav`, `aside`  for main site structure
 
 `element` is
 - `button` for buttons, or links that look like buttons (e.g. with a class `button` or `btn` or `cta`)
