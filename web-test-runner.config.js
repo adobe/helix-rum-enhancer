@@ -18,7 +18,6 @@ export default {
   },
   coverageConfig: {
     report: true,
-    reporters: ['lcov', 'text-summary', 'cobertura'],
     reportDir: 'coverage',
     exclude: [
       'test/fixtures/**',
