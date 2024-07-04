@@ -22,11 +22,6 @@ const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelect
 // eslint-disable-next-line no-use-before-define
 const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback) : null;
 
-// eslint-disable-next-line no-unused-vars
-function optedIn(checkpoint, data) {
-  // TODO: check config service to know if
-  return true;
-}
 // Gets configured collection from the config service for the current domain
 function getCollectionConfig() {
   // eslint-disable-next-line max-len
@@ -36,7 +31,7 @@ function getCollectionConfig() {
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  if (optedIn(checkpoint, data) && isSelected) {
+  if (isSelected) {
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
