@@ -239,33 +239,47 @@ fflags.enabled('onetrust', () => {
   }
 });
 
+sampleRUM.paidNetworks = {
+  google: /gclid|gclsrc|wbraid|gbraid/,
+  doubleclick: /dclid/,
+  microsoft: /msclkid/,
+  facebook: /fb(cl|ad_|pxl_)id/,
+  twitter: /tw(clid|src|term)/,
+  linkedin: /li_fat_id/,
+  pinterest: /epik/,
+  tiktok: /ttclid/,
+};
+
 // paid checkpoint
 (() => {
-  const networks = {
-    google: /gclid|gclsrc|wbraid|gbraid/,
-    doubleclick: /dclid/,
-    microsoft: /msclkid/,
-    facebook: /fb(cl|ad_|pxl_)id/,
-    twitter: /tw(clid|src|term)/,
-    linkedin: /li_fat_id/,
-    pinterest: /epik/,
-    tiktok: /ttclid/,
-  };
   const params = Array.from(new URLSearchParams(window.location.search).keys());
-  Object.entries(networks).forEach(([network, regex]) => {
+  Object.entries(sampleRUM.paidNetworks).forEach(([network, regex]) => {
     params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('paid', { source: network, target: param }));
   });
 })();
 
+sampleRUM.emailProviders = {
+  mailchimp: /mc_(c|e)id/,
+  marketo: /mkt_tok/,
+};
+
 // email checkpoint
 (() => {
-  const networks = {
-    mailchimp: /mc_(c|e)id/,
-    marketo: /mkt_tok/,
-
-  };
   const params = Array.from(new URLSearchParams(window.location.search).keys());
-  Object.entries(networks).forEach(([network, regex]) => {
+  Object.entries(sampleRUM.emailProviders).forEach(([network, regex]) => {
     params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
   });
+})();
+
+(() => {
+  const nonPIITrackingParams = [
+    ...Object.values(sampleRUM.paidNetworks),
+    ...Object.values(sampleRUM.emailProviders),
+    /utm_(source|medium)/,
+  ];
+  const target = [...new URLSearchParams(window.location.search)]
+    .filter(([key]) => nonPIITrackingParams.find((regex) => regex.test(key)))
+    .map(([key, value]) => `${key}=${value}`)
+    .join('&');
+  sampleRUM('acquisition', { source: document.referrer, target });
 })();
