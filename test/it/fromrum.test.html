@@ -31,7 +31,7 @@
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { sendMouse } from '@web/test-runner-commands';
-    import { expect } from '@esm-bundle/chai';
+          import { assert } from '@esm-bundle/chai';
 
     runTests(async () => {
       beforeEach(() => {
@@ -43,16 +43,21 @@
       describe('HTML Integration Tests', () => {
 
         it('Can load rum enhancer through a (prepared) helix-rum-js', async () => {
+
+          await sendMouse({ type: 'click', position: [100, 100] });
+
           await new Promise((resolve) => {
             setTimeout(resolve, 3000);
           });
 
-          expect(window.called).to.have.lengthOf(5);
-          expect(window.called.some((call) => call.checkpoint === 'top')).to.be.true;
-          expect(window.called.some((call) => call.checkpoint === 'utm')).to.be.true;
-          expect(window.called.some((call) => call.checkpoint === 'enter')).to.be.true;
-          expect(window.called.some((call) => call.checkpoint === 'viewmedia')).to.be.true;
-          expect(window.called.some((call) => call.checkpoint === 'cwv')).to.be.true;
+          await sendMouse({ type: 'click', position: [10, 10] });
+
+          assert(window.called.some((call) => call.checkpoint === 'top'), 'top checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'utm'), 'utm checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'enter'), 'enter checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'viewmedia'), 'viewmedia checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'cwv'), 'cwv checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'click'), 'click checkpoint missing');
         });
 
       });
