@@ -166,6 +166,7 @@ function activateBlocksMutationObserver() {
 }
 
 function getIntersectionObsever(checkpoint) {
+  /* c8 ignore next 3 */ // we can't test this, our browsers are too new
   if (!window.IntersectionObserver) {
     return null;
   }
