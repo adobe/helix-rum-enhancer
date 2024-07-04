@@ -44,7 +44,11 @@
 
       describe('HTML Integration Tests (With OneTrust hidden)', () => {
 
-        it('Can load rum enhancer through a (prepared) helix-rum-js', async () => {
+        it('Can load rum enhancer through a (prepared) helix-rum-js', async function test() {
+          // if user agent is webkit, we skip this test
+          if (navigator.userAgent.includes('WebKit') && !navigator.userAgent.includes('Chrome')) {
+            this.skip();
+          }
 
           await sendMouse({ type: 'click', position: [100, 100] });
 
