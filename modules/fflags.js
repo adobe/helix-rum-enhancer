@@ -15,5 +15,5 @@ export const fflags = {
     .reduce((a, b) => a + b, 1) % 1371) !== -1,
   enabled: (flag, callback) => fflags.has(flag) && callback(),
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
-  onetrust: [543, 770, 1136],
+  onetrust: [543, 770, 1136, 458, 457],
 };
