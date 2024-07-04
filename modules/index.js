@@ -11,7 +11,7 @@
  */
 /* eslint-env browser */
 
-import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
+import { KNOWN_PROPERTIES } from './defaults.js';
 import { fflags } from './fflags.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
@@ -21,13 +21,6 @@ const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window
 const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
 // eslint-disable-next-line no-use-before-define
 const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback) : null;
-
-// Gets configured collection from the config service for the current domain
-function getCollectionConfig() {
-  // eslint-disable-next-line max-len
-  fflags.enabled('onetrust', () => DEFAULT_TRACKING_EVENTS.push('consent'));
-  return DEFAULT_TRACKING_EVENTS;
-}
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
@@ -289,14 +282,13 @@ function addCookieConsentTracking() {
   }
 }
 
-const addObserver = (ck, fn, block) => getCollectionConfig().includes(ck) && fn(block);
 function mutationsCallback(mutations) {
   mutations.filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
     .filter((m) => m.target.dataset.blockStatus === 'loaded')
     .forEach((m) => {
-      addObserver('form', addFormTracking, m.target);
-      addObserver('viewblock', addViewBlockTracking, m.target);
-      addObserver('viewmedia', addViewMediaTracking, m.target);
+      addFormTracking(m.target);
+      addViewBlockTracking(m.target);
+      addViewMediaTracking(m.target);
     });
 }
 
@@ -314,13 +306,11 @@ function addTrackingFromConfig() {
     utm: () => addUTMParametersTracking(),
     viewblock: () => addViewBlockTracking(window.document.body),
     viewmedia: () => addViewMediaTracking(window.document.body),
-    consent: () => addCookieConsentTracking(),
+    consent: () => fflags.enabled('onetrust', addCookieConsentTracking),
     paid: () => addAdsParametersTracking(),
     email: () => addEmailParameterTracking(),
   };
-
-  getCollectionConfig().filter((ck) => trackingFunctions[ck])
-    .forEach((ck) => trackingFunctions[ck]());
+  Object.values(trackingFunctions).forEach((fn) => fn());
 }
 
 function initEnhancer() {
