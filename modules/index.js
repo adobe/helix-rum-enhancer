@@ -78,16 +78,12 @@ function addCWVTracking() {
           }
           sampleRUM('cwv', data);
         };
-
-        const featureToggle = () => window.location.hostname === 'blog.adobe.com';
-        const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
-
         // When loading `web-vitals` using a classic script, all the public
         // methods can be found on the `webVitals` global namespace.
         ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
           const metricFn = window.webVitals[`on${metric}`];
           if (typeof metricFn === 'function') {
-            const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
+            const opts = { reportAllChanges: ['CLS', 'LCP'].includes(metric) };
             metricFn(storeCWV, opts);
           }
         });
