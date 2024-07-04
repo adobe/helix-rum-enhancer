@@ -198,6 +198,14 @@ new PerformanceObserver((list) => {
     });
 }).observe({ type: 'resource', buffered: true });
 
+[...new URLSearchParams(window.location.search).entries()]
+  .filter(([key]) => key.startsWith('utm_'))
+  .filter(([key]) => key !== 'utm_id')
+  .filter(([key]) => key !== 'utm_term')
+  .forEach(([key, value]) => {
+    sampleRUM('utm', { source: key, target: value });
+  });
+
 fflags.enabled('onetrust', () => {
   const cmpCookie = document.cookie.split(';')
     .map((c) => c.trim())
@@ -232,17 +240,9 @@ fflags.enabled('onetrust', () => {
   }
 });
 
-// acquisition checkpoint
+// paid checkpoint
 (() => {
-  const matchParams = (networks, params) => {
-    const match = params.filter(([key]) => Object.values(networks).some((regex) => regex.test(key)))
-      .map(([key]) => Object.keys(networks).find((network) => networks[network].test(key)));
-    return [...new Set(match)];
-  };
-
-  const searchParams = [...new URLSearchParams(window.location.search).entries()];
-
-  const adNetworks = {
+  const networks = {
     google: /gclid|gclsrc|wbraid|gbraid/,
     doubleclick: /dclid/,
     microsoft: /msclkid/,
@@ -252,19 +252,20 @@ fflags.enabled('onetrust', () => {
     pinterest: /epik/,
     tiktok: /ttclid/,
   };
+  const params = Array.from(new URLSearchParams(window.location.search).keys());
+  Object.entries(networks).forEach(([network, regex]) => {
+    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('paid', { source: network, target: param }));
+  });
+})();
 
-  const emailNetworks = {
+fflags.enabled('email', () => {
+  const networks = {
     mailchimp: /mc_(c|e)id/,
     marketo: /mkt_tok/,
 
   };
-
-  const knownAdNetworksSection = matchParams(adNetworks, searchParams).map((network) => `paid=${network}`);
-  const knownEmailNetworksSection = matchParams(emailNetworks, searchParams).map((network) => `email=${network}`);
-  const utmSection = searchParams.filter(([key]) => ['utm_medium', 'utm_source'].includes(key))
-    .map(([key, value]) => `${key}=${value}`);
-
-  const target = [knownAdNetworksSection, knownEmailNetworksSection, utmSection].join('&');
-
-  sampleRUM('acquisition', { source: document.referrer, target });
-})();
+  const params = Array.from(new URLSearchParams(window.location.search).keys());
+  Object.entries(networks).forEach(([network, regex]) => {
+    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
+  });
+});
