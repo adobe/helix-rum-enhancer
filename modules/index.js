@@ -44,6 +44,7 @@ function trackCheckpoint(checkpoint, data, t) {
       if (window.location.origin === origin) {
         const headers = { type: 'application/json' };
         navigator.sendBeacon(url, new Blob([body], headers));
+        /* c8 ignore next 3 */
       } else {
         navigator.sendBeacon(url, body);
       }
@@ -97,6 +98,7 @@ function addCWVTracking() {
         });
       };
       document.head.appendChild(script);
+      /* c8 ignore next 3 */
     } catch (error) {
       // something went wrong
     }
@@ -153,6 +155,7 @@ function addLoadResourceTracking() {
         .forEach((entry) => {
           sampleRUM('missingresource', { source: entry.name, target: entry.hostname });
         });
+      /* c8 ignore next 3 */
     } catch (error) {
       // something went wrong
     }
@@ -187,6 +190,7 @@ function getIntersectionObsever(checkpoint) {
           const source = sourceSelector(entry.target);
           sampleRUM(checkpoint, { target, source });
         });
+      /* c8 ignore next 3 */
     } catch (error) {
       // something went wrong
     }
