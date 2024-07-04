@@ -60,34 +60,33 @@ function processQueue() {
 function addCWVTracking() {
   setTimeout(() => {
     try {
-      const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
-      if (document.querySelector(`script[src="${cwvScript}"]`)) {
-        // web vitals script has been loaded already
+      const storeCWV = (measurement) => {
+        const data = { cwv: {} };
+        data.cwv[measurement.name] = measurement.value;
+        if (measurement.name === 'LCP' && measurement.entries.length > 0) {
+          const { element } = measurement.entries.pop();
+          data.target = targetSelector(element);
+          data.source = sourceSelector(element) || (element && element.outerHTML.slice(0, 30));
+        }
+        sampleRUM('cwv', data);
+      };
+
+      const setupCWV = () => ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
+        const metricFn = window.webVitals[`on${metric}`];
+        if (typeof metricFn === 'function') {
+          const opts = { reportAllChanges: ['CLS', 'LCP'].includes(metric) };
+          metricFn(storeCWV, opts);
+        }
+      });
+
+      if (window.webVitals) { // already loaded, we use what we have
+        setupCWV();
         return;
       }
+      const cwvScript = new URL('.rum/web-vitals@4/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
       const script = document.createElement('script');
       script.src = cwvScript;
-      script.onload = () => {
-        const storeCWV = (measurement) => {
-          const data = { cwv: {} };
-          data.cwv[measurement.name] = measurement.value;
-          if (measurement.name === 'LCP' && measurement.entries.length > 0) {
-            const { element } = measurement.entries.pop();
-            data.target = targetSelector(element);
-            data.source = sourceSelector(element) || (element && element.outerHTML.slice(0, 30));
-          }
-          sampleRUM('cwv', data);
-        };
-        // When loading `web-vitals` using a classic script, all the public
-        // methods can be found on the `webVitals` global namespace.
-        ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
-          const metricFn = window.webVitals[`on${metric}`];
-          if (typeof metricFn === 'function') {
-            const opts = { reportAllChanges: ['CLS', 'LCP'].includes(metric) };
-            metricFn(storeCWV, opts);
-          }
-        });
-      };
+      script.onload = setupCWV;
       document.head.appendChild(script);
       /* c8 ignore next 3 */
     } catch (error) {
