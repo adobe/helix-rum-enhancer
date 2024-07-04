@@ -45,6 +45,13 @@ export default [...bundles.map(({ outputFile, source }) => ({
       exports: 'auto',
       banner,
     },
+    {
+      file: `${outputFile}.map.js`,
+      format: 'iife',
+      sourcemap: 'inline',
+      exports: 'auto',
+      banner,
+    },
   ],
   plugins: [
     cleanup({

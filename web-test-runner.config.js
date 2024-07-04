@@ -10,16 +10,54 @@
  * governing permissions and limitations under the License.
  */
 export default {
+  testFramework: {
+    type: 'mocha',
+    config: {
+      timeout: 10000,
+    },
+  },
   coverageConfig: {
     report: true,
     reportDir: 'coverage',
     exclude: [
       'test/fixtures/**',
       'node_modules/**',
+      '.rum/**',
     ],
   },
   files: [
     'test/**/*.test.{html,js}',
     'test/*.test.{html,js}',
+  ],
+  middleware: [
+    async function emulateRUM(context, next) {
+      if (context.url.startsWith('/src/index.map.js')) {
+        await next();
+        context.body = context.body
+          .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon');
+        return true;
+      } else if (context.url.startsWith('/.rum')) {
+        if (context.url.startsWith('/.rum/@adobe/helix-rum-js@%5E2/dist/')
+          || context.url.startsWith('/.rum/@adobe/helix-rum-js@^2/dist/')
+        ) {
+          context.url = '/node_modules/@adobe/helix-rum-js/dist/rum-standalone.js';
+          await next();
+          context.body = context.body
+            .replace(/const weight.*/, 'const weight = 1;')
+            .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon')
+            .replace('.rum/@adobe/helix-rum-enhancer@^2/src/index.js', 'src/index.map.js');
+          return true;
+        } else if (context.url.startsWith('/.rum/web-vitals')) {
+          context.url = '/node_modules/web-vitals/dist/web-vitals.iife.js';
+          await next();
+          return true;
+        } else if (context.url === '/.rum/1') {
+          // return a 201 response and do nothing
+          context.status = 201;
+          return true;
+        }
+      }
+      return next();
+    },
   ],
 };
