@@ -31,6 +31,19 @@
     The first block
     <img src="/test/it/fire.jpg" height="200" width="200">
   </div>
+  <div class="block" data-block-status="loaded">
+    <form action="javascript:false;" method="POST">
+      <input type="text" name="name" value="John Doe">
+      <input type="submit" value="Submit">
+    </form>
+    <script>
+      document.querySelector('form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        // turn the contents uppercase
+        e.target.name.value = e.target.name.value.toUpperCase();
+      });
+    </script>
+  </div>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { sendMouse, setViewport } from '@web/test-runner-commands';
@@ -92,6 +105,22 @@
 
           assert(window.called.some((call) => call.checkpoint === 'missingresource'), 'missingresource checkpoint missing');
         });
+      });
+
+      it('Can track form submit events', async function test() {
+        const form = document.querySelector('form');
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 2000);
+        });
+
+        // find the form field
+        form.querySelector('input[type="submit"]').click();
+
+        await new Promise((resolve) => {
+          setTimeout(resolve, 2000);
+        });
+        assert(window.called.some((call) => call.checkpoint === 'formsubmit'), 'formsubmit checkpoint missing');
       });
     });
   </script>
