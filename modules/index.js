@@ -44,7 +44,7 @@ function trackCheckpoint(checkpoint, data, t) {
         navigator.sendBeacon(url, body);
       }
       // eslint-disable-next-line no-console
-      console.debug(`ping:${checkpoint}`, pdata);
+      if (weight === 1) console.debug(`ping:${checkpoint}`, pdata);
     };
     sendPing(data);
   }
