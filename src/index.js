@@ -244,7 +244,7 @@ fflags.enabled('onetrust', () => {
   const target = {
     utm_source: usp.get('utm_source'),
     utm_medium: usp.get('utm_medium'),
-    others: [...usp.keys()].filter((k) => !/utm_([ms])/.test(k)),
+    others: [...usp.keys()].filter((k) => !/^utm_/.test(k)),
   };
   sampleRUM('acquisition', { source: document.referrer, target: JSON.stringify(target) });
 })();
