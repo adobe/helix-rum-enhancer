@@ -240,14 +240,11 @@ fflags.enabled('onetrust', () => {
 });
 
 (() => {
-  const nonPIITrackingParams = [
-    /gclid|gclsrc|wbraid|gbraid|dclid|msclkid|fb(cl|ad_|pxl_)id|tw(clid|src|term)|li_fat_id|epik|ttclid/,
-    /mc_([ce])id|mkt_tok/,
-    /utm_(source|medium)/];
-
-  const target = [...new URLSearchParams(window.location.search)]
-    .filter(([key]) => nonPIITrackingParams.find((regex) => regex.test(key)))
-    .map(([key, value]) => `${key}=${value}`)
-    .join('&');
-  sampleRUM('acquisition', { source: document.referrer, target });
+  const usp = new URLSearchParams(window.location.search);
+  const target = {
+    utm_source: usp.get('utm_source'),
+    utm_medium: usp.get('utm_medium'),
+    others: [...usp.keys()].filter((k) => !/utm_([ms])/.test(k)),
+  };
+  sampleRUM('acquisition', { source: document.referrer, target: JSON.stringify(target) });
 })();
