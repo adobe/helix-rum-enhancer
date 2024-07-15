@@ -54,7 +54,7 @@
 
         const expectedAcquisition = {
           source: 'https://some-referrer.com/',
-          target: '{"utm_source":"some-utm-source","utm_medium":"some-utm-medium","others":["gclid","not_interesting_param"]}'
+          target: {utm_source:'some-utm-source',utm_medium:'some-utm-medium',others:['gclid']}
         }
 
         expect(acquisition).to.eql(expectedAcquisition);

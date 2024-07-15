@@ -240,11 +240,12 @@ fflags.enabled('onetrust', () => {
 });
 
 (() => {
+  const tracking = /gclid|gclsrc|wbraid|gbraid|dclid|msclkid|fb(cl|ad_|pxl_)id|tw(clid|src|term)|li_fat_id|epik|ttclid|mc_([ce])id|mkt_tok|srsltid/;
   const usp = new URLSearchParams(window.location.search);
   const target = {
     utm_source: usp.get('utm_source'),
     utm_medium: usp.get('utm_medium'),
-    others: [...usp.keys()].filter((k) => !/^utm_/.test(k)),
+    others: [...usp.keys()].filter((k) => tracking.test(k)),
   };
-  sampleRUM('acquisition', { source: document.referrer, target: JSON.stringify(target) });
+  sampleRUM('acquisition', { source: document.referrer, target });
 })();
