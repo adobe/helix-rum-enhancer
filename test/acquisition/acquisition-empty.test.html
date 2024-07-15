@@ -1,0 +1,50 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+</head>
+
+<body>
+<script type="module">
+  import { runTests } from '@web/test-runner-mocha';
+  import { expect } from '@esm-bundle/chai';
+
+  runTests(async () => {
+    describe('Acquisition checkpoint with empty params', () => {
+
+      it('no referrer and query params', async () => {
+        const url = new URL(window.location.href);
+        url.searchParams.delete('wtr-session-id');
+        history.replaceState(null, '', url.href);
+
+        let acquisition;
+
+        window.hlx = { rum: {} };
+        window.hlx.rum.sampleRUM = (checkpoint, data) => {
+          if (checkpoint === 'acquisition') {
+            acquisition = data;
+          }
+        }
+        window.hlx.rum.sampleRUM.drain = () => {};
+
+        const script = document.createElement('script');
+        script.src = new URL('/src/index.js', window.location).href;
+        document.head.appendChild(script);
+
+        await new Promise((resolve) => {
+          script.onload = resolve;
+        });
+
+        const expectedAcquisition = {
+          source: '',
+          target: '{"utm_source":null,"utm_medium":null,"others":[]}'
+        }
+
+        expect(acquisition).to.eql(expectedAcquisition);
+      });
+    });
+  });
+</script>
+</body>
+
+</html>
