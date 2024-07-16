@@ -275,8 +275,13 @@ function addCookieConsentTracking() {
 
   let consentMutationObserver;
   const trackShowConsent = () => {
-    if (document.querySelector('body > div#onetrust-consent-sdk')) {
-      sampleRUM('consent', { source: 'onetrust', target: 'show' });
+    const otsdk = document.querySelector('body > div#onetrust-consent-sdk');
+    if (otsdk) {
+      if (otsdk.checkVisibility && !otsdk.checkVisibility()) {
+        sampleRUM('consent', { source: 'onetrust', target: 'supressed' });
+      } else {
+        sampleRUM('consent', { source: 'onetrust', target: 'show' });
+      }
       if (consentMutationObserver) {
         consentMutationObserver.disconnect();
       }
