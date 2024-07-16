@@ -278,7 +278,7 @@ function addCookieConsentTracking() {
     const otsdk = document.querySelector('body > div#onetrust-consent-sdk');
     if (otsdk) {
       if (otsdk.checkVisibility && !otsdk.checkVisibility()) {
-        sampleRUM('consent', { source: 'onetrust', target: 'supressed' });
+        sampleRUM('consent', { source: 'onetrust', target: 'suppressed' });
       } else {
         sampleRUM('consent', { source: 'onetrust', target: 'show' });
       }
