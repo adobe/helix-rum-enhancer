@@ -16,6 +16,8 @@ import { fflags } from './fflags.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
 
+const DIFFERENTIAL_SELECTION_PROBABILITY = 0.6;
+
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
 
 const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
@@ -34,18 +36,46 @@ function getCollectionConfig() {
   return DEFAULT_TRACKING_EVENTS;
 }
 
+// Only track the real audience sometimes, but otherwise add noise to anonymize the session
+function anonymizeAudience(data = {}) {
+  const allAudiences = ['default', ...(data.target?.split(':') || [])];
+  const isRandomized = Math.random() < DIFFERENTIAL_SELECTION_PROBABILITY;
+  if (isRandomized) {
+    const randomAudience = Math.floor(Math.random() * allAudiences.length);
+    // eslint-disable-next-line no-param-reassign
+    data.source = allAudiences[randomAudience];
+  }
+}
+
 // Potentially filter out invalid or abused checkpoints
 function isValidData(checkpoint, data = {}) {
   switch (checkpoint) {
-    case 'audience': return data.source?.match(/^[\w-]+$/) && data.target?.match(/^[\w-:]+$/);
-    case 'experiment': return data.source?.match(/^[\w-]+$/) && data.target?.match(/^[\w-]+$/);
+    case 'audience':
+      return data.source?.match(/^[\w-]+$/)
+        && data.target?.match(/^[\w-:]+$/)
+        && ['default', data.target.split(':')].includes(data.source);
+    case 'experiment':
+      return data.source?.match(/^[\w-]+$/)
+        && data.target?.match(/^[\w-]+$/);
+    default:
+      return true;
   }
-  return true;
+}
+
+// Pre-process the data if needed
+function preProcessData(checkpoint, data = {}) {
+  // eslint-disable-next-line default-case
+  switch (checkpoint) {
+    case 'audience':
+      anonymizeAudience(data);
+      break;
+  }
 }
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
   if (isSelected && isValidData(checkpoint, data) && optedIn(checkpoint, data)) {
+    preProcessData(data);
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
