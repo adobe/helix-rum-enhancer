@@ -34,9 +34,18 @@ function getCollectionConfig() {
   return DEFAULT_TRACKING_EVENTS;
 }
 
+// Potentially filter out invalid or abused checkpoints
+function isValidData(checkpoint, data = {}) {
+  switch (checkpoint) {
+    case 'audience': return data.source?.match(/^[\w-]+$/) && data.target?.match(/^[\w-:]+$/);
+    case 'experiment': return data.source?.match(/^[\w-]+$/) && data.target?.match(/^[\w-]+$/);
+  }
+  return true;
+}
+
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  if (optedIn(checkpoint, data) && isSelected) {
+  if (isSelected && isValidData(checkpoint, data) && optedIn(checkpoint, data)) {
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
