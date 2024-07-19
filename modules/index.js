@@ -61,20 +61,17 @@ const dataValidator = {
 };
 
 // Pre-process the data if needed
-function preProcessData(checkpoint, data = {}) {
-  // eslint-disable-next-line default-case
-  switch (checkpoint) {
-    case 'audience':
-      anonymizeAudience(data);
-      break;
-  }
-}
+const dataPreProcessor = {
+  audience: (data) => anonymizeAudience(data),
+};
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
   const isValidData = !dataValidator[checkpoint] || dataValidator[checkpoint](data);
   if (isSelected && isValidData && optedIn(checkpoint, data)) {
-    preProcessData(data);
+    if (dataPreProcessor[checkpoint]) {
+      dataPreProcessor[checkpoint](data);
+    }
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
