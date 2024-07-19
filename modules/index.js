@@ -48,19 +48,17 @@ function anonymizeAudience(data = {}) {
 }
 
 // Potentially filter out invalid or abused checkpoints
-function isValidData(checkpoint, data = {}) {
-  switch (checkpoint) {
-    case 'audience':
-      return data.source?.match(/^[\w-]+$/)
-        && data.target?.match(/^[\w-:]+$/)
-        && ['default', data.target.split(':')].includes(data.source);
-    case 'experiment':
-      return data.source?.match(/^[\w-]+$/)
-        && data.target?.match(/^[\w-]+$/);
-    default:
-      return true;
-  }
-}
+const dataValidator = {
+  audience: (data) => data.source
+    && data.source.match(/^[\w-]+$/)
+    && data.target
+    && data.target.match(/^[\w-:]+$/)
+    && ['default', data.target.split(':')].includes(data.source),
+  experiment: (data) => data.source
+    && data.source.match(/^[\w-]+$/)
+    && data.target
+    && data.target.match(/^[\w-]+$/),
+};
 
 // Pre-process the data if needed
 function preProcessData(checkpoint, data = {}) {
@@ -74,7 +72,8 @@ function preProcessData(checkpoint, data = {}) {
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  if (isSelected && isValidData(checkpoint, data) && optedIn(checkpoint, data)) {
+  const isValidData = !dataValidator[checkpoint] || dataValidator[checkpoint](data);
+  if (isSelected && isValidData && optedIn(checkpoint, data)) {
     preProcessData(data);
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
