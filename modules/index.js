@@ -37,14 +37,16 @@ function getCollectionConfig() {
 }
 
 // Only track the real audience sometimes, but otherwise add noise to anonymize the session
-function anonymizeAudience(data = {}) {
-  const allAudiences = ['default', ...(data.target?.split(':') || [])];
+function anonymizeAudience({ source, target } = {}) {
+  const allAudiences = ['default', ...(source?.split(',') || [])];
   const isRandomized = Math.random() < DIFFERENTIAL_SELECTION_PROBABILITY;
   if (isRandomized) {
     const randomAudience = Math.floor(Math.random() * allAudiences.length);
-    // eslint-disable-next-line no-param-reassign
-    data.source = allAudiences[randomAudience];
+    // eslint-disable-next-line no-param-reassign, no-unused-vars
+    target = allAudiences[randomAudience];
   }
+  // eslint-disable-next-line no-param-reassign
+  source = source.split(',').join(':');
 }
 
 // Potentially filter out invalid or abused checkpoints
@@ -52,8 +54,8 @@ const dataValidator = {
   audience: (data) => data.source
     && data.source.match(/^[\w-]+$/)
     && data.target
-    && data.target.match(/^[\w-:]+$/)
-    && ['default', data.target.split(':')].includes(data.source),
+    && data.target.match(/^[\w-,]+$/)
+    && ['default', data.target.split(',')].includes(data.source),
   experiment: (data) => data.source
     && data.source.match(/^[\w-]+$/)
     && data.target
@@ -67,11 +69,7 @@ const dataPreProcessor = {
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  const isValidData = !dataValidator[checkpoint] || dataValidator[checkpoint](data);
-  if (isSelected && isValidData && optedIn(checkpoint, data)) {
-    if (dataPreProcessor[checkpoint]) {
-      dataPreProcessor[checkpoint](data);
-    }
+  if (isSelected && optedIn(checkpoint, data)) {
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
@@ -232,6 +230,7 @@ function getIntersectionObsever(checkpoint) {
   }, { threshold: 0.25 });
   return observer;
 }
+
 function addViewBlockTracking(element) {
   const blockobserver = getIntersectionObsever('viewblock');
   if (blockobserver) {
@@ -333,6 +332,46 @@ function addCookieConsentTracking() {
   }
 }
 
+function addDataAttributeTracking(checkpoint, attrs, mapFn, conditionFn = () => true) {
+  const handler = (mutations) => {
+    mutations
+      .filter(conditionFn)
+      .forEach((m) => {
+        const data = mapFn(m);
+        if (!dataValidator[checkpoint] || dataValidator[checkpoint](data)) {
+          if (dataPreProcessor[checkpoint]) {
+            dataPreProcessor[checkpoint](data);
+          }
+          sampleRUM(checkpoint, data);
+        }
+      });
+  };
+  const observer = window.MutationObserver ? new MutationObserver(handler) : null;
+  if (observer) {
+    observer.observe(document.body, {
+      childList: true, subtree: true, attributes: true, attributeFilter: attrs,
+    });
+  }
+}
+
+function addExperimentTracking() {
+  addDataAttributeTracking(
+    'experiment',
+    ['data-experiment', 'data-variant'],
+    (m) => ({ source: m.target.dataset.experiment, target: m.target.dataset.variant }),
+    (m) => m.target.dataset.experiment && m.target.dataset.variant,
+  );
+}
+
+function addAudienceTracking() {
+  addDataAttributeTracking(
+    'audience',
+    ['data-audience'],
+    (m) => ({ source: document.body.dataset.audiences, target: m.target.dataset.audience }),
+    (m) => document.body.dataset.audiences && m.target.dataset.audience,
+  );
+}
+
 const addObserver = (ck, fn, block) => getCollectionConfig().includes(ck) && fn(block);
 function mutationsCallback(mutations) {
   mutations.filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
@@ -361,6 +400,8 @@ function addTrackingFromConfig() {
     consent: () => addCookieConsentTracking(),
     paid: () => addAdsParametersTracking(),
     email: () => addEmailParameterTracking(),
+    experiment: () => addExperimentTracking(),
+    audience: () => addAudienceTracking(),
   };
 
   getCollectionConfig().filter((ck) => trackingFunctions[ck])
