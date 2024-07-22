@@ -36,7 +36,7 @@ function getCollectionConfig() {
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  if (isSelected && optedIn(checkpoint, data)) {
+  if (optedIn(checkpoint, data) && isSelected) {
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
