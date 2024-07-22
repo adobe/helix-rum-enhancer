@@ -332,12 +332,17 @@ function addCookieConsentTracking() {
   }
 }
 
-function addDataAttributeTracking(checkpoint, attrs, mapFn, conditionFn = () => true) {
+function addDataAttributeTracking(
+  checkpoint,
+  attrs,
+  conditionFn = () => true,
+  mapFn = (el) => ({ target: targetSelector(el), source: sourceSelector(el) }),
+) {
   const handler = (mutations) => {
     mutations
       .filter(conditionFn)
       .forEach((m) => {
-        const data = mapFn(m);
+        const data = mapFn(m.target);
         if (!dataValidator[checkpoint] || dataValidator[checkpoint](data)) {
           if (dataPreProcessor[checkpoint]) {
             dataPreProcessor[checkpoint](data);
@@ -358,8 +363,8 @@ function addExperimentTracking() {
   addDataAttributeTracking(
     'experiment',
     ['data-experiment', 'data-variant'],
-    (m) => ({ source: m.target.dataset.experiment, target: m.target.dataset.variant }),
-    (m) => m.target.dataset.experiment && m.target.dataset.variant,
+    (el) => el.dataset && el.dataset.experiment && el.dataset.variant,
+    (el) => ({ source: el.dataset.experiment, target: el.dataset.variant }),
   );
 }
 
@@ -367,8 +372,8 @@ function addAudienceTracking() {
   addDataAttributeTracking(
     'audience',
     ['data-audience'],
-    (m) => ({ source: document.body.dataset.audiences, target: m.target.dataset.audience }),
-    (m) => document.body.dataset.audiences && m.target.dataset.audience,
+    (el) => el.dataset && document.body.dataset.audiences && el.dataset.audience,
+    (el) => ({ source: document.body.dataset.audiences, target: el.dataset.audience }),
   );
 }
 
