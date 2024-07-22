@@ -13,10 +13,8 @@
 
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { fflags } from './fflags.js';
-import { urlSanitizers } from './utils.js';
+import { dataValidator, dataPreProcessor, urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
-
-const DIFFERENTIAL_SELECTION_PROBABILITY = 0.6;
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
 
@@ -35,37 +33,6 @@ function getCollectionConfig() {
   fflags.enabled('onetrust', () => DEFAULT_TRACKING_EVENTS.push('consent'));
   return DEFAULT_TRACKING_EVENTS;
 }
-
-// Only track the real audience sometimes, but otherwise add noise to anonymize the session
-function anonymizeAudience({ source, target } = {}) {
-  const allAudiences = ['default', ...(source?.split(',') || [])];
-  const isRandomized = Math.random() < DIFFERENTIAL_SELECTION_PROBABILITY;
-  if (isRandomized) {
-    const randomAudience = Math.floor(Math.random() * allAudiences.length);
-    // eslint-disable-next-line no-param-reassign, no-unused-vars
-    target = allAudiences[randomAudience];
-  }
-  // eslint-disable-next-line no-param-reassign
-  source = source.split(',').join(':');
-}
-
-// Potentially filter out invalid or abused checkpoints
-const dataValidator = {
-  audience: (data) => data.source
-    && data.source.match(/^[\w-]+$/)
-    && data.target
-    && data.target.match(/^[\w-,]+$/)
-    && ['default', data.target.split(',')].includes(data.source),
-  experiment: (data) => data.source
-    && data.source.match(/^[\w-]+$/)
-    && data.target
-    && data.target.match(/^[\w-]+$/),
-};
-
-// Pre-process the data if needed
-const dataPreProcessor = {
-  audience: (data) => anonymizeAudience(data),
-};
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
@@ -342,10 +309,10 @@ function addDataAttributeTracking(
     mutations
       .filter(conditionFn)
       .forEach((m) => {
-        const data = mapFn(m.target);
+        let data = mapFn(m.target);
         if (!dataValidator[checkpoint] || dataValidator[checkpoint](data)) {
           if (dataPreProcessor[checkpoint]) {
-            dataPreProcessor[checkpoint](data);
+            data = dataPreProcessor[checkpoint](data);
           }
           sampleRUM(checkpoint, data);
         }
