@@ -1,3 +1,18 @@
+# [1.23.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.22.0...v1.23.0) (2024-08-01)
+
+
+### Bug Fixes
+
+* source can be null ([#220](https://github.com/adobe/helix-rum-enhancer/issues/220)) ([4fe7ec4](https://github.com/adobe/helix-rum-enhancer/commit/4fe7ec4e0dae6f226bb2cc349dcf8aee59511d10))
+* trigger semantic release ([2756bd2](https://github.com/adobe/helix-rum-enhancer/commit/2756bd28c68e51c072cbb89ec9e7114c538c387f))
+* trigger semantic release ([ce6306e](https://github.com/adobe/helix-rum-enhancer/commit/ce6306e509fd60b376505a82966e1750e4652109))
+
+
+### Features
+
+* **email:** rollout for all customers 1.x ([#221](https://github.com/adobe/helix-rum-enhancer/issues/221)) ([a8f7402](https://github.com/adobe/helix-rum-enhancer/commit/a8f74020ac01b17352021a64a8a8a3f3ef54673c))
+* **paid:** roll out the paid checkpoint for all customers ([#214](https://github.com/adobe/helix-rum-enhancer/issues/214)) ([86cabf3](https://github.com/adobe/helix-rum-enhancer/commit/86cabf322c5c1b98b33327d0afe7bbe8025aab29))
+
 # [1.22.0](https://github.com/adobe/helix-rum-enhancer/compare/v1.21.1...v1.22.0) (2024-06-10)
 
 
