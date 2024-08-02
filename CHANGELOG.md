@@ -1,3 +1,11 @@
+## [2.17.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.17.0...v2.17.1) (2024-08-02)
+
+
+### Bug Fixes
+
+* **loadresource:** fix closing bracket ([0978b71](https://github.com/adobe/helix-rum-enhancer/commit/0978b7138f16421b5eb22c49b3c757116cb7053b))
+* **loadresource:** include all JSON resources, and GraphQL resources ([8ebaa97](https://github.com/adobe/helix-rum-enhancer/commit/8ebaa97e844ff605ec2e6a458fc43adc3c5a37dd))
+
 # [2.17.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.16.0...v2.17.0) (2024-07-03)
 
 
