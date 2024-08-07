@@ -146,7 +146,7 @@ function addLoadResourceTracking() {
       list.getEntries()
         .filter((entry) => !entry.responseStatus || entry.responseStatus < 400)
         .filter((entry) => window.location.hostname === new URL(entry.name).hostname)
-        .filter((entry) => new URL(entry.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql)'))
+        .filter((entry) => new URL(entry.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)'))
         .forEach((entry) => {
           sampleRUM('loadresource', { source: entry.name, target: Math.round(entry.duration) });
         });
