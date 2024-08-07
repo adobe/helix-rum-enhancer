@@ -239,33 +239,13 @@ fflags.enabled('onetrust', () => {
   }
 });
 
-// paid checkpoint
 (() => {
-  const networks = {
-    google: /gclid|gclsrc|wbraid|gbraid/,
-    doubleclick: /dclid/,
-    microsoft: /msclkid/,
-    facebook: /fb(cl|ad_|pxl_)id/,
-    twitter: /tw(clid|src|term)/,
-    linkedin: /li_fat_id/,
-    pinterest: /epik/,
-    tiktok: /ttclid/,
+  const tracking = /gclid|gclsrc|wbraid|gbraid|dclid|msclkid|fb(cl|ad_|pxl_)id|tw(clid|src|term)|li_fat_id|epik|ttclid|mc_([ce])id|mkt_tok|srsltid/;
+  const usp = new URLSearchParams(window.location.search);
+  const target = {
+    utm_source: usp.get('utm_source'),
+    utm_medium: usp.get('utm_medium'),
+    others: [...usp.keys()].filter((k) => tracking.test(k)),
   };
-  const params = Array.from(new URLSearchParams(window.location.search).keys());
-  Object.entries(networks).forEach(([network, regex]) => {
-    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('paid', { source: network, target: param }));
-  });
-})();
-
-// email checkpoint
-(() => {
-  const networks = {
-    mailchimp: /mc_(c|e)id/,
-    marketo: /mkt_tok/,
-
-  };
-  const params = Array.from(new URLSearchParams(window.location.search).keys());
-  Object.entries(networks).forEach(([network, regex]) => {
-    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
-  });
+  sampleRUM('acquisition', { source: document.referrer, target });
 })();
