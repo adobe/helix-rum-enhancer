@@ -25,6 +25,7 @@ module.exports = {
   rules: {
     'import/extensions': [2, 'ignorePackages'],
     'import/prefer-default-export': 0,
+    'no-underscore-dangle': ['error', { allow: ['_reactRootContainer'] }],
   },
   globals: {
     __rootdir: true,
