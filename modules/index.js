@@ -13,7 +13,7 @@
 
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { fflags } from './fflags.js';
-import { urlSanitizers } from './utils.js';
+import { dataValidator, dataPreProcessor, urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
@@ -197,6 +197,7 @@ function getIntersectionObsever(checkpoint) {
   }, { threshold: 0.25 });
   return observer;
 }
+
 function addViewBlockTracking(element) {
   const blockobserver = getIntersectionObsever('viewblock');
   if (blockobserver) {
@@ -298,6 +299,51 @@ function addCookieConsentTracking() {
   }
 }
 
+function addDataAttributeTracking(
+  checkpoint,
+  attrs,
+  conditionFn = () => true,
+  mapFn = (el) => ({ target: targetSelector(el), source: sourceSelector(el) }),
+) {
+  const handler = (mutations) => {
+    mutations
+      .filter(conditionFn)
+      .forEach((m) => {
+        let data = mapFn(m.target);
+        if (!dataValidator[checkpoint] || dataValidator[checkpoint](data)) {
+          if (dataPreProcessor[checkpoint]) {
+            data = dataPreProcessor[checkpoint](data);
+          }
+          sampleRUM(checkpoint, data);
+        }
+      });
+  };
+  const observer = window.MutationObserver ? new MutationObserver(handler) : null;
+  if (observer) {
+    observer.observe(document.body, {
+      childList: true, subtree: true, attributes: true, attributeFilter: attrs,
+    });
+  }
+}
+
+function addExperimentTracking() {
+  addDataAttributeTracking(
+    'experiment',
+    ['data-experiment', 'data-variant'],
+    (el) => el.dataset && el.dataset.experiment && el.dataset.variant,
+    (el) => ({ source: el.dataset.experiment, target: el.dataset.variant }),
+  );
+}
+
+function addAudienceTracking() {
+  addDataAttributeTracking(
+    'audience',
+    ['data-audience'],
+    (el) => el.dataset && document.body.dataset.audiences && el.dataset.audience,
+    (el) => ({ source: document.body.dataset.audiences, target: el.dataset.audience }),
+  );
+}
+
 const addObserver = (ck, fn, block) => getCollectionConfig().includes(ck) && fn(block);
 function mutationsCallback(mutations) {
   mutations.filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
@@ -326,6 +372,8 @@ function addTrackingFromConfig() {
     consent: () => addCookieConsentTracking(),
     paid: () => addAdsParametersTracking(),
     email: () => addEmailParameterTracking(),
+    experiment: () => addExperimentTracking(),
+    audience: () => addAudienceTracking(),
   };
 
   getCollectionConfig().filter((ck) => trackingFunctions[ck])
