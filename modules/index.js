@@ -11,7 +11,7 @@
  */
 /* eslint-env browser */
 
-import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
+import { KNOWN_PROPERTIES } from './defaults.js';
 import { fflags } from './fflags.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
@@ -22,21 +22,9 @@ const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelect
 // eslint-disable-next-line no-use-before-define
 const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback) : null;
 
-// eslint-disable-next-line no-unused-vars
-function optedIn(checkpoint, data) {
-  // TODO: check config service to know if
-  return true;
-}
-// Gets configured collection from the config service for the current domain
-function getCollectionConfig() {
-  // eslint-disable-next-line max-len
-  fflags.enabled('onetrust', () => DEFAULT_TRACKING_EVENTS.push('consent'));
-  return DEFAULT_TRACKING_EVENTS;
-}
-
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  if (optedIn(checkpoint, data) && isSelected) {
+  if (isSelected) {
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
@@ -49,7 +37,7 @@ function trackCheckpoint(checkpoint, data, t) {
         navigator.sendBeacon(url, body);
       }
       // eslint-disable-next-line no-console
-      console.debug(`ping:${checkpoint}`, pdata);
+      if (weight === 1) console.debug(`ping:${checkpoint}`, pdata);
     };
     sendPing(data);
   }
@@ -65,38 +53,33 @@ function processQueue() {
 function addCWVTracking() {
   setTimeout(() => {
     try {
-      const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
-      if (document.querySelector(`script[src="${cwvScript}"]`)) {
-        // web vitals script has been loaded already
+      const storeCWV = (measurement) => {
+        const data = { cwv: {} };
+        data.cwv[measurement.name] = measurement.value;
+        if (measurement.name === 'LCP' && measurement.entries.length > 0) {
+          const { element } = measurement.entries.pop();
+          data.target = targetSelector(element);
+          data.source = sourceSelector(element) || (element && element.outerHTML.slice(0, 30));
+        }
+        sampleRUM('cwv', data);
+      };
+
+      const setupCWV = () => ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
+        const metricFn = window.webVitals[`on${metric}`];
+        if (typeof metricFn === 'function') {
+          const opts = { reportAllChanges: ['CLS', 'LCP'].includes(metric) };
+          metricFn(storeCWV, opts);
+        }
+      });
+
+      if (window.webVitals) { // already loaded, we use what we have
+        setupCWV();
         return;
       }
+      const cwvScript = new URL('.rum/web-vitals@4/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
       const script = document.createElement('script');
       script.src = cwvScript;
-      script.onload = () => {
-        const storeCWV = (measurement) => {
-          const data = { cwv: {} };
-          data.cwv[measurement.name] = measurement.value;
-          if (measurement.name === 'LCP' && measurement.entries.length > 0) {
-            const { element } = measurement.entries.pop();
-            data.target = targetSelector(element);
-            data.source = sourceSelector(element) || (element && element.outerHTML.slice(0, 30));
-          }
-          sampleRUM('cwv', data);
-        };
-
-        const featureToggle = () => window.location.hostname === 'blog.adobe.com';
-        const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
-
-        // When loading `web-vitals` using a classic script, all the public
-        // methods can be found on the `webVitals` global namespace.
-        ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
-          const metricFn = window.webVitals[`on${metric}`];
-          if (typeof metricFn === 'function') {
-            const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
-            metricFn(storeCWV, opts);
-          }
-        });
-      };
+      script.onload = setupCWV;
       document.head.appendChild(script);
       /* c8 ignore next 3 */
     } catch (error) {
@@ -176,6 +159,7 @@ function activateBlocksMutationObserver() {
 }
 
 function getIntersectionObsever(checkpoint) {
+  /* c8 ignore next 3 */ // we can't test this, our browsers are too new
   if (!window.IntersectionObserver) {
     return null;
   }
@@ -298,14 +282,13 @@ function addCookieConsentTracking() {
   }
 }
 
-const addObserver = (ck, fn, block) => getCollectionConfig().includes(ck) && fn(block);
 function mutationsCallback(mutations) {
   mutations.filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
     .filter((m) => m.target.dataset.blockStatus === 'loaded')
     .forEach((m) => {
-      addObserver('form', addFormTracking, m.target);
-      addObserver('viewblock', addViewBlockTracking, m.target);
-      addObserver('viewmedia', addViewMediaTracking, m.target);
+      addFormTracking(m.target);
+      addViewBlockTracking(m.target);
+      addViewMediaTracking(m.target);
     });
 }
 
@@ -323,13 +306,11 @@ function addTrackingFromConfig() {
     utm: () => addUTMParametersTracking(),
     viewblock: () => addViewBlockTracking(window.document.body),
     viewmedia: () => addViewMediaTracking(window.document.body),
-    consent: () => addCookieConsentTracking(),
+    consent: () => fflags.enabled('onetrust', addCookieConsentTracking),
     paid: () => addAdsParametersTracking(),
     email: () => addEmailParameterTracking(),
   };
-
-  getCollectionConfig().filter((ck) => trackingFunctions[ck])
-    .forEach((ck) => trackingFunctions[ck]());
+  Object.values(trackingFunctions).forEach((fn) => fn());
 }
 
 function initEnhancer() {
