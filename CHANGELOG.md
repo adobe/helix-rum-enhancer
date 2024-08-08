@@ -1,3 +1,10 @@
+# [2.18.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.17.1...v2.18.0) (2024-08-08)
+
+
+### Features
+
+* **loadresource:** include API calls in `loadresouce` requests for content request counting ([45449c2](https://github.com/adobe/helix-rum-enhancer/commit/45449c2e6a1602d80321f4ffa8698cbd116f1383))
+
 ## [2.17.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.17.0...v2.17.1) (2024-08-02)
 
 
