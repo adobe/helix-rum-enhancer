@@ -14,7 +14,12 @@
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
-import { addCookieConsentTracking } from './martech.js';
+import {
+  addAdsParametersTracking,
+  addCookieConsentTracking,
+  addEmailParameterTracking,
+  addUTMParametersTracking,
+} from './martech.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
 
@@ -204,45 +209,6 @@ function addViewMediaTracking(parent) {
   }
 }
 
-function addUTMParametersTracking() {
-  const usp = new URLSearchParams(window.location.search);
-  [...usp.entries()]
-    .filter(([key]) => key.startsWith('utm_'))
-    // exclude keys that may leak PII
-    .filter(([key]) => key !== 'utm_id')
-    .filter(([key]) => key !== 'utm_term')
-    .forEach(([source, target]) => sampleRUM('utm', { source, target }));
-}
-
-function addAdsParametersTracking() {
-  const networks = {
-    google: /gclid|gclsrc|wbraid|gbraid/,
-    doubleclick: /dclid/,
-    microsoft: /msclkid/,
-    facebook: /fb(cl|ad_|pxl_)id/,
-    twitter: /tw(clid|src|term)/,
-    linkedin: /li_fat_id/,
-    pinterest: /epik/,
-    tiktok: /ttclid/,
-  };
-  const params = Array.from(new URLSearchParams(window.location.search).keys());
-  Object.entries(networks).forEach(([network, regex]) => {
-    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('paid', { source: network, target: param }));
-  });
-}
-
-function addEmailParameterTracking() {
-  const networks = {
-    mailchimp: /mc_(c|e)id/,
-    marketo: /mkt_tok/,
-
-  };
-  const params = Array.from(new URLSearchParams(window.location.search).keys());
-  Object.entries(networks).forEach(([network, regex]) => {
-    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
-  });
-}
-
 function addFormTracking(parent) {
   activateBlocksMutationObserver();
   parent.querySelectorAll('form').forEach((form) => {
@@ -273,12 +239,12 @@ function addTrackingFromConfig() {
     form: () => addFormTracking(window.document.body),
     enterleave: () => addEnterLeaveTracking(),
     loadresource: () => addLoadResourceTracking(),
-    utm: () => addUTMParametersTracking(),
+    utm: () => addUTMParametersTracking(sampleRUM),
     viewblock: () => addViewBlockTracking(window.document.body),
     viewmedia: () => addViewMediaTracking(window.document.body),
     consent: () => addCookieConsentTracking(sampleRUM),
-    paid: () => addAdsParametersTracking(),
-    email: () => addEmailParameterTracking(),
+    paid: () => addAdsParametersTracking(sampleRUM),
+    email: () => addEmailParameterTracking(sampleRUM),
   };
 
   DEFAULT_TRACKING_EVENTS.filter((ck) => trackingFunctions[ck])

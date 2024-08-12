@@ -43,3 +43,39 @@ export function addCookieConsentTracking(sampleRUM) {
     }
   }
 }
+
+export function addUTMParametersTracking(sampleRUM) {
+  const usp = new URLSearchParams(window.location.search);
+  [...usp.entries()]
+    .filter(([key]) => key.startsWith('utm_'))
+    // exclude keys that may leak PII
+    .filter(([key]) => key !== 'utm_id')
+    .filter(([key]) => key !== 'utm_term')
+    .forEach(([source, target]) => sampleRUM('utm', { source, target }));
+}
+export function addAdsParametersTracking(sampleRUM) {
+  const networks = {
+    google: /gclid|gclsrc|wbraid|gbraid/,
+    doubleclick: /dclid/,
+    microsoft: /msclkid/,
+    facebook: /fb(cl|ad_|pxl_)id/,
+    twitter: /tw(clid|src|term)/,
+    linkedin: /li_fat_id/,
+    pinterest: /epik/,
+    tiktok: /ttclid/,
+  };
+  const params = Array.from(new URLSearchParams(window.location.search).keys());
+  Object.entries(networks).forEach(([network, regex]) => {
+    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('paid', { source: network, target: param }));
+  });
+}
+export function addEmailParameterTracking(sampleRUM) {
+  const networks = {
+    mailchimp: /mc_(c|e)id/,
+    marketo: /mkt_tok/,
+  };
+  const params = Array.from(new URLSearchParams(window.location.search).keys());
+  Object.entries(networks).forEach(([network, regex]) => {
+    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
+  });
+}
