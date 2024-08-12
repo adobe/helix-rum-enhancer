@@ -14,6 +14,7 @@
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
+import { addCookieConsentTracking } from './martech.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
 
@@ -250,41 +251,6 @@ function addFormTracking(parent) {
   });
 }
 
-function addCookieConsentTracking() {
-  const cmpCookie = document.cookie.split(';')
-    .map((c) => c.trim())
-    .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
-
-  if (cmpCookie) {
-    sampleRUM('consent', { source: 'onetrust', target: 'hidden' });
-    return;
-  }
-
-  let consentMutationObserver;
-  const trackShowConsent = () => {
-    if (document.querySelector('body > div#onetrust-consent-sdk')) {
-      sampleRUM('consent', { source: 'onetrust', target: 'show' });
-      if (consentMutationObserver) {
-        consentMutationObserver.disconnect();
-      }
-      return true;
-    }
-    return false;
-  };
-
-  if (!trackShowConsent()) {
-    // eslint-disable-next-line max-len
-    consentMutationObserver = window.MutationObserver ? new MutationObserver(trackShowConsent) : null;
-    if (consentMutationObserver) {
-      consentMutationObserver.observe(
-        document.body,
-        // eslint-disable-next-line object-curly-newline
-        { attributes: false, childList: true, subtree: false },
-      );
-    }
-  }
-}
-
 const addObserver = (ck, fn, block) => DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
 function mutationsCallback(mutations) {
   mutations.filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
@@ -310,7 +276,7 @@ function addTrackingFromConfig() {
     utm: () => addUTMParametersTracking(),
     viewblock: () => addViewBlockTracking(window.document.body),
     viewmedia: () => addViewMediaTracking(window.document.body),
-    consent: () => addCookieConsentTracking(),
+    consent: () => addCookieConsentTracking(sampleRUM),
     paid: () => addAdsParametersTracking(),
     email: () => addEmailParameterTracking(),
   };
