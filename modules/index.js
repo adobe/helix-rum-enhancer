@@ -12,7 +12,6 @@
 /* eslint-env browser */
 
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
-import { fflags } from './fflags.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
 
@@ -22,21 +21,9 @@ const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelect
 // eslint-disable-next-line no-use-before-define
 const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback) : null;
 
-// eslint-disable-next-line no-unused-vars
-function optedIn(checkpoint, data) {
-  // TODO: check config service to know if
-  return true;
-}
-// Gets configured collection from the config service for the current domain
-function getCollectionConfig() {
-  // eslint-disable-next-line max-len
-  fflags.enabled('onetrust', () => DEFAULT_TRACKING_EVENTS.push('consent'));
-  return DEFAULT_TRACKING_EVENTS;
-}
-
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  if (optedIn(checkpoint, data) && isSelected) {
+  if (isSelected) {
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
@@ -298,7 +285,7 @@ function addCookieConsentTracking() {
   }
 }
 
-const addObserver = (ck, fn, block) => getCollectionConfig().includes(ck) && fn(block);
+const addObserver = (ck, fn, block) => DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
 function mutationsCallback(mutations) {
   mutations.filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
     .filter((m) => m.target.dataset.blockStatus === 'loaded')
@@ -328,7 +315,7 @@ function addTrackingFromConfig() {
     email: () => addEmailParameterTracking(),
   };
 
-  getCollectionConfig().filter((ck) => trackingFunctions[ck])
+  DEFAULT_TRACKING_EVENTS.filter((ck) => trackingFunctions[ck])
     .forEach((ck) => trackingFunctions[ck]());
 }
 
