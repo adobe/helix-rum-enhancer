@@ -1,3 +1,10 @@
+# [2.19.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.18.0...v2.19.0) (2024-08-13)
+
+
+### Features
+
+* **onetrust:** enable on all domains ([6039f11](https://github.com/adobe/helix-rum-enhancer/commit/6039f1198f6484d623a3e42ffdd24807b6ed7c54))
+
 # [2.18.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.17.1...v2.18.0) (2024-08-08)
 
 
