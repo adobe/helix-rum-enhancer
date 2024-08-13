@@ -40,7 +40,7 @@ describe('test fflags', () => {
     expect(fflags.disabled('onetrust', () => true)).to.be.a('boolean');
   });
 
-  it('fflags.onetrust is an array', () => {
-    expect(fflags.onetrust).to.be.an('array');
+  it('fflags.example is an array', () => {
+    expect(fflags.example).to.be.an('array');
   });
 });
