@@ -119,16 +119,11 @@ function addEnterLeaveTracking() {
     .observe({ type: 'navigation', buffered: true });
 
   const leave = ((event) => {
-    try {
-      if (leave.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
-        return;
-      }
-      leave.left = true;
-      sampleRUM('leave');
-      /* c8 ignore next 3 */
-    } catch (error) {
-      // something went wrong
+    if (leave.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
+      return;
     }
+    leave.left = true;
+    sampleRUM('leave');
   });
   window.addEventListener('visibilitychange', ((event) => leave(event)));
   window.addEventListener('pagehide', ((event) => leave(event)));
