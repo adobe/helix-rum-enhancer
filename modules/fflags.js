@@ -16,5 +16,6 @@ export const fflags = {
     || !!window.origin.match(/localhost/),
   enabled: (flag, callback) => fflags.has(flag) && callback(),
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
+  eagercwv: [683],
   example: [543, 770, 1136],
 };

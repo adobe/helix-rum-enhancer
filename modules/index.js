@@ -20,6 +20,7 @@ import {
   addEmailParameterTracking,
   addUTMParametersTracking,
 } from './martech.js';
+import { fflags } from './fflags.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
 
@@ -77,7 +78,6 @@ function addCWVTracking() {
           sampleRUM('cwv', data);
         };
 
-        const featureToggle = () => window.location.hostname === 'blog.adobe.com';
         const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
 
         // When loading `web-vitals` using a classic script, all the public
@@ -85,7 +85,10 @@ function addCWVTracking() {
         ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
           const metricFn = window.webVitals[`on${metric}`];
           if (typeof metricFn === 'function') {
-            const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
+            let opts = {};
+            fflags.enabled('eagercwv', () => {
+              opts = { reportAllChanges: isEager(metric) };
+            });
             metricFn(storeCWV, opts);
           }
         });
