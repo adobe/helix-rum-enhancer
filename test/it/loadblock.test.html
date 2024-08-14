@@ -57,9 +57,10 @@
           const contents = await fetch('/test/fixtures/block.plain.html');
           block.innerHTML = await contents.text();
 
-          block.dataset.blockStatus = 'loaded';
-
           document.body.appendChild(block);
+
+          // block.dataset.blockStatus = 'loaded';
+          block.setAttribute('data-block-status', 'loaded');
 
 
           await new Promise((resolve) => {
