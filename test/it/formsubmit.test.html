@@ -31,44 +31,40 @@
     The first block
     <img src="/test/fixtures/fire.jpg" height="200" width="200">
   </div>
+  <div class="block" data-block-status="loaded">
+    <form action="javascript:false;" method="POST">
+      <input type="text" name="name" value="John Doe">
+      <input type="submit" value="Submit">
+    </form>
+    <script>
+      document.querySelector('form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        // turn the contents uppercase
+        e.target.name.value = e.target.name.value.toUpperCase();
+      });
+    </script>
+  </div>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { sendMouse, setViewport } from '@web/test-runner-commands';
     import { assert } from '@esm-bundle/chai';
 
     runTests(async () => {
-      describe('Test Block Loading', () => {
-        it('Can observe blocks that enter the viewport', async () => {
-
-          await setViewport({ width: 800, height: 600 });
-
-          await sendMouse({ type: 'click', position: [100, 100] });
+      describe('Test Form Loading', () => {
+        it('Can track form submit events', async function test() {
+          const form = document.querySelector('form');
 
           await new Promise((resolve) => {
-            setTimeout(resolve, 0);
+            setTimeout(resolve, 2000);
           });
 
-          // let's start injecting "blocks", "forms", and "media" 
-          // into the page
-
-          const block = document.createElement('div');
-          block.className = 'block';
-
-          const contents = await fetch('/test/fixtures/block.plain.html');
-          block.innerHTML = await contents.text();
-
-          block.dataset.blockStatus = 'loaded';
-
-          document.body.appendChild(block);
-
+          // find the form field
+          form.querySelector('input[type="submit"]').click();
 
           await new Promise((resolve) => {
-            setTimeout(resolve, 100);
+            setTimeout(resolve, 2000);
           });
-
-          await sendMouse({ type: 'click', position: [10, 10] });
-
-          assert(window.called.some((call) => call.checkpoint === 'viewblock'), 'viewblock checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'formsubmit'), 'formsubmit checkpoint missing');
         });
       });
     });

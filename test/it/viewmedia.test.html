@@ -31,14 +31,27 @@
     The first block
     <img src="/test/fixtures/fire.jpg" height="200" width="200">
   </div>
+  <div class="block" data-block-status="loaded">
+    <form action="javascript:false;" method="POST">
+      <input type="text" name="name" value="John Doe">
+      <input type="submit" value="Submit">
+    </form>
+    <script>
+      document.querySelector('form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        // turn the contents uppercase
+        e.target.name.value = e.target.name.value.toUpperCase();
+      });
+    </script>
+  </div>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { sendMouse, setViewport } from '@web/test-runner-commands';
     import { assert } from '@esm-bundle/chai';
 
     runTests(async () => {
-      describe('Test Block Loading', () => {
-        it('Can observe blocks that enter the viewport', async () => {
+      describe('Test Media Loading', () => {
+        it('Can observe media that enter the viewport', async () => {
 
           await setViewport({ width: 800, height: 600 });
 
@@ -68,7 +81,7 @@
 
           await sendMouse({ type: 'click', position: [10, 10] });
 
-          assert(window.called.some((call) => call.checkpoint === 'viewblock'), 'viewblock checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'viewmedia'), 'viewmedia checkpoint missing');
         });
       });
     });
