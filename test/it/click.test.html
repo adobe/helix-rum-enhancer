@@ -7,6 +7,9 @@
     // change the scripts that are being served. Check the
     // web-test-runner.config.js file for details
     window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin'
+    };
     // we log what's being sent to the "server"
     window.called = [];
     // and navigator.sendBeacon has been replaced with
