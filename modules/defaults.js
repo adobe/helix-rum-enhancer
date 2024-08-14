@@ -9,5 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { fflags } from './fflags.js';
+
 export const KNOWN_PROPERTIES = ['weight', 'id', 'referer', 'checkpoint', 't', 'source', 'target', 'cwv', 'CLS', 'FID', 'LCP', 'INP', 'TTFB'];
-export const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia', 'loadresource', 'utm', 'paid', 'email'];
+export const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'enterleave', 'viewblock', 'viewmedia', 'loadresource', 'utm', 'paid', 'email', 'consent'];
+fflags.enabled('example', () => DEFAULT_TRACKING_EVENTS.push('example'));
