@@ -115,7 +115,7 @@ function addEnterLeaveTracking() {
   };
 
   new PerformanceObserver((list) => list
-    .getEntries().map((entry) => navigate(document.referrer, entry.type)))
+    .getEntries().map((entry) => navigate(window.hlx.referrer || document.referrer, entry.type)))
     .observe({ type: 'navigation', buffered: true });
 
   const leave = ((event) => {
