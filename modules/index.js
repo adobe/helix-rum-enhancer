@@ -125,6 +125,7 @@ function addEnterLeaveTracking() {
       }
       leave.left = true;
       sampleRUM('leave');
+      /* c8 ignore next 3 */
     } catch (error) {
       // something went wrong
     }
