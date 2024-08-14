@@ -228,26 +228,19 @@ function mutationsCallback(mutations) {
 }
 
 function addTrackingFromConfig() {
-  const trackingFunctions = {
-    click: () => {
-      document.addEventListener('click', (event) => {
-        sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
-      });
-    },
-    cwv: () => addCWVTracking(),
-    form: () => addFormTracking(window.document.body),
-    enterleave: () => addEnterLeaveTracking(),
-    loadresource: () => addLoadResourceTracking(),
-    utm: () => addUTMParametersTracking(sampleRUM),
-    viewblock: () => addViewBlockTracking(window.document.body),
-    viewmedia: () => addViewMediaTracking(window.document.body),
-    consent: () => addCookieConsentTracking(sampleRUM),
-    paid: () => addAdsParametersTracking(sampleRUM),
-    email: () => addEmailParameterTracking(sampleRUM),
-  };
-
-  DEFAULT_TRACKING_EVENTS.filter((ck) => trackingFunctions[ck])
-    .forEach((ck) => trackingFunctions[ck]());
+  document.addEventListener('click', (event) => {
+    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
+  });
+  addCWVTracking();
+  addFormTracking(window.document.body);
+  addEnterLeaveTracking();
+  addLoadResourceTracking();
+  addUTMParametersTracking(sampleRUM);
+  addViewBlockTracking(window.document.body);
+  addViewMediaTracking(window.document.body);
+  addCookieConsentTracking(sampleRUM);
+  addAdsParametersTracking(sampleRUM);
+  addEmailParameterTracking(sampleRUM);
 }
 
 function initEnhancer() {
