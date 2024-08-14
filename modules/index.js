@@ -22,11 +22,13 @@ import {
 } from './martech.js';
 import { fflags } from './fflags.js';
 
-const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
+const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
+  /* c8 ignore next */ : {};
 
 const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
 // eslint-disable-next-line no-use-before-define
-const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback) : null;
+const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback)
+/* c8 ignore next */ : null;
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
