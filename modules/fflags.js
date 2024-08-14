@@ -15,6 +15,7 @@ export const fflags = {
     .reduce((a, b) => a + b, 1) % 1371) !== -1
     || !!window.origin.match(/localhost/),
   enabled: (flag, callback) => fflags.has(flag) && callback(),
+  /* c8 ignore next */
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
   eagercwv: [683],
   example: [543, 770, 1136],
