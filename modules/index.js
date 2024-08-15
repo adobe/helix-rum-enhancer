@@ -20,12 +20,15 @@ import {
   addEmailParameterTracking,
   addUTMParametersTracking,
 } from './martech.js';
+import { fflags } from './fflags.js';
 
-const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
+const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
+  /* c8 ignore next */ : {};
 
 const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
 // eslint-disable-next-line no-use-before-define
-const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback) : null;
+const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback)
+/* c8 ignore next */ : null;
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
@@ -77,7 +80,6 @@ function addCWVTracking() {
           sampleRUM('cwv', data);
         };
 
-        const featureToggle = () => window.location.hostname === 'blog.adobe.com';
         const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
 
         // When loading `web-vitals` using a classic script, all the public
@@ -85,7 +87,10 @@ function addCWVTracking() {
         ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
           const metricFn = window.webVitals[`on${metric}`];
           if (typeof metricFn === 'function') {
-            const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
+            let opts = {};
+            fflags.enabled('eagercwv', () => {
+              opts = { reportAllChanges: isEager(metric) };
+            });
             metricFn(storeCWV, opts);
           }
         });
@@ -115,19 +120,15 @@ function addEnterLeaveTracking() {
   };
 
   new PerformanceObserver((list) => list
-    .getEntries().map((entry) => navigate(document.referrer, entry.type)))
+    .getEntries().map((entry) => navigate(window.hlx.referrer || document.referrer, entry.type)))
     .observe({ type: 'navigation', buffered: true });
 
   const leave = ((event) => {
-    try {
-      if (leave.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
-        return;
-      }
-      leave.left = true;
-      sampleRUM('leave');
-    } catch (error) {
-      // something went wrong
+    if (leave.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
+      return;
     }
+    leave.left = true;
+    sampleRUM('leave');
   });
   window.addEventListener('visibilitychange', ((event) => leave(event)));
   window.addEventListener('pagehide', ((event) => leave(event)));
@@ -169,9 +170,8 @@ function activateBlocksMutationObserver() {
 }
 
 function getIntersectionObsever(checkpoint) {
-  if (!window.IntersectionObserver) {
-    return null;
-  }
+  /* c8 ignore next */
+  if (!window.IntersectionObserver) return null;
   activateBlocksMutationObserver();
   const observer = new IntersectionObserver((entries) => {
     try {
@@ -229,26 +229,19 @@ function mutationsCallback(mutations) {
 }
 
 function addTrackingFromConfig() {
-  const trackingFunctions = {
-    click: () => {
-      document.addEventListener('click', (event) => {
-        sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
-      });
-    },
-    cwv: () => addCWVTracking(),
-    form: () => addFormTracking(window.document.body),
-    enterleave: () => addEnterLeaveTracking(),
-    loadresource: () => addLoadResourceTracking(),
-    utm: () => addUTMParametersTracking(sampleRUM),
-    viewblock: () => addViewBlockTracking(window.document.body),
-    viewmedia: () => addViewMediaTracking(window.document.body),
-    consent: () => addCookieConsentTracking(sampleRUM),
-    paid: () => addAdsParametersTracking(sampleRUM),
-    email: () => addEmailParameterTracking(sampleRUM),
-  };
-
-  DEFAULT_TRACKING_EVENTS.filter((ck) => trackingFunctions[ck])
-    .forEach((ck) => trackingFunctions[ck]());
+  document.addEventListener('click', (event) => {
+    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
+  });
+  addCWVTracking();
+  addFormTracking(window.document.body);
+  addEnterLeaveTracking();
+  addLoadResourceTracking();
+  addUTMParametersTracking(sampleRUM);
+  addViewBlockTracking(window.document.body);
+  addViewMediaTracking(window.document.body);
+  addCookieConsentTracking(sampleRUM);
+  addAdsParametersTracking(sampleRUM);
+  addEmailParameterTracking(sampleRUM);
 }
 
 function initEnhancer() {

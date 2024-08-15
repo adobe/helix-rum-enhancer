@@ -33,7 +33,9 @@ export function addCookieConsentTracking(sampleRUM) {
 
   if (!trackShowConsent()) {
     // eslint-disable-next-line max-len
-    consentMutationObserver = window.MutationObserver ? new MutationObserver(trackShowConsent) : null;
+    consentMutationObserver = window.MutationObserver
+      ? new MutationObserver(trackShowConsent)
+      : /* c8 ignore next */ null;
     if (consentMutationObserver) {
       consentMutationObserver.observe(
         document.body,
