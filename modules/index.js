@@ -251,6 +251,7 @@ function initEnhancer() {
       window.hlx.rum.collector = trackCheckpoint;
       processQueue();
     }
+  /* c8 ignore next 3 */
   } catch (error) {
     // something went wrong
   }
