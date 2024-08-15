@@ -1,3 +1,10 @@
+## [2.19.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.0...v2.19.1) (2024-08-15)
+
+
+### Bug Fixes
+
+* **navigation:** remove `leave` checkpoint ([95503de](https://github.com/adobe/helix-rum-enhancer/commit/95503de3dfd83534a8692d6fa3a1af96734e65aa)), closes [/github.com/adobe/helix-rum-enhancer/pull/257#discussion_r1718152824](https://github.com//github.com/adobe/helix-rum-enhancer/pull/257/issues/discussion_r1718152824)
+
 # [2.19.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.18.0...v2.19.0) (2024-08-13)
 
 
