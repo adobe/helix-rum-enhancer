@@ -22,8 +22,7 @@
         });
       }
     };
-  </script>
-  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</script>
 </head>
 
 <body>
@@ -31,13 +30,18 @@
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { sendMouse } from '@web/test-runner-commands';
-          import { assert } from '@esm-bundle/chai';
+    import { assert } from '@esm-bundle/chai';
 
     runTests(async () => {
       beforeEach(() => {
         const usp = new URLSearchParams(window.location.search);
         usp.append('utm_medium', 'test');
         window.history.replaceState({}, '', `${window.location.pathname}?${usp.toString()}`);
+        console.log('replaced', window.location.href);
+        const script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = '/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js';
+        document.head.appendChild(script);
       });
 
       describe('HTML Integration Tests', () => {
