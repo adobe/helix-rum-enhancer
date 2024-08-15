@@ -103,7 +103,7 @@ function addCWVTracking() {
   }, 2000); // wait for delayed
 }
 
-function addEnterLeaveTracking() {
+function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
   const navigate = (source, type) => {
     const payload = { source, target: document.visibilityState };
@@ -122,16 +122,6 @@ function addEnterLeaveTracking() {
   new PerformanceObserver((list) => list
     .getEntries().map((entry) => navigate(window.hlx.referrer || document.referrer, entry.type)))
     .observe({ type: 'navigation', buffered: true });
-
-  const leave = ((event) => {
-    if (leave.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
-      return;
-    }
-    leave.left = true;
-    sampleRUM('leave');
-  });
-  window.addEventListener('visibilitychange', ((event) => leave(event)));
-  window.addEventListener('pagehide', ((event) => leave(event)));
 }
 
 function addLoadResourceTracking() {
@@ -234,7 +224,7 @@ function addTrackingFromConfig() {
   });
   addCWVTracking();
   addFormTracking(window.document.body);
-  addEnterLeaveTracking();
+  addNavigationTracking();
   addLoadResourceTracking();
   addUTMParametersTracking(sampleRUM);
   addViewBlockTracking(window.document.body);

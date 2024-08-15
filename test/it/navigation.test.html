@@ -72,16 +72,11 @@
             setTimeout(resolve, 1000);
           });
 
-          // pretend to leave the page
-          window.dispatchEvent(new Event('pagehide'));
-          window.dispatchEvent(new Event('pagehide'));
-
-          expect(called).to.have.lengthOf(5);
+          expect(called).to.have.lengthOf(4);
           expect(called[0][0]).to.equal('navigate');
           expect(called[1][0]).to.equal('reload');
           expect(called[2][0]).to.equal('back_forward');
           expect(called[3][0]).to.equal('prerender');
-          expect(called[4][0]).to.equal('leave');
         });
 
       });
