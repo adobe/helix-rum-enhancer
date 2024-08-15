@@ -1,3 +1,10 @@
+## [2.19.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.1...v2.19.2) (2024-08-15)
+
+
+### Bug Fixes
+
+* remove intersection threshold ([#258](https://github.com/adobe/helix-rum-enhancer/issues/258)) ([8805b49](https://github.com/adobe/helix-rum-enhancer/commit/8805b49a052bbc9a659ee2485ada8a9db5a13e40))
+
 ## [2.19.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.0...v2.19.1) (2024-08-15)
 
 
