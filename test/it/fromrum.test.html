@@ -40,7 +40,6 @@
         const usp = new URLSearchParams(window.location.search);
         usp.append('utm_medium', 'test');
         window.history.replaceState({}, '', `${window.location.pathname}?${usp.toString()}`);
-        console.log('replaced', window.location.href);
         const script = document.createElement('script');
         script.type = 'text/javascript';
         script.src = '/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js';

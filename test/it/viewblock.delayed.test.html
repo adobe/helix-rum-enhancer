@@ -57,7 +57,6 @@
             setTimeout(resolve, 1000);
           });
 
-          console.log('called', window.called);
           expect(window.called.length).to.equal(1);
           expect(window.called[0].source).to.equal('div.block1');
         });
