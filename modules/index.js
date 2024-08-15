@@ -26,9 +26,11 @@ const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window
   /* c8 ignore next */ : {};
 
 const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
-// eslint-disable-next-line no-use-before-define
-const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback)
-/* c8 ignore next */ : null;
+
+// eslint-disable-next-line no-use-before-define, max-len
+const blocksMutationObserver = window.MutationObserver ? new MutationObserver(blocksMutationsCallback) : null;
+// eslint-disable-next-line no-use-before-define, max-len
+const mediaMutationObserver = window.MutationObserver ? new MutationObserver(mediaMutationsCallback) : null;
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
@@ -147,12 +149,24 @@ function addLoadResourceTracking() {
   observer.observe({ type: 'resource', buffered: true });
 }
 
-function activateMutationObserver() {
-  if (!mutationObserver || mutationObserver.active) {
+function activateBlocksMutationObserver() {
+  if (!blocksMutationObserver || blocksMutationObserver.active) {
     return;
   }
-  mutationObserver.active = true;
-  mutationObserver.observe(
+  blocksMutationObserver.active = true;
+  blocksMutationObserver.observe(
+    document.body,
+    // eslint-disable-next-line object-curly-newline
+    { subtree: true, attributes: true, attributeFilter: ['data-block-status'] },
+  );
+}
+
+function activateMediaMutationObserver() {
+  if (!mediaMutationObserver || mediaMutationObserver.active) {
+    return;
+  }
+  mediaMutationObserver.active = true;
+  mediaMutationObserver.observe(
     document.body,
     // eslint-disable-next-line object-curly-newline
     { subtree: true, attributes: false, childList: true },
@@ -160,9 +174,11 @@ function activateMutationObserver() {
 }
 
 function getIntersectionObsever(checkpoint) {
-  /* c8 ignore next */
-  if (!window.IntersectionObserver) return null;
-  activateMutationObserver();
+  if (!window.IntersectionObserver) {
+    return null;
+  }
+  activateBlocksMutationObserver();
+  activateMediaMutationObserver();
   const observer = new IntersectionObserver((entries) => {
     try {
       entries
@@ -202,7 +218,8 @@ function addViewMediaTracking(parent) {
 }
 
 function addFormTracking(parent) {
-  activateMutationObserver();
+  activateBlocksMutationObserver();
+  activateMediaMutationObserver();
   parent.querySelectorAll('form').forEach((form) => {
     form.removeEventListener('submit', formSubmitListener); // listen only once
     form.addEventListener('submit', formSubmitListener);
@@ -210,7 +227,7 @@ function addFormTracking(parent) {
 }
 
 const addObserver = (ck, fn, block) => DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
-function mutationsCallback(mutations) {
+function blocksMutationsCallback(mutations) {
   // block specific mutations
   mutations
     .filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
@@ -219,11 +236,12 @@ function mutationsCallback(mutations) {
       addObserver('form', addFormTracking, m.target);
       addObserver('viewblock', addViewBlockTracking, m.target);
     });
+}
 
+function mediaMutationsCallback(mutations) {
   // media mutations
   mutations
     .forEach((m) => {
-      // filtering will be done in the observer
       addObserver('viewmedia', addViewMediaTracking, m.target);
     });
 }
