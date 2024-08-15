@@ -3,8 +3,17 @@
 <head>
   <title>Test Runner</title>
   <style>
+    .section {
+      height: 500px;
+      overflow: auto;
+    }
+
     .block {
-      min-height: 500px;
+      height: 1000px;
+    }
+
+    .block[data-block-name="block2"] {
+      height: 4000px;
     }
   </style>
 </head>
@@ -50,38 +59,42 @@
             script.onload = resolve;
           });
 
+          const section = document.querySelector('.section');
+          section.scrollTo(0, 0);
+
           // wait one second for the script to run
           await new Promise((resolve) => {
             setTimeout(resolve, 1000);
           });
 
-          expect(called).to.be.true;
-          expect(blocksViewed.length).to.equal(1);
-          expect(blocksViewed[0]).to.equal('.block1');
+          expect(called, 'viewblock has been triggerd').to.be.true;
+          expect(blocksViewed.length, 'only one block is viewed').to.equal(1);
+          expect(blocksViewed[0], 'only first block is viewed').to.equal('.block1');
 
           const b2 = document.querySelector('[data-block-name="block2"]');
 
-          window.scrollTo(0, b2.offsetTop);
+          section.scrollTo(0, b2.offsetTop);
 
           // wait one second for the scrolling to happen
           await new Promise((resolve) => {
             setTimeout(resolve, 1000);
           });
 
-          expect(blocksViewed.length).to.equal(2);
-          expect(blocksViewed[1]).to.equal('.block2');
+          expect(blocksViewed.length, '2 blocks are viewed').to.equal(2);
+          expect(blocksViewed[1], 'second block has been viewed').to.equal('.block2');
 
           const b3 = document.querySelector('[data-block-name="block3"]');
 
-          window.scrollTo(0, b3.offsetTop);
+
+          section.scrollTo(0, b3.offsetTop);
 
           // wait one second for the scrolling to happen
           await new Promise((resolve) => {
             setTimeout(resolve, 1000);
           });
 
-          expect(blocksViewed.length).to.equal(3);
-          expect(blocksViewed[2]).to.equal('.block3');
+          expect(blocksViewed.length, '3 blocks are viewed').to.equal(3);
+          expect(blocksViewed[2], 'thrid block has been viewed').to.equal('.block3');
           
         });
 
