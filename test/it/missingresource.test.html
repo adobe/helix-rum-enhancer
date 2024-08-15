@@ -55,7 +55,11 @@
             setTimeout(resolve, 100);
           });
 
-          assert(window.called.some((call) => call.checkpoint === 'missingresource'), 'missingresource checkpoint missing');
+          console.log(window.called);
+          assert(window.called.some((call) =>
+            call.checkpoint === 'missingresource'
+            && call.source.endsWith('/test/fixtures/placeholders.json')
+          ), 'missingresource checkpoint missing');
         });
       });
     });

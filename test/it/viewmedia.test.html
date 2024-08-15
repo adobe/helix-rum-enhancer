@@ -77,7 +77,10 @@
             setTimeout(resolve, 100);
           });
 
-          assert(window.called.some((call) => call.checkpoint === 'viewmedia'), 'viewmedia checkpoint missing');
+          assert(window.called.some((call) =>
+            call.checkpoint === 'viewmedia'
+            && call.target.endsWith('fire.jpg')
+          ), 'viewmedia checkpoint missing');
         });
       });
     });
