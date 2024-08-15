@@ -12,7 +12,7 @@
     runTests(async () => {
       describe('HTML IMG Tests', () => {
 
-        it('rum enhancer reports image, even if added later', async () => {
+        it('rum enhancer reports image in the DOM onload', async () => {
           let called = false;
           const imagesSeen = [];
           window.hlx = {
