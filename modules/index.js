@@ -177,7 +177,7 @@ function getIntersectionObsever(checkpoint) {
     } catch (error) {
       // something went wrong
     }
-  }, { threshold: 0.25 });
+  });
   return observer;
 }
 function addViewBlockTracking(element) {
