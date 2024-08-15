@@ -52,7 +52,7 @@ function trackCheckpoint(checkpoint, data, t) {
 }
 
 function processQueue() {
-  while (queue.length) {
+  while (queue && queue.length) {
     const ck = queue.shift();
     trackCheckpoint(...ck);
   }
@@ -147,7 +147,7 @@ function addLoadResourceTracking() {
   observer.observe({ type: 'resource', buffered: true });
 }
 
-function activateBlocksMutationObserver() {
+function activateMutationObserver() {
   if (!mutationObserver || mutationObserver.active) {
     return;
   }
@@ -155,14 +155,14 @@ function activateBlocksMutationObserver() {
   mutationObserver.observe(
     document.body,
     // eslint-disable-next-line object-curly-newline
-    { subtree: true, attributes: true, attributeFilter: ['data-block-status'] },
+    { subtree: true, attributes: false, childList: true },
   );
 }
 
 function getIntersectionObsever(checkpoint) {
   /* c8 ignore next */
   if (!window.IntersectionObserver) return null;
-  activateBlocksMutationObserver();
+  activateMutationObserver();
   const observer = new IntersectionObserver((entries) => {
     try {
       entries
@@ -188,11 +188,13 @@ function addViewBlockTracking(element) {
   }
 }
 
+const observedMedia = new Set();
 function addViewMediaTracking(parent) {
   const mediaobserver = getIntersectionObsever('viewmedia');
   if (mediaobserver) {
     parent.querySelectorAll('img, video, audio, iframe').forEach((m) => {
-      if (!m.closest('div .block') || m.closest('div[data-block-status="loaded"]')) {
+      if (!observedMedia.has(m)) {
+        observedMedia.add(m);
         mediaobserver.observe(m);
       }
     });
@@ -200,7 +202,7 @@ function addViewMediaTracking(parent) {
 }
 
 function addFormTracking(parent) {
-  activateBlocksMutationObserver();
+  activateMutationObserver();
   parent.querySelectorAll('form').forEach((form) => {
     form.removeEventListener('submit', formSubmitListener); // listen only once
     form.addEventListener('submit', formSubmitListener);
@@ -209,11 +211,19 @@ function addFormTracking(parent) {
 
 const addObserver = (ck, fn, block) => DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
 function mutationsCallback(mutations) {
-  mutations.filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
+  // block specific mutations
+  mutations
+    .filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
     .filter((m) => m.target.dataset.blockStatus === 'loaded')
     .forEach((m) => {
       addObserver('form', addFormTracking, m.target);
       addObserver('viewblock', addViewBlockTracking, m.target);
+    });
+
+  // media mutations
+  mutations
+    .forEach((m) => {
+      // filtering will be done in the observer
       addObserver('viewmedia', addViewMediaTracking, m.target);
     });
 }

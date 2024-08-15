@@ -14,13 +14,13 @@
 
         it('rum enhancer reports image, even if added later', async () => {
           let called = false;
-          const imagesSeen = [];
+          let imagesSeen = '';
           window.hlx = {
             rum: {
               sampleRUM: (checkpoint, data) => {
                 called = true;
                 if (checkpoint === 'viewmedia') {
-                  imagesSeen.push(data.target);
+                  imagesSeen = data.target;
                   console.log('viewmedia', data.target);
                 }
               }
@@ -41,17 +41,24 @@
             setTimeout(resolve, 1000);
           });
 
-          expect(called).to.be.true;
-          expect(imagesSeen).to.deep.equal(['https://www.example.com/loadstart.jpg']);
+          const img = document.createElement('img');
+          img.src = 'https://www.example.com/loadlater.jpg';
+          img.alt = 'loadlater example image';
+          document.body.appendChild(img);
 
-          const anotherImage = document.createElement('img');
-          anotherImage.src = 'https://www.example.com/loadlater.jpg';
-          document.body.appendChild(anotherImage);
+          // wait one second for the script to run
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          expect(called).to.be.true;
+          expect(imagesSeen, 'img inserted later triggers viewmedia').to.equal('https://www.example.com/loadlater.jpg');
+          
         });
+
       });
     });
   </script>
-  <img src="https://www.example.com/loadstart.jpg" alt="example image">
 </body>
 
 </html>
