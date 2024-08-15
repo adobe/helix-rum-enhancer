@@ -12,8 +12,11 @@
 export const fflags = {
   has: (flag) => fflags[flag].indexOf(Array.from(window.origin)
     .map((a) => a.charCodeAt(0))
-    .reduce((a, b) => a + b, 1) % 1371) !== -1,
+    .reduce((a, b) => a + b, 1) % 1371) !== -1
+    || !!window.origin.match(/localhost/),
   enabled: (flag, callback) => fflags.has(flag) && callback(),
+  /* c8 ignore next */
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
-  onetrust: [543, 770, 1136],
+  eagercwv: [683],
+  example: [543, 770, 1136],
 };

@@ -7,18 +7,18 @@
 <body>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
+                      import { sendMouse } from '@web/test-runner-commands';
     import { expect } from '@esm-bundle/chai';
 
     runTests(async () => {
       describe('HTML Index Tests', () => {
 
         it('can load rum enhancer as a script', async () => {
-          let called = false;
+          let called = [];
           window.hlx = {
             rum: {
               sampleRUM: (...args) => {
-                called = true;
-                console.log('fake sampleRUM', ...args, called);
+                called.push(args);
               }
             }
           };
@@ -37,7 +37,12 @@
             setTimeout(resolve, 1000);
           });
 
-          expect(called).to.be.true;
+          // click anywhere
+          await sendMouse({ type: 'click', position: [10, 10] });
+
+          expect(called).to.have.lengthOf(2);
+          expect(called[0][0]).to.equal('enter');
+          expect(called[1][0]).to.equal('click');
         });
 
       });

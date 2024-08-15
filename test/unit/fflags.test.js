@@ -21,7 +21,7 @@ describe('test fflags', () => {
   });
 
   it('fflags.has returns a boolean', () => {
-    expect(fflags.has('onetrust')).to.be.a('boolean');
+    expect(fflags.has('example')).to.be.a('boolean');
   });
 
   it('fflags.enabled is a function', () => {
@@ -29,7 +29,7 @@ describe('test fflags', () => {
   });
 
   it('fflags.enabled returns a boolean', () => {
-    expect(fflags.enabled('onetrust', () => true)).to.be.a('boolean');
+    expect(fflags.enabled('example', () => true)).to.be.a('boolean');
   });
 
   it('fflags.disabled is a function', () => {
@@ -37,10 +37,10 @@ describe('test fflags', () => {
   });
 
   it('fflags.disabled returns a boolean', () => {
-    expect(fflags.disabled('onetrust', () => true)).to.be.a('boolean');
+    expect(fflags.disabled('example', () => true)).to.be.a('boolean');
   });
 
-  it('fflags.onetrust is an array', () => {
-    expect(fflags.onetrust).to.be.an('array');
+  it('fflags.example is an array', () => {
+    expect(fflags.example).to.be.an('array');
   });
 });

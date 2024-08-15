@@ -18,3 +18,4 @@ node_modules/
 snykmocha.js
 test
 test-results.xml
+src/index.map.js
