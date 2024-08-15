@@ -170,9 +170,8 @@ function activateBlocksMutationObserver() {
 }
 
 function getIntersectionObsever(checkpoint) {
-  if (!window.IntersectionObserver) {
-    return null;
-  }
+  /* c8 ignore next */
+  if (!window.IntersectionObserver) return null;
   activateBlocksMutationObserver();
   const observer = new IntersectionObserver((entries) => {
     try {
