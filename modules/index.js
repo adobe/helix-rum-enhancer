@@ -28,9 +28,12 @@ const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window
 const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
 
 // eslint-disable-next-line no-use-before-define, max-len
-const blocksMutationObserver = window.MutationObserver ? new MutationObserver(blocksMutationsCallback) : null;
+const blocksMutationObserver = window.MutationObserver ? new MutationObserver(blocksMutationsCallback)
+  /* c8 ignore next */ : {};
+
 // eslint-disable-next-line no-use-before-define, max-len
-const mediaMutationObserver = window.MutationObserver ? new MutationObserver(mediaMutationsCallback) : null;
+const mediaMutationObserver = window.MutationObserver ? new MutationObserver(mediaMutationsCallback)
+  /* c8 ignore next */ : {};
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
@@ -227,7 +230,10 @@ function addFormTracking(parent) {
   });
 }
 
-const addObserver = (ck, fn, block) => DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
+function addObserver(ck, fn, block) {
+  return DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
+}
+
 function blocksMutationsCallback(mutations) {
   // block specific mutations
   mutations
