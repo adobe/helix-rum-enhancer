@@ -174,6 +174,7 @@ function activateMediaMutationObserver() {
 }
 
 function getIntersectionObsever(checkpoint) {
+  /* c8 ignore next 3 */
   if (!window.IntersectionObserver) {
     return null;
   }
