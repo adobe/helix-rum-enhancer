@@ -1,3 +1,25 @@
+# [2.19.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.18.0...v2.19.0) (2024-08-13)
+
+
+### Features
+
+* **onetrust:** enable on all domains ([6039f11](https://github.com/adobe/helix-rum-enhancer/commit/6039f1198f6484d623a3e42ffdd24807b6ed7c54))
+
+# [2.18.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.17.1...v2.18.0) (2024-08-08)
+
+
+### Features
+
+* **loadresource:** include API calls in `loadresouce` requests for content request counting ([45449c2](https://github.com/adobe/helix-rum-enhancer/commit/45449c2e6a1602d80321f4ffa8698cbd116f1383))
+
+## [2.17.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.17.0...v2.17.1) (2024-08-02)
+
+
+### Bug Fixes
+
+* **loadresource:** fix closing bracket ([0978b71](https://github.com/adobe/helix-rum-enhancer/commit/0978b7138f16421b5eb22c49b3c757116cb7053b))
+* **loadresource:** include all JSON resources, and GraphQL resources ([8ebaa97](https://github.com/adobe/helix-rum-enhancer/commit/8ebaa97e844ff605ec2e6a458fc43adc3c5a37dd))
+
 # [2.17.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.16.0...v2.17.0) (2024-07-03)
 
 

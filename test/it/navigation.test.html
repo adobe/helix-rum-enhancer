@@ -1,0 +1,87 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+</head>
+
+<body>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendMouse } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('Navigation Tests', () => {
+
+        it('can handle navigation', async () => {
+          let called = [];
+          window.hlx = {
+            rum: {
+              sampleRUM: (...args) => {
+                // console.log('sampleRUM', args);
+                called.push(args);
+              }
+            }
+          };
+
+
+          class MockPerformanceEntries {
+            getEntries() {
+              // console.log('getEntries');
+              return [
+                {
+                  type: 'navigate'
+                },
+                {
+                  type: 'reload'
+                },
+                {
+                  type: 'back_forward'
+                },
+                {
+                  type: 'prerender'
+                }
+              ];
+            }
+          }
+          window.PerformanceObserver = class {
+            constructor(cb) {
+              //console.log('PerformanceObserver constructor');
+              this.cb = cb;
+            }
+            observe() {
+              //console.log('PerformanceObserver observe');
+              this.cb(new MockPerformanceEntries());
+            }
+          };
+
+          const url = new URL('/test/fixtures/referrer.html', window.location);
+          window.hlx.referrer = url.href;
+
+
+          const script = document.createElement('script');
+          script.src = new URL('/modules/index.js', window.location).href;
+          script.type = 'module';
+          document.head.appendChild(script);
+
+          await new Promise((resolve) => {
+            script.onload = resolve;
+          });
+          // wait one second for the script to run
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          expect(called).to.have.lengthOf(4);
+          expect(called[0][0]).to.equal('navigate');
+          expect(called[1][0]).to.equal('reload');
+          expect(called[2][0]).to.equal('back_forward');
+          expect(called[3][0]).to.equal('prerender');
+        });
+
+      });
+    });
+  </script>
+</body>
+
+</html>

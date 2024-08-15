@@ -12,31 +12,27 @@
 /* eslint-env browser */
 
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
-import { fflags } from './fflags.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
+import {
+  addAdsParametersTracking,
+  addCookieConsentTracking,
+  addEmailParameterTracking,
+  addUTMParametersTracking,
+} from './martech.js';
+import { fflags } from './fflags.js';
 
-const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
+const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
+  /* c8 ignore next */ : {};
 
 const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
 // eslint-disable-next-line no-use-before-define
-const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback) : null;
-
-// eslint-disable-next-line no-unused-vars
-function optedIn(checkpoint, data) {
-  // TODO: check config service to know if
-  return true;
-}
-// Gets configured collection from the config service for the current domain
-function getCollectionConfig() {
-  // eslint-disable-next-line max-len
-  fflags.enabled('onetrust', () => DEFAULT_TRACKING_EVENTS.push('consent'));
-  return DEFAULT_TRACKING_EVENTS;
-}
+const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback)
+/* c8 ignore next */ : null;
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  if (optedIn(checkpoint, data) && isSelected) {
+  if (isSelected) {
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
@@ -84,7 +80,6 @@ function addCWVTracking() {
           sampleRUM('cwv', data);
         };
 
-        const featureToggle = () => window.location.hostname === 'blog.adobe.com';
         const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
 
         // When loading `web-vitals` using a classic script, all the public
@@ -92,7 +87,10 @@ function addCWVTracking() {
         ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
           const metricFn = window.webVitals[`on${metric}`];
           if (typeof metricFn === 'function') {
-            const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
+            let opts = {};
+            fflags.enabled('eagercwv', () => {
+              opts = { reportAllChanges: isEager(metric) };
+            });
             metricFn(storeCWV, opts);
           }
         });
@@ -105,7 +103,7 @@ function addCWVTracking() {
   }, 2000); // wait for delayed
 }
 
-function addEnterLeaveTracking() {
+function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
   const navigate = (source, type) => {
     const payload = { source, target: document.visibilityState };
@@ -122,22 +120,8 @@ function addEnterLeaveTracking() {
   };
 
   new PerformanceObserver((list) => list
-    .getEntries().map((entry) => navigate(document.referrer, entry.type)))
+    .getEntries().map((entry) => navigate(window.hlx.referrer || document.referrer, entry.type)))
     .observe({ type: 'navigation', buffered: true });
-
-  const leave = ((event) => {
-    try {
-      if (leave.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
-        return;
-      }
-      leave.left = true;
-      sampleRUM('leave');
-    } catch (error) {
-      // something went wrong
-    }
-  });
-  window.addEventListener('visibilitychange', ((event) => leave(event)));
-  window.addEventListener('pagehide', ((event) => leave(event)));
 }
 
 function addLoadResourceTracking() {
@@ -146,7 +130,7 @@ function addLoadResourceTracking() {
       list.getEntries()
         .filter((entry) => !entry.responseStatus || entry.responseStatus < 400)
         .filter((entry) => window.location.hostname === new URL(entry.name).hostname)
-        .filter((entry) => new URL(entry.name).pathname.match('.*(\\.plain\\.html|\\.json)$'))
+        .filter((entry) => new URL(entry.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)'))
         .forEach((entry) => {
           sampleRUM('loadresource', { source: entry.name, target: Math.round(entry.duration) });
         });
@@ -176,9 +160,8 @@ function activateBlocksMutationObserver() {
 }
 
 function getIntersectionObsever(checkpoint) {
-  if (!window.IntersectionObserver) {
-    return null;
-  }
+  /* c8 ignore next */
+  if (!window.IntersectionObserver) return null;
   activateBlocksMutationObserver();
   const observer = new IntersectionObserver((entries) => {
     try {
@@ -216,45 +199,6 @@ function addViewMediaTracking(parent) {
   }
 }
 
-function addUTMParametersTracking() {
-  const usp = new URLSearchParams(window.location.search);
-  [...usp.entries()]
-    .filter(([key]) => key.startsWith('utm_'))
-    // exclude keys that may leak PII
-    .filter(([key]) => key !== 'utm_id')
-    .filter(([key]) => key !== 'utm_term')
-    .forEach(([source, target]) => sampleRUM('utm', { source, target }));
-}
-
-function addAdsParametersTracking() {
-  const networks = {
-    google: /gclid|gclsrc|wbraid|gbraid/,
-    doubleclick: /dclid/,
-    microsoft: /msclkid/,
-    facebook: /fb(cl|ad_|pxl_)id/,
-    twitter: /tw(clid|src|term)/,
-    linkedin: /li_fat_id/,
-    pinterest: /epik/,
-    tiktok: /ttclid/,
-  };
-  const params = Array.from(new URLSearchParams(window.location.search).keys());
-  Object.entries(networks).forEach(([network, regex]) => {
-    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('paid', { source: network, target: param }));
-  });
-}
-
-function addEmailParameterTracking() {
-  const networks = {
-    mailchimp: /mc_(c|e)id/,
-    marketo: /mkt_tok/,
-
-  };
-  const params = Array.from(new URLSearchParams(window.location.search).keys());
-  Object.entries(networks).forEach(([network, regex]) => {
-    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
-  });
-}
-
 function addFormTracking(parent) {
   activateBlocksMutationObserver();
   parent.querySelectorAll('form').forEach((form) => {
@@ -263,47 +207,7 @@ function addFormTracking(parent) {
   });
 }
 
-function addCookieConsentTracking() {
-  const cmpCookie = document.cookie.split(';')
-    .map((c) => c.trim())
-    .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
-
-  if (cmpCookie) {
-    sampleRUM('consent', { source: 'onetrust', target: 'hidden' });
-    return;
-  }
-
-  let consentMutationObserver;
-  const trackShowConsent = () => {
-    const otsdk = document.querySelector('body > div#onetrust-consent-sdk');
-    if (otsdk) {
-      if (otsdk.checkVisibility && !otsdk.checkVisibility()) {
-        sampleRUM('consent', { source: 'onetrust', target: 'suppressed' });
-      } else {
-        sampleRUM('consent', { source: 'onetrust', target: 'show' });
-      }
-      if (consentMutationObserver) {
-        consentMutationObserver.disconnect();
-      }
-      return true;
-    }
-    return false;
-  };
-
-  if (!trackShowConsent()) {
-    // eslint-disable-next-line max-len
-    consentMutationObserver = window.MutationObserver ? new MutationObserver(trackShowConsent) : null;
-    if (consentMutationObserver) {
-      consentMutationObserver.observe(
-        document.body,
-        // eslint-disable-next-line object-curly-newline
-        { attributes: false, childList: true, subtree: false },
-      );
-    }
-  }
-}
-
-const addObserver = (ck, fn, block) => getCollectionConfig().includes(ck) && fn(block);
+const addObserver = (ck, fn, block) => DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
 function mutationsCallback(mutations) {
   mutations.filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
     .filter((m) => m.target.dataset.blockStatus === 'loaded')
@@ -315,26 +219,19 @@ function mutationsCallback(mutations) {
 }
 
 function addTrackingFromConfig() {
-  const trackingFunctions = {
-    click: () => {
-      document.addEventListener('click', (event) => {
-        sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
-      });
-    },
-    cwv: () => addCWVTracking(),
-    form: () => addFormTracking(window.document.body),
-    enterleave: () => addEnterLeaveTracking(),
-    loadresource: () => addLoadResourceTracking(),
-    utm: () => addUTMParametersTracking(),
-    viewblock: () => addViewBlockTracking(window.document.body),
-    viewmedia: () => addViewMediaTracking(window.document.body),
-    consent: () => addCookieConsentTracking(),
-    paid: () => addAdsParametersTracking(),
-    email: () => addEmailParameterTracking(),
-  };
-
-  getCollectionConfig().filter((ck) => trackingFunctions[ck])
-    .forEach((ck) => trackingFunctions[ck]());
+  document.addEventListener('click', (event) => {
+    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
+  });
+  addCWVTracking();
+  addFormTracking(window.document.body);
+  addNavigationTracking();
+  addLoadResourceTracking();
+  addUTMParametersTracking(sampleRUM);
+  addViewBlockTracking(window.document.body);
+  addViewMediaTracking(window.document.body);
+  addCookieConsentTracking(sampleRUM);
+  addAdsParametersTracking(sampleRUM);
+  addEmailParameterTracking(sampleRUM);
 }
 
 function initEnhancer() {
