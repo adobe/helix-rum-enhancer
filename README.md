@@ -22,7 +22,6 @@ It will add following new checkpoints:
 - `viewmedia`: An image or video hosted by Helix Media Bus has been scrolled into the viewport
 - `reload`, `navigate`, `enter`: depending on how the current page was accessed
 - `formsubmit`: when a form is submitted
-- `leave`: when the user leaves the page
 
 ## Development
 

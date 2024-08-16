@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-rum-enhancer",
-  "version": "2.19.0",
+  "version": "2.19.2",
   "description": "Helix RUM Enhancer",
   "main": "src/index.js",
   "type": "module",
@@ -8,7 +8,7 @@
     "setup-playwright": "npx playwright install --with-deps chromium firefox webkit",
     "test": "npm run build-bundle && npm run setup-playwright && web-test-runner --node-resolve --coverage --playwright --browsers chromium firefox webkit",
     "test:ci": "npm run build-bundle && npm run setup-playwright && web-test-runner --node-resolve --coverage --playwright --browsers chromium firefox webkit",
-    "test:watch": "web-test-runner --node-resolve --playwright --coverage --watch",
+    "test:watch": "npm run build-bundle && npm run setup-playwright && web-test-runner --node-resolve --playwright --coverage --watch",
     "lint": "eslint .",
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
     "build-bundle": "rollup --config",
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.6",
-    "@adobe/helix-rum-js": "2.1.4",
+    "@adobe/helix-rum-js": "2.2.0",
     "@esm-bundle/chai": "4.3.4-fix.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
