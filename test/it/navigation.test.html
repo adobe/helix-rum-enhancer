@@ -18,7 +18,6 @@
           window.hlx = {
             rum: {
               sampleRUM: (...args) => {
-                // console.log('sampleRUM', args);
                 called.push(args);
               }
             }
@@ -27,7 +26,6 @@
 
           class MockPerformanceEntries {
             getEntries() {
-              // console.log('getEntries');
               return [
                 {
                   type: 'navigate'
@@ -46,11 +44,9 @@
           }
           window.PerformanceObserver = class {
             constructor(cb) {
-              //console.log('PerformanceObserver constructor');
               this.cb = cb;
             }
             observe() {
-              //console.log('PerformanceObserver observe');
               this.cb(new MockPerformanceEntries());
             }
           };
