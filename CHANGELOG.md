@@ -1,3 +1,10 @@
+# [2.20.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.2...v2.20.0) (2024-08-19)
+
+
+### Features
+
+* observe all mutations to capture late added medias ([#261](https://github.com/adobe/helix-rum-enhancer/issues/261)) ([56844b2](https://github.com/adobe/helix-rum-enhancer/commit/56844b2aa61fe5cc837cd5a887f0c8669a335e0f))
+
 ## [2.19.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.1...v2.19.2) (2024-08-15)
 
 
