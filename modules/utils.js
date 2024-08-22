@@ -36,3 +36,17 @@ export const urlSanitizers = {
     return `${u.origin}${u.pathname}`;
   },
 };
+
+/**
+ * Determines if the current page is running a React application
+ * by inspecting React-related elements in the DOM.
+ * @returns {bool}
+ */
+export const isReactApp = () => {
+  // https://gist.github.com/rambabusaravanan/1d594bd8d1c3153bc8367753b17d074b
+  if (!!window.React
+    || !!document.querySelector('[data-reactroot], [data-reactid]')
+    || Array.from(document.querySelectorAll('*')).some((e) => e._reactRootContainer !== undefined || Object.keys(e).some((k) => k.startsWith('__reactContainer')))
+  ) return true;
+  return false;
+};

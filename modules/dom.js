@@ -9,6 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { isReactApp } from './utils.js';
+
 export const getTargetValue = (element) => element.getAttribute('data-rum-target') || element.getAttribute('href')
     || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
 
@@ -45,7 +47,7 @@ export const sourceSelector = (element) => {
     }
 
     const blockName = element.closest('.block') ? element.closest('.block').getAttribute('data-block-name') : '';
-    if (element.id || formElementSelector) {
+    if ((element.id && !isReactApp()) || formElementSelector) {
       const id = element.id ? `#${element.id}` : '';
       return blockName ? `.${blockName} ${formElementSelector}${id}` : `${formElementSelector}${id}`;
     }
