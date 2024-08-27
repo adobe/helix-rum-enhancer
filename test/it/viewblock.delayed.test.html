@@ -31,10 +31,6 @@
 </head>
 
 <body>
-  <div class="block1 block" data-block-status="loading">
-    The first block
-    <img src="/test/fixtures/fire.jpg" height="200" width="200">
-  </div>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { setViewport } from '@web/test-runner-commands';
@@ -46,11 +42,15 @@
 
           await setViewport({ width: 800, height: 600 });
 
-          await new Promise((resolve) => {
-            setTimeout(resolve, 0);
-          });
+          const block = document.createElement('div');
+          block.className = 'block1 block';
+          block.setAttribute('data-block-status', 'loading');
 
-          const block = document.querySelector('.block1');
+          const contents = await fetch('/test/fixtures/block.plain.html');
+          block.innerHTML = await contents.text();
+
+          document.body.appendChild(block);
+
           block.setAttribute('data-block-status', 'loaded');
 
           await new Promise((resolve) => {
