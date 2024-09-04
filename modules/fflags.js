@@ -18,5 +18,6 @@ export const fflags = {
   /* c8 ignore next */
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
   eagercwv: [683],
+  redirect: [620, 1139],
   example: [543, 770, 1136],
 };

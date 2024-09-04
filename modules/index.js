@@ -110,7 +110,7 @@ function addCWVTracking() {
 
 function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
-  const navigate = (source, type) => {
+  const navigate = (source, type, redirectCount) => {
     const payload = { source, target: document.visibilityState };
     // reload: same page, navigate: same origin, enter: everything else
     if (type === 'reload' || source === window.location.href) {
@@ -122,10 +122,20 @@ function addNavigationTracking() {
     } else {
       sampleRUM('enter', payload); // enter site
     }
+    fflags.enabled('redirect', () => {
+      const from = new URLSearchParams(window.location.search).get('redirect-from');
+      if (redirectCount) {
+        sampleRUM('redirect', { source: from, target: redirectCount });
+      }
+    });
   };
 
   new PerformanceObserver((list) => list
-    .getEntries().map((entry) => navigate(window.hlx.referrer || document.referrer, entry.type)))
+    .getEntries().map((entry) => navigate(
+      window.hlx.referrer || document.referrer,
+      entry.type,
+      entry.redirectCount,
+    )))
     .observe({ type: 'navigation', buffered: true });
 }
 
