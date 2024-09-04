@@ -19,4 +19,5 @@ export const fflags = {
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
   eagercwv: [683],
   example: [543, 770, 1136],
+  language: [543, 959, 1139, 620],
 };
