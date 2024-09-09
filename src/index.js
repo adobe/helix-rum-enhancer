@@ -12,13 +12,14 @@
 const { sampleRUM } = window.hlx.rum;
 
 const fflags = {
-  has: (flag) => fflags[flag].indexOf(Array.from(window.origin)
+  has: (flag) => fflags[flag] && fflags[flag].indexOf(Array.from(window.origin)
     .map((a) => a.charCodeAt(0))
     .reduce((a, b) => a + b, 1) % 1371) !== -1,
   enabled: (flag, callback) => fflags.has(flag) && callback(),
   disabled: (flag, callback) => !fflags.has(flag) && callback(),
-  onetrust: [543, 770, 1136],
+  // example: [543, 770, 1136], -> sample feature toggle
 };
+// fflags.enabled('example', () => { example tracking }); -> invocation of sample feature toggle
 
 sampleRUM.baseURL = sampleRUM.baseURL || new URL('https://rum.hlx.page');
 
@@ -205,7 +206,8 @@ new PerformanceObserver((list) => {
     sampleRUM('utm', { source: key, target: value });
   });
 
-fflags.enabled('onetrust', () => {
+// consent
+(() => {
   const cmpCookie = document.cookie.split(';')
     .map((c) => c.trim())
     .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
@@ -237,7 +239,7 @@ fflags.enabled('onetrust', () => {
       }
     }
   }
-});
+})();
 
 // paid checkpoint
 (() => {
