@@ -315,6 +315,11 @@ function addTrackingFromConfig() {
   addEmailParameterTracking(sampleRUM);
   addExperimentTracking();
   addAudienceTracking();
+  fflags.enabled('language', () => {
+    const target = navigator.language;
+    const source = document.documentElement.lang;
+    sampleRUM('language', { source, target });
+  });
 }
 
 function initEnhancer() {
