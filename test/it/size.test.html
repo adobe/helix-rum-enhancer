@@ -1,0 +1,74 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+</head>
+
+<body>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendMouse } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('HTML Size Tests', () => {
+
+        it('can load rum enhancer as a script', async function () {
+          let called = [];
+          window.hlx = {
+            rum: {
+              sampleRUM: (...args) => {
+                called.push(args);
+              }
+            }
+          };
+
+
+          const script = document.createElement('script');
+          script.src = new URL('/src/index.js', window.location).href;
+          script.type = 'module';
+          document.head.appendChild(script);
+
+          await new Promise((resolve) => {
+            script.onload = resolve;
+          });
+          // wait one second for the script to run
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          // click anywhere, just to make sure the script is running
+          await sendMouse({ type: 'click', position: [10, 10] });
+
+          expect(called).to.have.lengthOf(2);
+          expect(called[0][0]).to.equal('enter');
+          expect(called[1][0]).to.equal('click');
+
+          let transferSize = 0;
+          // check the size of loaded JS files
+          const p = new PerformanceObserver((list) => {
+            const entries = list.getEntries();
+            const jsEntries = entries
+              .filter((entry) => entry.initiatorType === 'script')
+              .filter((entry) => entry.name.endsWith('/src/index.js'));
+            jsEntries.forEach((entry) => {
+              transferSize = entry.transferSize;
+            });
+          });
+          p.observe({ type: 'resource', buffered: true });
+
+          // wait a second for the observer to pick up the entries
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+          expect(transferSize).to.be.greaterThan(0, 'the file should not be empty');
+          expect(transferSize).to.be.lessThan(17 * 1024, 'we limit the size of the file to 17KB');
+
+        });
+
+      });
+    });
+  </script>
+</body>
+
+</html>
