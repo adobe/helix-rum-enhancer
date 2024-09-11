@@ -20,4 +20,5 @@ export const fflags = {
   eagercwv: [683],
   redirect: [620, 1139],
   example: [543, 770, 1136],
+  language: [543, 959, 1139, 620],
 };

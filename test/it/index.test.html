@@ -1,4 +1,4 @@
-<html>
+<html lang="en-NZ">
 
 <head>
   <title>Test Runner</title>
@@ -40,9 +40,17 @@
           // click anywhere
           await sendMouse({ type: 'click', position: [10, 10] });
 
-          expect(called).to.have.lengthOf(2);
-          expect(called[0][0]).to.equal('enter');
-          expect(called[1][0]).to.equal('click');
+          // the order is not stable across browsers, so we
+          // sort called by the first argument
+          called.sort((a, b) => a[0].localeCompare(b[0]));
+
+          expect(called).to.have.lengthOf(3);
+          expect(called[0][0]).to.equal('click');
+
+          expect(called[1][0]).to.equal('enter');
+
+          expect(called[2][0]).to.equal('language');
+          expect(called[2][1].source).to.equal('en-NZ');
         });
 
       });
