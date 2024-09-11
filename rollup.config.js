@@ -11,7 +11,6 @@
  */
 
 import cleanup from 'rollup-plugin-cleanup';
-import eslint from 'rollup-plugin-eslint-bundle';
 
 const banner = `/*
  * Copyright 2024 Adobe. All rights reserved.
@@ -23,10 +22,7 @@ const banner = `/*
  * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
- */
-
-/* eslint-disable max-classes-per-file, wrap-iife */
-// eslint-disable-next-line func-names`;
+ */`;
 
 const bundles = [
   {
@@ -55,13 +51,8 @@ export default [...bundles.map(({ outputFile, source }) => ({
   ],
   plugins: [
     cleanup({
-      comments: ['eslint', 'jsdoc', /^\//, /^\*(?!\sc8\s)(?!\n \* Copyright)/],
-      maxEmptyLines: -1,
-    }),
-    eslint({
-      eslintOptions: {
-        fix: true,
-      },
+      comments: [/^\*(?!\sc8\s)(?!\n \* Copyright)/],
+      maxEmptyLines: 0,
     }),
   ],
 }))];

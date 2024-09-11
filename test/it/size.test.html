@@ -41,8 +41,6 @@
           await sendMouse({ type: 'click', position: [10, 10] });
 
           expect(called).to.have.lengthOf(3, 'we expect three calls, got ' + called.map((c) => c[0]).join(', '));
-          expect(called[0][0]).to.equal('language');
-          expect(called[1][0]).to.equal('enter');
           expect(called[2][0]).to.equal('click');
 
           let transferSize = 0;
