@@ -17,6 +17,7 @@
     <input type="text" class="a-text"></input>
     <input type="checkbox" class="a-checkbox"></input>
     <textarea class="a-textarea"></textarea>
+    <input class="a-none"></input>
   </form>
 
   <div class="with-classes a-block block" data-block-name="a-block">
@@ -42,6 +43,7 @@
 
           expect(sourceSelector(document.querySelector('input[type="text"'))).to.be.equal('form input[type=\'text\'].a-text');
           expect(sourceSelector(document.querySelector('input[type="checkbox"'))).to.be.equal('form input[type=\'checkbox\'].a-checkbox');
+          expect(sourceSelector(document.querySelector('input.a-none'))).to.be.equal('form input.a-none');
           expect(sourceSelector(document.querySelector('textarea'))).to.be.equal('form textarea.a-textarea');
 
           expect(sourceSelector(document.querySelector('.a-block'))).to.be.equal('.a-block');
