@@ -1,3 +1,24 @@
+# [2.20.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.2...v2.20.0) (2024-08-19)
+
+
+### Features
+
+* observe all mutations to capture late added medias ([#261](https://github.com/adobe/helix-rum-enhancer/issues/261)) ([56844b2](https://github.com/adobe/helix-rum-enhancer/commit/56844b2aa61fe5cc837cd5a887f0c8669a335e0f))
+
+## [2.19.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.1...v2.19.2) (2024-08-15)
+
+
+### Bug Fixes
+
+* remove intersection threshold ([#258](https://github.com/adobe/helix-rum-enhancer/issues/258)) ([8805b49](https://github.com/adobe/helix-rum-enhancer/commit/8805b49a052bbc9a659ee2485ada8a9db5a13e40))
+
+## [2.19.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.0...v2.19.1) (2024-08-15)
+
+
+### Bug Fixes
+
+* **navigation:** remove `leave` checkpoint ([95503de](https://github.com/adobe/helix-rum-enhancer/commit/95503de3dfd83534a8692d6fa3a1af96734e65aa)), closes [/github.com/adobe/helix-rum-enhancer/pull/257#discussion_r1718152824](https://github.com//github.com/adobe/helix-rum-enhancer/pull/257/issues/discussion_r1718152824)
+
 # [2.19.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.18.0...v2.19.0) (2024-08-13)
 
 

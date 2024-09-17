@@ -26,9 +26,14 @@ const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window
   /* c8 ignore next */ : {};
 
 const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
-// eslint-disable-next-line no-use-before-define
-const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback)
-/* c8 ignore next */ : null;
+
+// eslint-disable-next-line no-use-before-define, max-len
+const blocksMutationObserver = window.MutationObserver ? new MutationObserver(blocksMutationsCallback)
+  /* c8 ignore next */ : {};
+
+// eslint-disable-next-line no-use-before-define, max-len
+const mediaMutationObserver = window.MutationObserver ? new MutationObserver(mediaMutationsCallback)
+  /* c8 ignore next */ : {};
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
@@ -52,7 +57,7 @@ function trackCheckpoint(checkpoint, data, t) {
 }
 
 function processQueue() {
-  while (queue.length) {
+  while (queue && queue.length) {
     const ck = queue.shift();
     trackCheckpoint(...ck);
   }
@@ -103,7 +108,7 @@ function addCWVTracking() {
   }, 2000); // wait for delayed
 }
 
-function addEnterLeaveTracking() {
+function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
   const navigate = (source, type) => {
     const payload = { source, target: document.visibilityState };
@@ -122,16 +127,6 @@ function addEnterLeaveTracking() {
   new PerformanceObserver((list) => list
     .getEntries().map((entry) => navigate(window.hlx.referrer || document.referrer, entry.type)))
     .observe({ type: 'navigation', buffered: true });
-
-  const leave = ((event) => {
-    if (leave.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
-      return;
-    }
-    leave.left = true;
-    sampleRUM('leave');
-  });
-  window.addEventListener('visibilitychange', ((event) => leave(event)));
-  window.addEventListener('pagehide', ((event) => leave(event)));
 }
 
 function addLoadResourceTracking() {
@@ -158,21 +153,36 @@ function addLoadResourceTracking() {
 }
 
 function activateBlocksMutationObserver() {
-  if (!mutationObserver || mutationObserver.active) {
+  if (!blocksMutationObserver || blocksMutationObserver.active) {
     return;
   }
-  mutationObserver.active = true;
-  mutationObserver.observe(
+  blocksMutationObserver.active = true;
+  blocksMutationObserver.observe(
     document.body,
     // eslint-disable-next-line object-curly-newline
     { subtree: true, attributes: true, attributeFilter: ['data-block-status'] },
   );
 }
 
+function activateMediaMutationObserver() {
+  if (!mediaMutationObserver || mediaMutationObserver.active) {
+    return;
+  }
+  mediaMutationObserver.active = true;
+  mediaMutationObserver.observe(
+    document.body,
+    // eslint-disable-next-line object-curly-newline
+    { subtree: true, attributes: false, childList: true },
+  );
+}
+
 function getIntersectionObsever(checkpoint) {
-  /* c8 ignore next */
-  if (!window.IntersectionObserver) return null;
+  /* c8 ignore next 3 */
+  if (!window.IntersectionObserver) {
+    return null;
+  }
   activateBlocksMutationObserver();
+  activateMediaMutationObserver();
   const observer = new IntersectionObserver((entries) => {
     try {
       entries
@@ -187,7 +197,7 @@ function getIntersectionObsever(checkpoint) {
     } catch (error) {
       // something went wrong
     }
-  }, { threshold: 0.25 });
+  });
   return observer;
 }
 function addViewBlockTracking(element) {
@@ -198,11 +208,13 @@ function addViewBlockTracking(element) {
   }
 }
 
+const observedMedia = new Set();
 function addViewMediaTracking(parent) {
   const mediaobserver = getIntersectionObsever('viewmedia');
   if (mediaobserver) {
     parent.querySelectorAll('img, video, audio, iframe').forEach((m) => {
-      if (!m.closest('div .block') || m.closest('div[data-block-status="loaded"]')) {
+      if (!observedMedia.has(m)) {
+        observedMedia.add(m);
         mediaobserver.observe(m);
       }
     });
@@ -211,19 +223,32 @@ function addViewMediaTracking(parent) {
 
 function addFormTracking(parent) {
   activateBlocksMutationObserver();
+  activateMediaMutationObserver();
   parent.querySelectorAll('form').forEach((form) => {
     form.removeEventListener('submit', formSubmitListener); // listen only once
     form.addEventListener('submit', formSubmitListener);
   });
 }
 
-const addObserver = (ck, fn, block) => DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
-function mutationsCallback(mutations) {
-  mutations.filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
+function addObserver(ck, fn, block) {
+  return DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
+}
+
+function blocksMutationsCallback(mutations) {
+  // block specific mutations
+  mutations
+    .filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
     .filter((m) => m.target.dataset.blockStatus === 'loaded')
     .forEach((m) => {
       addObserver('form', addFormTracking, m.target);
       addObserver('viewblock', addViewBlockTracking, m.target);
+    });
+}
+
+function mediaMutationsCallback(mutations) {
+  // media mutations
+  mutations
+    .forEach((m) => {
       addObserver('viewmedia', addViewMediaTracking, m.target);
     });
 }
@@ -234,7 +259,7 @@ function addTrackingFromConfig() {
   });
   addCWVTracking();
   addFormTracking(window.document.body);
-  addEnterLeaveTracking();
+  addNavigationTracking();
   addLoadResourceTracking();
   addUTMParametersTracking(sampleRUM);
   addViewBlockTracking(window.document.body);
@@ -242,6 +267,11 @@ function addTrackingFromConfig() {
   addCookieConsentTracking(sampleRUM);
   addAdsParametersTracking(sampleRUM);
   addEmailParameterTracking(sampleRUM);
+  fflags.enabled('language', () => {
+    const target = navigator.language;
+    const source = document.documentElement.lang;
+    sampleRUM('language', { source, target });
+  });
 }
 
 function initEnhancer() {
@@ -251,6 +281,7 @@ function initEnhancer() {
       window.hlx.rum.collector = trackCheckpoint;
       processQueue();
     }
+  /* c8 ignore next 3 */
   } catch (error) {
     // something went wrong
   }
