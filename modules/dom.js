@@ -72,7 +72,7 @@ function getSourceContext(element) {
 }
 
 function getSourceElement(element) {
-  if (element.closest('form') && Array.from(element.closest('form').elements).includes(element)) return element.tagName.toLowerCase() + (element.tagName === 'INPUT' ? `[type='${element.getAttribute('type')}']` : '');
+  if (element.closest('form') && Array.from(element.closest('form').elements).includes(element)) return element.tagName.toLowerCase() + (element.tagName === 'INPUT' ? `[type='${element.getAttribute('type') || ''}']` : '');
   if (walk(element, isFakeButton)) return 'button';
   return element.tagName.toLowerCase().match(/^(a|img|video)$/) && element.tagName.toLowerCase();
 }
