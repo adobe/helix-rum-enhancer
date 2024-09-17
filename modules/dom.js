@@ -62,7 +62,7 @@ function isFakeButton(element) {
 
 function getSourceContext(element) {
   if (element.closest('form')) return 'form';
-  if (element.closest('.block')) return `.${element.closest('.block').getAttribute('data-block-name')}`;
+  if (element.closest('.block[data-block-name]')) return `.${element.closest('.block').getAttribute('data-block-name')}`;
   if (walk(element, isFakeDialog)) return 'dialog';
   if (element.closest('nav')) return 'nav';
   if (element.closest('header')) return 'header';
