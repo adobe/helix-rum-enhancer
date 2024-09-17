@@ -38,7 +38,7 @@ function walk(element, checkFn) {
   return checkValue || walk(element.parentElement, checkFn);
 }
 
-function isFakeDialog(element) {
+function isDialog(element) {
   // doing it well
   if (element.tagName === 'DIALOG') return true;
   // making the best of it
@@ -50,7 +50,7 @@ function isFakeDialog(element) {
   return (computedStyle && computedStyle.position === 'fixed' && computedStyle.zIndex > 100);
 }
 
-function isFakeButton(element) {
+function isButton(element) {
   if (element.tagName === 'BUTTON') return true;
   if (element.tagName === 'INPUT' && element.getAttribute('type') === 'button') return true;
   if (element.tagName === 'A') {
@@ -63,7 +63,7 @@ function isFakeButton(element) {
 function getSourceContext(element) {
   if (element.closest('form')) return 'form';
   if (element.closest('.block[data-block-name]')) return `.${element.closest('.block').getAttribute('data-block-name')}`;
-  if (walk(element, isFakeDialog)) return 'dialog';
+  if (walk(element, isDialog)) return 'dialog';
   if (element.closest('nav')) return 'nav';
   if (element.closest('header')) return 'header';
   if (element.closest('footer')) return 'footer';
@@ -73,7 +73,7 @@ function getSourceContext(element) {
 
 function getSourceElement(element) {
   if (element.closest('form') && Array.from(element.closest('form').elements).includes(element)) return element.tagName.toLowerCase() + (element.tagName === 'INPUT' ? `[type='${element.getAttribute('type') || ''}']` : '');
-  if (walk(element, isFakeButton)) return 'button';
+  if (walk(element, isButton)) return 'button';
   return element.tagName.toLowerCase().match(/^(a|img|video)$/) && element.tagName.toLowerCase();
 }
 
