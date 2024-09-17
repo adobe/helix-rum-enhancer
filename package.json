@@ -11,7 +11,7 @@
     "test:watch": "npm run build-bundle && npm run setup-playwright && web-test-runner --node-resolve --playwright --coverage --watch",
     "lint": "eslint .",
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
-    "build-bundle": "rollup --config",
+    "build-bundle": "rollup --config && sha256sum src/index.js > src/checksum.sha256",
     "prepack": "npm run build-bundle",
     "semantic-release": "semantic-release",
     "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH 1.x main",
