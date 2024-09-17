@@ -1,0 +1,78 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin'
+    };
+    // we log what's being sent to the "server"
+    window.called = [];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = function (url, payload) {
+      // if payload is a string, we assume it's a JSON string
+      if (typeof payload === 'string') {
+        console.log('fakeSendBeacon string', url, JSON.parse(payload));
+        const data = JSON.parse(payload);
+        if (data.checkpoint === 'click') {
+          window.called.push(data);
+        }
+      } else {
+        // it's a blob
+        payload.text().then((text) => {
+          console.log('fakeSendBeacon blob', url, JSON.parse(text));
+          const data = JSON.parse(text);
+          if (data.checkpoint === 'click') {
+            window.called.push(data);
+          }
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <fancy-webcomponent>
+    The first block
+    <img src="/test/fixtures/fire.jpg" height="200" width="200">
+  </fancy-webcomponent>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendMouse, setViewport } from '@web/test-runner-commands';
+    import { assert } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('Test Click Tracking', () => {
+        it('Can observe clicks', async () => {
+
+          await setViewport({ width: 800, height: 600 });
+
+          await sendMouse({ type: 'click', position: [100, 100] });
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 0);
+          });
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          });
+
+          const img = document.querySelector('img');
+          img.click();
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          assert(window.called.length === 2, 'some click checkpoints are missing');
+        });
+      });
+    });
+  </script>
+</body>
