@@ -40,7 +40,7 @@
 <body>
   <fancy-webcomponent>
     The first block
-    <img src="/test/fixtures/fire.jpg" height="200" width="200">
+    <img data-rum-source="tracked-image" src="/test/fixtures/fire.jpg" height="200" width="200">
   </fancy-webcomponent>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
@@ -71,6 +71,7 @@
           });
 
           assert(window.called.length === 2, 'some click checkpoints are missing');
+          assert(window.called[1].source === 'tracked-image', 'source is not correct');
         });
       });
     });
