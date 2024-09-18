@@ -54,8 +54,8 @@ export default [...bundles.map(({ outputFile, source }) => ({
   ],
   plugins: [
     cleanup({
-      comments: ['eslint', 'jsdoc', /^\//, /^\*(?!\sc8\s)(?!\n \* Copyright)/],
-      maxEmptyLines: -1,
+      comments: [],
+      maxEmptyLines: 0,
     }),
     checksum({
       filename: `${outputFile.split('/').pop()}.md5`,
