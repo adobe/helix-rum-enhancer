@@ -38,16 +38,16 @@ export default [...bundles.map(({ outputFile, source }) => ({
   input: source,
   output: [
     {
-      file: `${outputFile}.js`,
+      file: `${outputFile}.map.js`,
       format: 'iife',
-      sourcemap: false,
+      sourcemap: 'inline',
       exports: 'auto',
       banner,
     },
     {
-      file: `${outputFile}.map.js`,
+      file: `${outputFile}.js`,
       format: 'iife',
-      sourcemap: 'inline',
+      sourcemap: false,
       exports: 'auto',
       banner,
     },
