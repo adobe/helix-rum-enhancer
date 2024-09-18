@@ -11,6 +11,9 @@
  */
 
 import cleanup from 'rollup-plugin-cleanup';
+import pkg from 'rollup-plugin-checksum';
+
+const checksum = pkg.default;
 
 const banner = `/*
  * Copyright 2024 Adobe. All rights reserved.
@@ -51,8 +54,12 @@ export default [...bundles.map(({ outputFile, source }) => ({
   ],
   plugins: [
     cleanup({
-      comments: [/^\*(?!\sc8\s)(?!\n \* Copyright)/],
-      maxEmptyLines: 0,
+      comments: ['eslint', 'jsdoc', /^\//, /^\*(?!\sc8\s)(?!\n \* Copyright)/],
+      maxEmptyLines: -1,
+    }),
+    checksum({
+      filename: `${outputFile.split('/').pop()}.md5`,
+      includeAssets: false,
     }),
   ],
 }))];
