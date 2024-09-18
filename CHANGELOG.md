@@ -1,3 +1,10 @@
+## [2.21.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.21.0...v2.21.1) (2024-09-18)
+
+
+### Bug Fixes
+
+* **release:** do not attempt to create hash from source map ([0ba7631](https://github.com/adobe/helix-rum-enhancer/commit/0ba763158ee7760ec405a0a0e2d6c32e8911d6c2))
+
 # [2.21.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.20.0...v2.21.0) (2024-09-18)
 
 
