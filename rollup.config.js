@@ -11,7 +11,9 @@
  */
 
 import cleanup from 'rollup-plugin-cleanup';
-import eslint from 'rollup-plugin-eslint-bundle';
+import pkg from 'rollup-plugin-checksum';
+
+const checksum = pkg.default;
 
 const banner = `/*
  * Copyright 2024 Adobe. All rights reserved.
@@ -23,10 +25,7 @@ const banner = `/*
  * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
- */
-
-/* eslint-disable max-classes-per-file, wrap-iife */
-// eslint-disable-next-line func-names`;
+ */`;
 
 const bundles = [
   {
@@ -39,29 +38,28 @@ export default [...bundles.map(({ outputFile, source }) => ({
   input: source,
   output: [
     {
-      file: `${outputFile}.js`,
-      format: 'iife',
-      sourcemap: false,
-      exports: 'auto',
-      banner,
-    },
-    {
       file: `${outputFile}.map.js`,
       format: 'iife',
       sourcemap: 'inline',
       exports: 'auto',
       banner,
     },
+    {
+      file: `${outputFile}.js`,
+      format: 'iife',
+      sourcemap: false,
+      exports: 'auto',
+      banner,
+    },
   ],
   plugins: [
     cleanup({
-      comments: ['eslint', 'jsdoc', /^\//, /^\*(?!\sc8\s)(?!\n \* Copyright)/],
-      maxEmptyLines: -1,
+      comments: [],
+      maxEmptyLines: 0,
     }),
-    eslint({
-      eslintOptions: {
-        fix: true,
-      },
+    checksum({
+      filename: `${outputFile.split('/').pop()}.md5`,
+      includeAssets: false,
     }),
   ],
 }))];
