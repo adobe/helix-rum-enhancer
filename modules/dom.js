@@ -62,7 +62,8 @@ function isButton(element) {
 
 function getSourceContext(element) {
   if (element.closest('form')) return 'form';
-  if (element.closest('.block[data-block-name]')) return `.${element.closest('.block').getAttribute('data-block-name')}`;
+  const block = element.closest('.block[data-block-name]');
+  if (block) return `.${block.getAttribute('data-block-name')}`;
   if (walk(element, isDialog)) return 'dialog';
   if (element.closest('nav')) return 'nav';
   if (element.closest('header')) return 'header';
