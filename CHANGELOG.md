@@ -1,3 +1,15 @@
+# [2.22.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.21.1...v2.22.0) (2024-09-18)
+
+
+### Bug Fixes
+
+* **consent:** spelling ([1279aca](https://github.com/adobe/helix-rum-enhancer/commit/1279aca5ab997b33428766a9c552cbde7007804a))
+
+
+### Features
+
+* **onetrust:** detect supressed consent banner ([440473e](https://github.com/adobe/helix-rum-enhancer/commit/440473ea92fcd281eacad5a14478d3d4751a3c1a))
+
 ## [2.21.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.21.0...v2.21.1) (2024-09-18)
 
 
