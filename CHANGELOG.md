@@ -1,3 +1,25 @@
+## [2.21.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.21.0...v2.21.1) (2024-09-18)
+
+
+### Bug Fixes
+
+* **release:** do not attempt to create hash from source map ([0ba7631](https://github.com/adobe/helix-rum-enhancer/commit/0ba763158ee7760ec405a0a0e2d6c32e8911d6c2))
+
+# [2.21.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.20.0...v2.21.0) (2024-09-18)
+
+
+### Bug Fixes
+
+* **dom:** apply change ([67803e6](https://github.com/adobe/helix-rum-enhancer/commit/67803e60f57ef29b9ea1c51eea26d99c778b5f97))
+* **dom:** better handling of empty type form inputs ([d53deb5](https://github.com/adobe/helix-rum-enhancer/commit/d53deb5c6e94ff18df2a01996c39b5cff7636fe4))
+* **dom:** better handling of fake blocks ([66a9049](https://github.com/adobe/helix-rum-enhancer/commit/66a90497a45d754ed0fa4e8f8bc0917be64b3245))
+
+
+### Features
+
+* **checkpoints:** add support for the `language` checkpoint ([f99755a](https://github.com/adobe/helix-rum-enhancer/commit/f99755a5cc8eef83b655a6beff5e7e371196c90d))
+* **dom:** more fine-grained sourceselector implementation ([ada279d](https://github.com/adobe/helix-rum-enhancer/commit/ada279d423590fb3feeb304b3a57d6da4ee3c9bf))
+
 # [2.20.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.2...v2.20.0) (2024-08-19)
 
 

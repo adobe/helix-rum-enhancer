@@ -40,7 +40,7 @@
           // click anywhere, just to make sure the script is running
           await sendMouse({ type: 'click', position: [10, 10] });
 
-          expect(called).to.have.lengthOf(3, 'we expect three calls, got ' + called.map((c) => c[0]).join(', '));
+          expect(called).to.have.lengthOf(3, 'three calls should have been made, got: ' + called.map((c) => c[0]).join(', '));
           expect(called[2][0]).to.equal('click');
 
           let transferSize = 0;
