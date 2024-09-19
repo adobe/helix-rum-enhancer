@@ -41,7 +41,8 @@ function trackCheckpoint(checkpoint, data, t) {
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
-      const { href: url, origin } = new URL(`.rum/${weight}`, sampleRUM.collectBaseURL || sampleRUM.baseURL);
+      const urlParams = window.RUM_PARAMS ? `?${new URLSearchParams(window.RUM_PARAMS).toString()}` : '';
+      const { href: url, origin } = new URL(`.rum/${weight}${urlParams}`, sampleRUM.collectBaseURL);
       if (window.location.origin === origin) {
         const headers = { type: 'application/json' };
         navigator.sendBeacon(url, new Blob([body], headers));
