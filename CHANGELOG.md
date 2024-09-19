@@ -1,3 +1,10 @@
+# [2.23.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.22.0...v2.23.0) (2024-09-19)
+
+
+### Features
+
+* **index:** support  to attach custom URL parameters to collection URL ([02f4d0b](https://github.com/adobe/helix-rum-enhancer/commit/02f4d0b366505fc17bc251e29364efa2e497c299))
+
 # [2.22.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.21.1...v2.22.0) (2024-09-18)
 
 
