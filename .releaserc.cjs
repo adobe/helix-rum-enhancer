@@ -21,7 +21,13 @@ module.exports = {
           "label": "RUM Enhancer Hash"
         }
       ]
-    }]
+    }],
+    ["semantic-release-slack-bot", {
+      notifyOnSuccess: true,
+      notifyOnFail: true,
+      markdownReleaseNotes: true,
+      slackChannel: "rum-explorers",
+    }],
   ],
   branches: ['main'],
 };
