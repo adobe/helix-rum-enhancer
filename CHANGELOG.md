@@ -1,3 +1,11 @@
+# [2.24.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.23.0...v2.24.0) (2024-09-20)
+
+
+### Features
+
+* **navigation:** add support for `redirect` checkpoint ([87b2c05](https://github.com/adobe/helix-rum-enhancer/commit/87b2c057a5e0afbe21cd6224bd995f48ebafa30e))
+* **redirect:** support soft-redirects ([00392c1](https://github.com/adobe/helix-rum-enhancer/commit/00392c18ad8a0677437f5846b9e63ea32df163cb))
+
 # [2.23.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.22.0...v2.23.0) (2024-09-19)
 
 
