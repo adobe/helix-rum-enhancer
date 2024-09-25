@@ -61,7 +61,9 @@ function isButton(element) {
 }
 
 function getSourceContext(element) {
-  if (element.closest('form')) return 'form';
+  if (element.closest('form')) {
+    return `form${element.id ? `#${element.id}` : ''}`;
+  }
   const block = element.closest('.block[data-block-name]');
   if (block) return `.${block.getAttribute('data-block-name')}`;
   if (walk(element, isDialog)) return 'dialog';
@@ -73,7 +75,12 @@ function getSourceContext(element) {
 }
 
 function getSourceElement(element) {
-  if (element.closest('form') && Array.from(element.closest('form').elements).includes(element)) return element.tagName.toLowerCase() + (element.tagName === 'INPUT' ? `[type='${element.getAttribute('type') || ''}']` : '');
+  if (element.closest('form') && Array.from(element.closest('form').elements).includes(element)) {
+    return (element.tagName.toLowerCase()
+        + (['INPUT', 'BUTTON'].includes(element.tagName)
+          ? `[type='${element.getAttribute('type') || ''}']`
+          : ''));
+  }
   if (walk(element, isButton)) return 'button';
   return element.tagName.toLowerCase().match(/^(a|img|video)$/) && element.tagName.toLowerCase();
 }
