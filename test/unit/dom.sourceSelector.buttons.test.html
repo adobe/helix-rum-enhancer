@@ -51,6 +51,7 @@
     <button class="explicit-submit-btn" type="submit">Button in a form</button>
     <button class="normal-btn" type="button">Button in a form</button>
     <button class="reset-btn" type="reset">Button in a form</button>
+    <button id="a-form-btn" class="btn" type="reset">Button in a form</button>
   </form>
 
   <script type="module">
@@ -82,11 +83,12 @@
 
           expect(sourceSelector(document.querySelector('span.cta'))).to.be.equal('.a-block .cta');
 
-          expect(sourceSelector(document.querySelector('form button'))).to.be.equal('form button[type=\'submit\']');
-          expect(sourceSelector(document.querySelector('form button.submit-btn'))).to.be.equal('form button.submit-btn[type=\'submit\']');
-          expect(sourceSelector(document.querySelector('form button.explicit-submit-btn'))).to.be.equal('form button.explicit-submit-btn[type=\'submit\']');
-          expect(sourceSelector(document.querySelector('form button.normal-btn'))).to.be.equal('form button.normal-btn[type=\'button\']');
-          expect(sourceSelector(document.querySelector('form button.reset-btn'))).to.be.equal('form button.reset-btn[type=\'reset\']');
+          expect(sourceSelector(document.querySelector('form button'))).to.be.equal('form button[type=\'\']');
+          expect(sourceSelector(document.querySelector('form button.submit-btn'))).to.be.equal('form button[type=\'\'].submit-btn');
+          expect(sourceSelector(document.querySelector('form button.explicit-submit-btn'))).to.be.equal('form button[type=\'submit\'].explicit-submit-btn');
+          expect(sourceSelector(document.querySelector('form button.normal-btn'))).to.be.equal('form button[type=\'button\'].normal-btn');
+          expect(sourceSelector(document.querySelector('form button.reset-btn'))).to.be.equal('form button[type=\'reset\'].reset-btn');
+          expect(sourceSelector(document.querySelector('#a-form-btn'))).to.be.equal('form button[type=\'reset\']#a-form-btn');
         });
       });
     });

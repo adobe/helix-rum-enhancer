@@ -20,7 +20,7 @@
     <input class="a-none"></input>
   </form>
 
-  <form id="b-form"></form>
+  <form id="b-form">
     <input type="text" class="a-text"></input>
   </form>
 
@@ -59,7 +59,7 @@
           expect(sourceSelector(document.querySelector('.not-a-block'))).to.be.equal('.not-a-block');
           expect(sourceSelector(document.querySelector('#not-a-div-in-block'))).to.be.equal('#not-a-div-in-block');
 
-          expect(sourceSelector(document.querySelectorAll('input[type="text"')[1])).to.be.equal('form#b-form input[type=\'text\'].a-text');
+          expect(sourceSelector(document.querySelector('form#b-form input'))).to.be.equal('form#b-form input[type=\'text\'].a-text');
         });
       });
     });
