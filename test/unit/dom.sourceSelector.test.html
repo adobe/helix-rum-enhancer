@@ -20,6 +20,10 @@
     <input class="a-none"></input>
   </form>
 
+  <form id="b-form"></form>
+    <input type="text" class="a-text"></input>
+  </form>
+
   <div class="with-classes a-block block" data-block-name="a-block">
     <div id="a-div-in-block">a div</div>
   </div>
@@ -28,7 +32,7 @@
     <div id="not-a-div-in-block">a div, not inside a block</div>
   </div>
 
-  
+
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
@@ -45,16 +49,17 @@
           expect(sourceSelector(document.querySelector('div.multi-2'))).to.be.equal('has-priority-too');
           expect(sourceSelector(document.querySelector('div.multi-3'))).to.be.equal('#id-has-priority');
 
-          expect(sourceSelector(document.querySelector('input[type="text"'))).to.be.equal('form input[type=\'text\'].a-text');
-          expect(sourceSelector(document.querySelector('input[type="checkbox"'))).to.be.equal('form input[type=\'checkbox\'].a-checkbox');
-          expect(sourceSelector(document.querySelector('input.a-none'))).to.be.equal('form input[type=\'\'].a-none');
-          expect(sourceSelector(document.querySelector('textarea'))).to.be.equal('form textarea.a-textarea');
+          expect(sourceSelector(document.querySelector('input[type="text"'))).to.be.equal('form#a-form input[type=\'text\'].a-text');
+          expect(sourceSelector(document.querySelector('input[type="checkbox"'))).to.be.equal('form#a-form input[type=\'checkbox\'].a-checkbox');
+          expect(sourceSelector(document.querySelector('input.a-none'))).to.be.equal('form#a-form input[type=\'\'].a-none');
+          expect(sourceSelector(document.querySelector('textarea'))).to.be.equal('form#a-form textarea.a-textarea');
 
           expect(sourceSelector(document.querySelector('.a-block'))).to.be.equal('.a-block');
           expect(sourceSelector(document.querySelector('#a-div-in-block'))).to.be.equal('.a-block #a-div-in-block');
           expect(sourceSelector(document.querySelector('.not-a-block'))).to.be.equal('.not-a-block');
           expect(sourceSelector(document.querySelector('#not-a-div-in-block'))).to.be.equal('#not-a-div-in-block');
-          
+
+          expect(sourceSelector(document.querySelectorAll('input[type="text"')[1])).to.be.equal('form#b-form input[type=\'text\'].a-text');
         });
       });
     });

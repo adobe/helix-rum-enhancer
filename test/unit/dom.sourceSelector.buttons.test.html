@@ -45,6 +45,13 @@
   <div class="with-classes a-block block" data-block-name="a-block">
     <span class="cta">Button in a block</span>
   </div>
+  <form>
+    <button>Submit Button in a form without class</button>
+    <button class="submit-btn">Submit Button in a form</button>
+    <button class="explicit-submit-btn" type="submit">Button in a form</button>
+    <button class="normal-btn" type="button">Button in a form</button>
+    <button class="reset-btn" type="reset">Button in a form</button>
+  </form>
 
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
@@ -74,6 +81,12 @@
           expect(sourceSelector(document.querySelector('a.button'))).to.be.equal('#an-a-container-2 button.button');
 
           expect(sourceSelector(document.querySelector('span.cta'))).to.be.equal('.a-block .cta');
+
+          expect(sourceSelector(document.querySelector('form button'))).to.be.equal('form button[type=\'submit\']');
+          expect(sourceSelector(document.querySelector('form button.submit-btn'))).to.be.equal('form button.submit-btn[type=\'submit\']');
+          expect(sourceSelector(document.querySelector('form button.explicit-submit-btn'))).to.be.equal('form button.explicit-submit-btn[type=\'submit\']');
+          expect(sourceSelector(document.querySelector('form button.normal-btn'))).to.be.equal('form button.normal-btn[type=\'button\']');
+          expect(sourceSelector(document.querySelector('form button.reset-btn'))).to.be.equal('form button.reset-btn[type=\'reset\']');
         });
       });
     });
