@@ -1,3 +1,10 @@
+# [2.25.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.24.0...v2.25.0) (2024-10-03)
+
+
+### Features
+
+* capturing id of form and button type inside a form ([#293](https://github.com/adobe/helix-rum-enhancer/issues/293)) ([530572f](https://github.com/adobe/helix-rum-enhancer/commit/530572f7c441c72f8d5f7683bef7490d37186a9f))
+
 # [2.24.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.23.0...v2.24.0) (2024-09-20)
 
 
