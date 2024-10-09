@@ -1,3 +1,10 @@
+# [2.26.0-beta.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.25.0...v2.26.0-beta.1) (2024-10-09)
+
+
+### Features
+
+* handle pre-rendering ([bb11187](https://github.com/adobe/helix-rum-enhancer/commit/bb11187058b8cb521a270c316323b66414a8d817))
+
 # [2.25.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.24.0...v2.25.0) (2024-10-03)
 
 
