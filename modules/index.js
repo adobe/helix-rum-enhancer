@@ -112,6 +112,8 @@ function addNavigationTracking() {
   const navigate = (source, type, redirectCount) => {
     // target can be 'visible', 'hidden' (background tab) or 'prerendered' (speculation rules)
     const payload = { source, target: document.visibilityState };
+    /* c8 ignore next 13 */
+    // prerendering cannot be tested yet with headless browsers
     if (document.prerendering) {
       // listen for "activation" of the current pre-rendered page
       document.addEventListener('prerenderingchange', () => {
