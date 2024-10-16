@@ -19,7 +19,7 @@ export function addCookieConsentTracking(sampleRUM) {
     return;
   }
 
-  let consentMO;
+  let consentMO; // consent mutation observer
   const trackShowConsent = () => {
     const otsdk = document.querySelector('body > div#onetrust-consent-sdk');
     if (otsdk) {

@@ -161,6 +161,7 @@ function addLoadResourceTracking() {
   observer.observe({ type: 'resource', buffered: true });
 }
 
+// activate blocks mutation observer
 function activateBlocksMO() {
   if (!blocksMO || blocksMO.active) {
     return;
@@ -173,6 +174,7 @@ function activateBlocksMO() {
   );
 }
 
+// activate media mutation observer
 function activateMediaMO() {
   if (!mediaMO || mediaMO.active) {
     return;
@@ -242,6 +244,7 @@ function addObserver(ck, fn, block) {
   return DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
 }
 
+// blocks mutation observer callback
 function blocksMCB(mutations) {
   // block specific mutations
   mutations
@@ -253,6 +256,7 @@ function blocksMCB(mutations) {
     });
 }
 
+// media mutation observer callback
 function mediaMCB(mutations) {
   // media mutations
   mutations
