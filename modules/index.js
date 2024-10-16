@@ -25,13 +25,15 @@ import { fflags } from './fflags.js';
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
   /* c8 ignore next */ : {};
 
+// blocks mutation observer
 // eslint-disable-next-line no-use-before-define, max-len
 const blocksMO = window.MutationObserver ? new MutationObserver(blocksMCB)
-  /* c8 ignore next */ : {}; // blocks mutation observer
+  /* c8 ignore next */ : {};
 
+// media mutation observer
 // eslint-disable-next-line no-use-before-define, max-len
 const mediaMO = window.MutationObserver ? new MutationObserver(mediaMCB)
-  /* c8 ignore next */ : {}; // media mutation observer
+  /* c8 ignore next */ : {};
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
