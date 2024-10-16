@@ -25,13 +25,15 @@ import { fflags } from './fflags.js';
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
   /* c8 ignore next */ : {};
 
+// blocks mutation observer
 // eslint-disable-next-line no-use-before-define, max-len
 const blocksMO = window.MutationObserver ? new MutationObserver(blocksMCB)
-  /* c8 ignore next */ : {}; // blocks mutation observer
+  /* c8 ignore next */ : {};
 
+// media mutation observer
 // eslint-disable-next-line no-use-before-define, max-len
 const mediaMO = window.MutationObserver ? new MutationObserver(mediaMCB)
-  /* c8 ignore next */ : {}; // media mutation observer
+  /* c8 ignore next */ : {};
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
@@ -110,9 +112,23 @@ function addCWVTracking() {
 function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
   const navigate = (source, type, redirectCount) => {
+    // target can be 'visible', 'hidden' (background tab) or 'prerendered' (speculation rules)
     const payload = { source, target: document.visibilityState };
-    // reload: same page, navigate: same origin, enter: everything else
-    if (type === 'reload' || source === window.location.href) {
+    /* c8 ignore next 13 */
+    // prerendering cannot be tested yet with headless browsers
+    if (document.prerendering) {
+      // listen for "activation" of the current pre-rendered page
+      document.addEventListener('prerenderingchange', () => {
+        // pre-rendered page is now "activated"
+        payload.target = 'prerendered';
+        sampleRUM('navigate', payload); // prerendered navigation
+      }, {
+        once: true,
+      });
+      if (type === 'navigate') {
+        sampleRUM('prerender', payload); // prerendering page
+      }
+    } else if (type === 'reload' || source === window.location.href) {
       sampleRUM('reload', payload);
     } else if (type && type !== 'navigate') {
       sampleRUM(type, payload); // back, forward, prerender, etc.
