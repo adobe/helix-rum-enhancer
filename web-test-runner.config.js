@@ -23,6 +23,7 @@ export default {
       'test/fixtures/**',
       'node_modules/**',
       '.rum/**',
+      'src/**',
     ],
   },
   files: [
