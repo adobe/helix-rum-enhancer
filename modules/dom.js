@@ -9,99 +9,99 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-export const getTargetValue = (element) => element.getAttribute('data-rum-target') || element.getAttribute('href')
-    || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
+export const getTargetValue = (el) => el.getAttribute('data-rum-target') || el.getAttribute('href')
+    || el.currentSrc || el.getAttribute('src') || el.dataset.action || el.action;
 
-export const targetSelector = (element) => {
+export const targetSelector = (el) => {
   try {
-    if (!element) return undefined;
-    let value = getTargetValue(element);
-    if (!value && element.tagName !== 'A' && element.closest('a')) {
-      value = getTargetValue(element.closest('a'));
+    if (!el) return undefined;
+    let v = getTargetValue(el);
+    if (!v && el.tagName !== 'A' && el.closest('a')) {
+      v = getTargetValue(el.closest('a'));
     }
-    if (value && !value.startsWith('https://')) {
+    if (v && !v.startsWith('https://')) {
     // resolve relative links
-      value = new URL(value, window.location).href;
+      v = new URL(v, window.location).href;
     }
-    return value;
+    return v;
     /* c8 ignore next 3 */
   } catch (error) {
     return null;
   }
 };
 
-function walk(element, checkFn) {
-  if (!element || element === document.body || element === document.documentElement) {
+function walk(el, checkFn) {
+  if (!el || el === document.body || el === document.documentElement) {
     return undefined;
   }
-  const checkValue = checkFn(element);
-  return checkValue || walk(element.parentElement, checkFn);
+  return checkFn(el) || walk(el.parentElement, checkFn);
 }
 
-function isDialog(element) {
+function isDialog(el) {
   // doing it well
-  if (element.tagName === 'DIALOG') return true;
+  if (el.tagName === 'DIALOG') return true;
   // making the best of it
-  if (element.getAttribute('role') === 'dialog') return true;
-  if (element.getAttribute('role') === 'alertdialog') return true;
-  if (element.getAttribute('aria-modal') === 'true') return true;
+  if (el.getAttribute('role') === 'dialog') return true;
+  if (el.getAttribute('role') === 'alertdialog') return true;
+  if (el.getAttribute('aria-modal') === 'true') return true;
   // doing it wrong
-  const computedStyle = window.getComputedStyle(element);
-  return (computedStyle && computedStyle.position === 'fixed' && computedStyle.zIndex > 100);
+  const cs = window.getComputedStyle(el);
+  return (cs && cs.position === 'fixed' && cs.zIndex > 100);
 }
 
-function isButton(element) {
-  if (element.tagName === 'BUTTON') return true;
-  if (element.tagName === 'INPUT' && element.getAttribute('type') === 'button') return true;
-  if (element.tagName === 'A') {
-    const classes = Array.from(element.classList);
+function isButton(el) {
+  if (el.tagName === 'BUTTON') return true;
+  if (el.tagName === 'INPUT' && el.getAttribute('type') === 'button') return true;
+  if (el.tagName === 'A') {
+    const classes = Array.from(el.classList);
     return classes.some((className) => className.match(/button|cta/));
   }
-  return element.getAttribute('role') === 'button';
+  return el.getAttribute('role') === 'button';
 }
 
-function getSourceContext(element) {
-  if (element.closest('form')) {
-    return `form${element.id ? `#${element.id}` : ''}`;
+function getSourceContext(el) {
+  if (el.closest('form')) {
+    return `form${el.id ? `#${el.id}` : ''}`;
   }
-  const block = element.closest('.block[data-block-name]');
+  const block = el.closest('.block[data-block-name]');
   if (block) return `.${block.getAttribute('data-block-name')}`;
-  if (walk(element, isDialog)) return 'dialog';
-  if (element.closest('nav')) return 'nav';
-  if (element.closest('header')) return 'header';
-  if (element.closest('footer')) return 'footer';
-  if (element.closest('aside')) return 'aside';
-  return (walk(element, (e) => e.id && `#${e.id}`));
+  if (walk(el, isDialog)) return 'dialog';
+  if (el.closest('nav')) return 'nav';
+  if (el.closest('header')) return 'header';
+  if (el.closest('footer')) return 'footer';
+  if (el.closest('aside')) return 'aside';
+  return (walk(el, (e) => e.id && `#${e.id}`));
 }
 
-function getSourceElement(element) {
-  if (element.closest('form') && Array.from(element.closest('form').elements).includes(element)) {
-    return (element.tagName.toLowerCase()
-        + (['INPUT', 'BUTTON'].includes(element.tagName)
-          ? `[type='${element.getAttribute('type') || ''}']`
+function getSourceElement(el) {
+  const f = el.closest('form');
+  if (f && Array.from(f.elements).includes(el)) {
+    return (el.tagName.toLowerCase()
+        + (['INPUT', 'BUTTON'].includes(el.tagName)
+          ? `[type='${el.getAttribute('type') || ''}']`
           : ''));
   }
-  if (walk(element, isButton)) return 'button';
-  return element.tagName.toLowerCase().match(/^(a|img|video)$/) && element.tagName.toLowerCase();
+  if (walk(el, isButton)) return 'button';
+  return el.tagName.toLowerCase().match(/^(a|img|video)$/) && el.tagName.toLowerCase();
 }
 
-function getSourceIdentifier(element) {
-  if (element.id) return `#${element.id}`;
-  if (element.getAttribute('data-block-name')) return `.${element.getAttribute('data-block-name')}`;
-  return (element.classList.length > 0 && `.${element.classList[0]}`);
+function getSourceIdentifier(el) {
+  if (el.id) return `#${el.id}`;
+  if (el.getAttribute('data-block-name')) return `.${el.getAttribute('data-block-name')}`;
+  return (el.classList.length > 0 && `.${el.classList[0]}`);
 }
-export const sourceSelector = (element) => {
+export const sourceSelector = (el) => {
   try {
-    if (!element || element === document.body || element === document.documentElement) {
+    if (!el || el === document.body || el === document.documentElement) {
       return undefined;
     }
-    if (element.getAttribute('data-rum-source')) {
-      return element.getAttribute('data-rum-source');
+    if (el.getAttribute('data-rum-source')) {
+      return el.getAttribute('data-rum-source');
     }
-    const context = getSourceContext(element.parentElement) || '';
-    const elementName = getSourceElement(element) || '';
-    const identifier = getSourceIdentifier(element) || '';
-    return `${context} ${elementName}${identifier}`.trim() || `"${element.textContent.substring(0, 10)}"`;
+    const ctx = getSourceContext(el.parentElement) || '';
+    const name = getSourceElement(el) || '';
+    const id = getSourceIdentifier(el) || '';
+    return `${ctx} ${name}${id}`.trim() || `"${el.textContent.substring(0, 10)}"`;
     /* c8 ignore next 3 */
   } catch (error) {
     return null;

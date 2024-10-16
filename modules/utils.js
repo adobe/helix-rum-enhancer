@@ -10,6 +10,8 @@
  * governing permissions and limitations under the License.
  */
 
+const { href } = window.location;
+
 export const urlSanitizers = {
   /**
    * Returns the full url.
@@ -17,21 +19,21 @@ export const urlSanitizers = {
    * @param {string} url (default: window.location.href) The url to sanitize
    * @returns {string} The sanitized url
    */
-  full: (url = window.location.href) => new URL(url).toString(),
+  full: (url = href) => new URL(url).toString(),
   /**
    * Returns the origin of the provided url.
    * If no url is provided, it defaults to window.location.href.
    * @param {string} url (default: window.location.href) The url to sanitize
    * @returns {string} The sanitized url
    */
-  origin: (url = window.location.href) => new URL(url).origin,
+  origin: (url = href) => new URL(url).origin,
   /**
    * Returns the sanitized url: the origin and the path (no query params or hash)
    * If no url is provided, it defaults to window.location.href.
    * @param {string} url (default: window.location.href) The url to sanitize
    * @returns {string} The sanitized url
    */
-  path: (url = window.location.href) => {
+  path: (url = href) => {
     const u = new URL(url);
     return `${u.origin}${u.pathname}`;
   },
