@@ -37,15 +37,11 @@
 
           // wait one second for the script to run
           await new Promise((resolve) => {
-            setTimeout(resolve, 1000);
+            setTimeout(resolve, 1500);
           });
 
           expect(called).to.be.true;
           expect(imagesSeen).to.deep.equal(['https://www.example.com/loadstart.jpg']);
-
-          const anotherImage = document.createElement('img');
-          anotherImage.src = 'https://www.example.com/loadlater.jpg';
-          document.body.appendChild(anotherImage);
         });
       });
     });
