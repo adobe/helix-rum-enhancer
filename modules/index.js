@@ -25,8 +25,6 @@ import { fflags } from './fflags.js';
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
   /* c8 ignore next */ : {};
 
-const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
-
 // eslint-disable-next-line no-use-before-define, max-len
 const blocksMO = window.MutationObserver ? new MutationObserver(blocksMCB)
   /* c8 ignore next */ : {};
@@ -236,8 +234,7 @@ function addFormTracking(parent) {
   activateBlocksMO();
   activateMediaMO();
   parent.querySelectorAll('form').forEach((form) => {
-    form.removeEventListener('submit', formSubmitListener); // listen only once
-    form.addEventListener('submit', formSubmitListener);
+    form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
   });
 }
 
