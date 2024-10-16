@@ -1,3 +1,10 @@
+# [2.26.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.25.0...v2.26.0) (2024-10-16)
+
+
+### Features
+
+* handle pre-speculation rules and rendering ([#301](https://github.com/adobe/helix-rum-enhancer/issues/301)) ([196d404](https://github.com/adobe/helix-rum-enhancer/commit/196d404f3f90a247a223e8ddc7c667592a87319f))
+
 # [2.25.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.24.0...v2.25.0) (2024-10-03)
 
 
