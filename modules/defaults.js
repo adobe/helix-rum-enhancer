@@ -14,3 +14,6 @@ import { fflags } from './fflags.js';
 export const KNOWN_PROPERTIES = ['weight', 'id', 'referer', 'checkpoint', 't', 'source', 'target', 'cwv', 'CLS', 'FID', 'LCP', 'INP', 'TTFB'];
 export const DEFAULT_TRACKING_EVENTS = ['click', 'cwv', 'form', 'viewblock', 'viewmedia', 'loadresource', 'utm', 'paid', 'email', 'consent'];
 fflags.enabled('example', () => DEFAULT_TRACKING_EVENTS.push('example'));
+
+export const w = window;
+export const d = document;

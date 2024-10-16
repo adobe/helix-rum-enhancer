@@ -9,8 +9,10 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { d, w } from './defaults.js';
+
 export function addCookieConsentTracking(sampleRUM) {
-  const cmpCookie = document.cookie.split(';')
+  const cmpCookie = d.cookie.split(';')
     .map((c) => c.trim())
     .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
 
@@ -21,7 +23,7 @@ export function addCookieConsentTracking(sampleRUM) {
 
   let consentMutationObserver;
   const trackShowConsent = () => {
-    const otsdk = document.querySelector('body > div#onetrust-consent-sdk');
+    const otsdk = d.querySelector('body > div#onetrust-consent-sdk');
     if (otsdk) {
       if (otsdk.checkVisibility && !otsdk.checkVisibility()) {
         sampleRUM('consent', { source: 'onetrust', target: 'suppressed' });
@@ -38,12 +40,12 @@ export function addCookieConsentTracking(sampleRUM) {
 
   if (!trackShowConsent()) {
     // eslint-disable-next-line max-len
-    consentMutationObserver = window.MutationObserver
+    consentMutationObserver = w.MutationObserver
       ? new MutationObserver(trackShowConsent)
       : /* c8 ignore next */ null;
     if (consentMutationObserver) {
       consentMutationObserver.observe(
-        document.body,
+        d.body,
         // eslint-disable-next-line object-curly-newline
         { attributes: false, childList: true, subtree: false },
       );
@@ -52,7 +54,7 @@ export function addCookieConsentTracking(sampleRUM) {
 }
 
 export function addUTMParametersTracking(sampleRUM) {
-  const usp = new URLSearchParams(window.location.search);
+  const usp = new URLSearchParams(w.location.search);
   [...usp.entries()]
     .filter(([key]) => key.startsWith('utm_'))
     // exclude keys that may leak PII
@@ -71,7 +73,7 @@ export function addAdsParametersTracking(sampleRUM) {
     pinterest: /epik/,
     tiktok: /ttclid/,
   };
-  const params = Array.from(new URLSearchParams(window.location.search).keys());
+  const params = Array.from(new URLSearchParams(w.location.search).keys());
   Object.entries(networks).forEach(([network, regex]) => {
     params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('paid', { source: network, target: param }));
   });
@@ -81,7 +83,7 @@ export function addEmailParameterTracking(sampleRUM) {
     mailchimp: /mc_(c|e)id/,
     marketo: /mkt_tok/,
   };
-  const params = Array.from(new URLSearchParams(window.location.search).keys());
+  const params = Array.from(new URLSearchParams(w.location.search).keys());
   Object.entries(networks).forEach(([network, regex]) => {
     params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
   });

@@ -9,6 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import { w, d } from './defaults.js';
+
 export const getTargetValue = (element) => element.getAttribute('data-rum-target') || element.getAttribute('href')
     || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
 
@@ -21,7 +23,7 @@ export const targetSelector = (element) => {
     }
     if (value && !value.startsWith('https://')) {
     // resolve relative links
-      value = new URL(value, window.location).href;
+      value = new URL(value, w.location).href;
     }
     return value;
     /* c8 ignore next 3 */
@@ -31,7 +33,7 @@ export const targetSelector = (element) => {
 };
 
 function walk(element, checkFn) {
-  if (!element || element === document.body || element === document.documentElement) {
+  if (!element || element === d.body || element === d.documentElement) {
     return undefined;
   }
   const checkValue = checkFn(element);
@@ -46,7 +48,7 @@ function isDialog(element) {
   if (element.getAttribute('role') === 'alertdialog') return true;
   if (element.getAttribute('aria-modal') === 'true') return true;
   // doing it wrong
-  const computedStyle = window.getComputedStyle(element);
+  const computedStyle = w.getComputedStyle(element);
   return (computedStyle && computedStyle.position === 'fixed' && computedStyle.zIndex > 100);
 }
 
@@ -92,7 +94,7 @@ function getSourceIdentifier(element) {
 }
 export const sourceSelector = (element) => {
   try {
-    if (!element || element === document.body || element === document.documentElement) {
+    if (!element || element === d.body || element === d.documentElement) {
       return undefined;
     }
     if (element.getAttribute('data-rum-source')) {

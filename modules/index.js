@@ -11,7 +11,9 @@
  */
 /* eslint-env browser */
 
-import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
+import {
+  KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS, w, d,
+} from './defaults.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
 import {
@@ -22,28 +24,30 @@ import {
 } from './martech.js';
 import { fflags } from './fflags.js';
 
-const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
+const { sampleRUM, queue, isSelected } = (w.hlx && w.hlx.rum) ? w.hlx.rum
   /* c8 ignore next */ : {};
 
-const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
+const s = sampleRUM;
+
+const formSubmitListener = (e) => s('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
 
 // eslint-disable-next-line no-use-before-define, max-len
-const blocksMutationObserver = window.MutationObserver ? new MutationObserver(blocksMutationsCallback)
+const blocksMutationObserver = w.MutationObserver ? new MutationObserver(blocksMutationsCallback)
   /* c8 ignore next */ : {};
 
 // eslint-disable-next-line no-use-before-define, max-len
-const mediaMutationObserver = window.MutationObserver ? new MutationObserver(mediaMutationsCallback)
+const mediaMutationObserver = w.MutationObserver ? new MutationObserver(mediaMutationsCallback)
   /* c8 ignore next */ : {};
 
 function trackCheckpoint(checkpoint, data, t) {
-  const { weight, id } = window.hlx.rum;
+  const { weight, id } = w.hlx.rum;
   if (isSelected) {
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
-      const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
-      const urlParams = window.RUM_PARAMS ? `?${new URLSearchParams(window.RUM_PARAMS).toString()}` : '';
+      const body = JSON.stringify({ weight, id, referer: urlSanitizers[w.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
+      const urlParams = w.RUM_PARAMS ? `?${new URLSearchParams(w.RUM_PARAMS).toString()}` : '';
       const { href: url, origin } = new URL(`.rum/${weight}${urlParams}`, sampleRUM.collectBaseURL);
-      if (window.location.origin === origin) {
+      if (w.location.origin === origin) {
         const headers = { type: 'application/json' };
         navigator.sendBeacon(url, new Blob([body], headers));
         /* c8 ignore next 3 */
@@ -68,11 +72,11 @@ function addCWVTracking() {
   setTimeout(() => {
     try {
       const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
-      if (document.querySelector(`script[src="${cwvScript}"]`)) {
+      if (d.querySelector(`script[src="${cwvScript}"]`)) {
         // web vitals script has been loaded already
         return;
       }
-      const script = document.createElement('script');
+      const script = d.createElement('script');
       script.src = cwvScript;
       script.onload = () => {
         const storeCWV = (measurement) => {
@@ -83,7 +87,7 @@ function addCWVTracking() {
             data.target = targetSelector(element);
             data.source = sourceSelector(element) || (element && element.outerHTML.slice(0, 30));
           }
-          sampleRUM('cwv', data);
+          s('cwv', data);
         };
 
         const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
@@ -91,7 +95,7 @@ function addCWVTracking() {
         // When loading `web-vitals` using a classic script, all the public
         // methods can be found on the `webVitals` global namespace.
         ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
-          const metricFn = window.webVitals[`on${metric}`];
+          const metricFn = w.webVitals[`on${metric}`];
           if (typeof metricFn === 'function') {
             let opts = {};
             fflags.enabled('eagercwv', () => {
@@ -101,7 +105,7 @@ function addCWVTracking() {
           }
         });
       };
-      document.head.appendChild(script);
+      d.head.appendChild(script);
       /* c8 ignore next 3 */
     } catch (error) {
       // something went wrong
@@ -112,28 +116,28 @@ function addCWVTracking() {
 function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
   const navigate = (source, type, redirectCount) => {
-    const payload = { source, target: document.visibilityState };
+    const payload = { source, target: d.visibilityState };
     // reload: same page, navigate: same origin, enter: everything else
-    if (type === 'reload' || source === window.location.href) {
-      sampleRUM('reload', payload);
+    if (type === 'reload' || source === w.location.href) {
+      s('reload', payload);
     } else if (type && type !== 'navigate') {
-      sampleRUM(type, payload); // back, forward, prerender, etc.
-    } else if (source && window.location.origin === new URL(source).origin) {
-      sampleRUM('navigate', payload); // internal navigation
+      s(type, payload); // back, forward, prerender, etc.
+    } else if (source && w.location.origin === new URL(source).origin) {
+      s('navigate', payload); // internal navigation
     } else {
-      sampleRUM('enter', payload); // enter site
+      s('enter', payload); // enter site
     }
     fflags.enabled('redirect', () => {
-      const from = new URLSearchParams(window.location.search).get('redirect-from');
+      const from = new URLSearchParams(w.location.search).get('redirect-from');
       if (redirectCount || from) {
-        sampleRUM('redirect', { source: from, target: redirectCount || 1 });
+        s('redirect', { source: from, target: redirectCount || 1 });
       }
     });
   };
 
   new PerformanceObserver((list) => list
     .getEntries().map((entry) => navigate(
-      window.hlx.referrer || document.referrer,
+      w.hlx.referrer || d.referrer,
       entry.type,
       entry.redirectCount,
     )))
@@ -145,15 +149,15 @@ function addLoadResourceTracking() {
     try {
       list.getEntries()
         .filter((entry) => !entry.responseStatus || entry.responseStatus < 400)
-        .filter((entry) => window.location.hostname === new URL(entry.name).hostname)
+        .filter((entry) => w.location.hostname === new URL(entry.name).hostname)
         .filter((entry) => new URL(entry.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)'))
         .forEach((entry) => {
-          sampleRUM('loadresource', { source: entry.name, target: Math.round(entry.duration) });
+          s('loadresource', { source: entry.name, target: Math.round(entry.duration) });
         });
       list.getEntries()
         .filter((entry) => entry.responseStatus === 404)
         .forEach((entry) => {
-          sampleRUM('missingresource', { source: entry.name, target: entry.hostname });
+          s('missingresource', { source: entry.name, target: entry.hostname });
         });
       /* c8 ignore next 3 */
     } catch (error) {
@@ -169,7 +173,7 @@ function activateBlocksMutationObserver() {
   }
   blocksMutationObserver.active = true;
   blocksMutationObserver.observe(
-    document.body,
+    d.body,
     // eslint-disable-next-line object-curly-newline
     { subtree: true, attributes: true, attributeFilter: ['data-block-status'] },
   );
@@ -181,7 +185,7 @@ function activateMediaMutationObserver() {
   }
   mediaMutationObserver.active = true;
   mediaMutationObserver.observe(
-    document.body,
+    d.body,
     // eslint-disable-next-line object-curly-newline
     { subtree: true, attributes: false, childList: true },
   );
@@ -189,7 +193,7 @@ function activateMediaMutationObserver() {
 
 function getIntersectionObsever(checkpoint) {
   /* c8 ignore next 3 */
-  if (!window.IntersectionObserver) {
+  if (!w.IntersectionObserver) {
     return null;
   }
   activateBlocksMutationObserver();
@@ -202,7 +206,7 @@ function getIntersectionObsever(checkpoint) {
           observer.unobserve(entry.target); // observe only once
           const target = targetSelector(entry.target);
           const source = sourceSelector(entry.target);
-          sampleRUM(checkpoint, { target, source });
+          s(checkpoint, { target, source });
         });
       /* c8 ignore next 3 */
     } catch (error) {
@@ -265,23 +269,23 @@ function mediaMutationsCallback(mutations) {
 }
 
 function addTrackingFromConfig() {
-  document.addEventListener('click', (event) => {
-    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
+  d.addEventListener('click', (event) => {
+    s('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
   });
   addCWVTracking();
-  addFormTracking(window.document.body);
+  addFormTracking(d.body);
   addNavigationTracking();
   addLoadResourceTracking();
   addUTMParametersTracking(sampleRUM);
-  addViewBlockTracking(window.document.body);
-  addViewMediaTracking(window.document.body);
+  addViewBlockTracking(d.body);
+  addViewMediaTracking(d.body);
   addCookieConsentTracking(sampleRUM);
   addAdsParametersTracking(sampleRUM);
   addEmailParameterTracking(sampleRUM);
   fflags.enabled('language', () => {
     const target = navigator.language;
-    const source = document.documentElement.lang;
-    sampleRUM('language', { source, target });
+    const source = d.documentElement.lang;
+    s('language', { source, target });
   });
 }
 
@@ -289,7 +293,7 @@ function initEnhancer() {
   try {
     if (sampleRUM) {
       addTrackingFromConfig();
-      window.hlx.rum.collector = trackCheckpoint;
+      w.hlx.rum.collector = trackCheckpoint;
       processQueue();
     }
   /* c8 ignore next 3 */
