@@ -60,8 +60,9 @@ function isButton(el) {
 }
 
 function getSourceContext(el) {
-  if (el.closest('form')) {
-    return `form${el.id ? `#${el.id}` : ''}`;
+  const formEl = el.closest('form');
+  if (formEl) {
+    return `form${formEl.id ? `#${formEl.id}` : ''}`;
   }
   const block = el.closest('.block[data-block-name]');
   if (block) return `.${block.getAttribute('data-block-name')}`;
