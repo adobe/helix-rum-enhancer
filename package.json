@@ -49,18 +49,18 @@
     "eslint-plugin-header": "3.1.1",
     "eslint-plugin-import": "2.31.0",
     "husky": "9.1.6",
-    "jsdoc-to-markdown": "9.0.2",
+    "jsdoc-to-markdown": "9.0.4",
     "junit-report-builder": "5.1.1",
     "lint-staged": "15.2.10",
     "mocha": "10.7.3",
     "mocha-multi-reporters": "1.5.1",
-    "rollup": "4.24.0",
+    "rollup": "4.24.2",
     "rollup-plugin-checksum": "1.0.1",
     "rollup-plugin-cleanup": "3.2.1",
     "rollup-plugin-eslint-bundle": "9.0.0",
-    "semantic-release": "24.1.2",
+    "semantic-release": "24.2.0",
     "semantic-release-slack-bot": "^4.0.2",
-    "web-vitals": "4.2.3"
+    "web-vitals": "4.2.4"
   },
   "lint-staged": {
     "*.js": "eslint",
