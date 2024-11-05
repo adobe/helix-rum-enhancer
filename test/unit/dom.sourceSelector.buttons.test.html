@@ -45,6 +45,14 @@
   <div class="with-classes a-block block" data-block-name="a-block">
     <span class="cta">Button in a block</span>
   </div>
+  <form>
+    <button>Submit Button in a form without class</button>
+    <button class="submit-btn">Submit Button in a form</button>
+    <button class="explicit-submit-btn" type="submit">Button in a form</button>
+    <button class="normal-btn" type="button">Button in a form</button>
+    <button class="reset-btn" type="reset">Button in a form</button>
+    <button id="a-form-btn" class="btn" type="reset">Button in a form</button>
+  </form>
 
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
@@ -54,26 +62,33 @@
     runTests(async () => {
       describe('dom#sourceSelector', () => {
         it('sourceSelector - buttons', () => {
-          expect(sourceSelector(document.querySelector('#reject-all-handler'))).to.be.equal('#reject-all-handler');
-          expect(sourceSelector(document.querySelector('#accept-btn-handler'))).to.be.equal('#accept-btn-handler');
+          expect(sourceSelector(document.querySelector('#reject-all-handler'))).to.be.equal('#test button#reject-all-handler');
+          expect(sourceSelector(document.querySelector('#accept-btn-handler'))).to.be.equal('#test button#accept-btn-handler');
 
-          expect(sourceSelector(document.querySelector('.close-btn-handler'))).to.be.equal('#close-btn-container button');
+          expect(sourceSelector(document.querySelector('.close-btn-handler'))).to.be.equal('#close-btn-container button.close-btn-handler');
           expect(sourceSelector(document.querySelector('.orphan-btn-handler'))).to.be.equal('#test button.orphan-btn-handler');
 
-          expect(sourceSelector(document.querySelector('.cta-1'))).to.be.equal('#cta-container input');
+          expect(sourceSelector(document.querySelector('.cta-1'))).to.be.equal('#cta-container button.cta');
 
           expect(sourceSelector(document.querySelector('.orphan'))).to.be.equal('button.orphan');
 
           expect(sourceSelector(document.querySelector('.a-btn'))).to.be.equal('button.a-btn');
-          expect(sourceSelector(document.querySelector('.a-btn-2'))).to.be.equal('#a-btn-container button');
+          expect(sourceSelector(document.querySelector('.a-btn-2'))).to.be.equal('#a-btn-container button.a-btn-2');
 
-          expect(sourceSelector(document.querySelector('.an-input'))).to.be.equal('input.an-input');
-          expect(sourceSelector(document.querySelector('.an-input-2'))).to.be.equal('#an-input-container input');
+          expect(sourceSelector(document.querySelector('.an-input'))).to.be.equal('button.an-input');
+          expect(sourceSelector(document.querySelector('.an-input-2'))).to.be.equal('#an-input-container button.an-input-2');
 
-          expect(sourceSelector(document.querySelector('a.cta'))).to.be.equal('#an-a-container a');
-          expect(sourceSelector(document.querySelector('a.button'))).to.be.equal('#an-a-container-2 a');
+          expect(sourceSelector(document.querySelector('a.cta'))).to.be.equal('#an-a-container button.cta');
+          expect(sourceSelector(document.querySelector('a.button'))).to.be.equal('#an-a-container-2 button.button');
 
-          expect(sourceSelector(document.querySelector('span.cta'))).to.be.equal('.a-block span.cta');
+          expect(sourceSelector(document.querySelector('span.cta'))).to.be.equal('.a-block .cta');
+
+          expect(sourceSelector(document.querySelector('form button'))).to.be.equal('form button[type=\'\']');
+          expect(sourceSelector(document.querySelector('form button.submit-btn'))).to.be.equal('form button[type=\'\'].submit-btn');
+          expect(sourceSelector(document.querySelector('form button.explicit-submit-btn'))).to.be.equal('form button[type=\'submit\'].explicit-submit-btn');
+          expect(sourceSelector(document.querySelector('form button.normal-btn'))).to.be.equal('form button[type=\'button\'].normal-btn');
+          expect(sourceSelector(document.querySelector('form button.reset-btn'))).to.be.equal('form button[type=\'reset\'].reset-btn');
+          expect(sourceSelector(document.querySelector('#a-form-btn'))).to.be.equal('form button[type=\'reset\']#a-form-btn');
         });
       });
     });

@@ -9,70 +9,100 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-export const getTargetValue = (element) => element.getAttribute('data-rum-target') || element.getAttribute('href')
-    || element.currentSrc || element.getAttribute('src') || element.dataset.action || element.action;
+export const getTargetValue = (el) => el.getAttribute('data-rum-target') || el.getAttribute('href')
+    || el.currentSrc || el.getAttribute('src') || el.dataset.action || el.action;
 
-export const targetSelector = (element) => {
+export const targetSelector = (el) => {
   try {
-    if (!element) return undefined;
-    let value = getTargetValue(element);
-    if (!value && element.tagName !== 'A' && element.closest('a')) {
-      value = getTargetValue(element.closest('a'));
+    if (!el) return undefined;
+    let v = getTargetValue(el);
+    if (!v && el.tagName !== 'A' && el.closest('a')) {
+      v = getTargetValue(el.closest('a'));
     }
-    if (value && !value.startsWith('https://')) {
+    if (v && !v.startsWith('https://')) {
     // resolve relative links
-      value = new URL(value, window.location).href;
+      v = new URL(v, window.location).href;
     }
-    return value;
+    return v;
     /* c8 ignore next 3 */
   } catch (error) {
     return null;
   }
 };
 
-export const sourceSelector = (element) => {
+function walk(el, checkFn) {
+  if (!el || el === document.body || el === document.documentElement) {
+    return undefined;
+  }
+  return checkFn(el) || walk(el.parentElement, checkFn);
+}
+
+function isDialog(el) {
+  // doing it well
+  if (el.tagName === 'DIALOG') return true;
+  // making the best of it
+  if (el.getAttribute('role') === 'dialog') return true;
+  if (el.getAttribute('role') === 'alertdialog') return true;
+  if (el.getAttribute('aria-modal') === 'true') return true;
+  // doing it wrong
+  const cs = window.getComputedStyle(el);
+  return (cs && cs.position === 'fixed' && cs.zIndex > 100);
+}
+
+function isButton(el) {
+  if (el.tagName === 'BUTTON') return true;
+  if (el.tagName === 'INPUT' && el.getAttribute('type') === 'button') return true;
+  if (el.tagName === 'A') {
+    const classes = Array.from(el.classList);
+    return classes.some((className) => className.match(/button|cta/));
+  }
+  return el.getAttribute('role') === 'button';
+}
+
+function getSourceContext(el) {
+  const formEl = el.closest('form');
+  if (formEl) {
+    return `form${formEl.id ? `#${formEl.id}` : ''}`;
+  }
+  const block = el.closest('.block[data-block-name]');
+  if (block) return `.${block.getAttribute('data-block-name')}`;
+  if (walk(el, isDialog)) return 'dialog';
+  if (el.closest('nav')) return 'nav';
+  if (el.closest('header')) return 'header';
+  if (el.closest('footer')) return 'footer';
+  if (el.closest('aside')) return 'aside';
+  return (walk(el, (e) => e.id && `#${e.id}`));
+}
+
+function getSourceElement(el) {
+  const f = el.closest('form');
+  if (f && Array.from(f.elements).includes(el)) {
+    return (el.tagName.toLowerCase()
+        + (['INPUT', 'BUTTON'].includes(el.tagName)
+          ? `[type='${el.getAttribute('type') || ''}']`
+          : ''));
+  }
+  if (walk(el, isButton)) return 'button';
+  return el.tagName.toLowerCase().match(/^(a|img|video)$/) && el.tagName.toLowerCase();
+}
+
+function getSourceIdentifier(el) {
+  if (el.id) return `#${el.id}`;
+  if (el.getAttribute('data-block-name')) return `.${el.getAttribute('data-block-name')}`;
+  return (el.classList.length > 0 && `.${el.classList[0]}`);
+}
+export const sourceSelector = (el) => {
   try {
-    if (!element || element === document.body || element === document.documentElement) {
+    if (!el || el === document.body || el === document.documentElement) {
       return undefined;
     }
-    if (element.getAttribute('data-rum-source')) {
-      return element.getAttribute('data-rum-source');
+    if (el.getAttribute('data-rum-source')) {
+      return el.getAttribute('data-rum-source');
     }
-    const form = element.closest('form');
-    let formElementSelector = '';
-    if (form && Array.from(form.elements).includes(element)) {
-      formElementSelector = element.tagName === 'INPUT' ? `form input[type='${element.getAttribute('type')}']` : `form ${element.tagName.toLowerCase()}`;
-    }
-
-    const blockName = element.closest('.block') ? element.closest('.block').getAttribute('data-block-name') : '';
-    if (element.id || formElementSelector) {
-      const id = element.id ? `#${element.id}` : '';
-      return blockName ? `.${blockName} ${formElementSelector}${id}` : `${formElementSelector}${id}`;
-    }
-
-    if (element.getAttribute('data-block-name')) {
-      return `.${element.getAttribute('data-block-name')}`;
-    }
-
-    const classes = Array.from(element.classList);
-    const label = element.tagName.toLowerCase();
-    const firstClass = classes.length > 0 ? `.${classes[0]}` : '';
-    const labelWithClass = `${element.tagName.toLowerCase()}${firstClass}`;
-    if (element.tagName.toLowerCase() === 'button'
-      || element.type === 'button'
-      || classes.some((className) => className.match(/button|cta/))) {
-      let parent = element.parentElement;
-      if (!parent) return labelWithClass;
-      if (parent.id) return `#${parent.id} ${label}`;
-      while (parent.tagName !== 'BODY' && !parent.id) parent = parent.parentElement;
-      if (parent.id) return `#${parent.id} ${labelWithClass}`;
-      return blockName ? `.${blockName} ${labelWithClass}` : labelWithClass;
-    }
-
-    const parent = sourceSelector(element.parentElement);
-    if (parent) return parent;
-
-    return labelWithClass;
+    const ctx = getSourceContext(el.parentElement) || '';
+    const name = getSourceElement(el) || '';
+    const id = getSourceIdentifier(el) || '';
+    return `${ctx} ${name}${id}`.trim() || `"${el.textContent.substring(0, 10)}"`;
     /* c8 ignore next 3 */
   } catch (error) {
     return null;

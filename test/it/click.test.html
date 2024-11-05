@@ -17,11 +17,17 @@
     window.fakeSendBeacon = function (url, payload) {
       // if payload is a string, we assume it's a JSON string
       if (typeof payload === 'string') {
-        window.called.push(JSON.parse(payload));
+        const data = JSON.parse(payload);
+        if (data.checkpoint === 'click') {
+          window.called.push(data);
+        }
       } else {
         // it's a blob
         payload.text().then((text) => {
-          window.called.push(JSON.parse(text));
+          const data = JSON.parse(text);
+          if (data.checkpoint === 'click') {
+            window.called.push(data);
+          }
         });
       }
     };
@@ -33,6 +39,7 @@
   <div class="block" data-block-status="loaded">
     The first block
     <img src="/test/fixtures/fire.jpg" height="200" width="200">
+    <a href="#" onclick="(e) => { e.preventDefault()}" id="alink">A link</a>
   </div>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
@@ -48,15 +55,44 @@
           await sendMouse({ type: 'click', position: [100, 100] });
 
           await new Promise((resolve) => {
-            setTimeout(resolve, 0);
+            setTimeout(resolve, 100);
           });
+
+          assert(window.called.length === 1, '1st click checkpoint missing');
+
+          await sendMouse({ type: 'click', position: [10, 10] });
 
           await new Promise((resolve) => {
             setTimeout(resolve, 100);
           });
 
-          await sendMouse({ type: 'click', position: [10, 10] });
-          assert(window.called.some((call) => call.checkpoint === 'click'), 'click checkpoint missing');
+          assert(window.called.length === 2, '2nd click checkpoint missing');
+
+          const a = document.getElementById('alink');
+          a.click();
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          });
+
+          assert(window.called.length === 3 , 'checkpoint for click on link missing');
+          assert(window.called[2].source === 'a#alink', 'invalid target for alink checkpoint');
+
+          const late = document.createElement('a');
+          late.id = 'alatelink';
+          late.onclick = (e) => { e.preventDefault(); };
+          document.body.append(late);
+
+          late.click();
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          });
+
+          assert(window.called.length === 4 , 'checkpoint for click on late added link missing');
+          assert(window.called[3].source === 'a#alatelink', 'invalid target for alatelink checkpoint');
+
+          console.log('window.called', window.called);
         });
       });
     });
