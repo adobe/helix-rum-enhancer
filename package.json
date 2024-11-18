@@ -54,7 +54,7 @@
     "lint-staged": "15.2.10",
     "mocha": "10.8.2",
     "mocha-multi-reporters": "1.5.1",
-    "rollup": "4.24.4",
+    "rollup": "4.27.2",
     "rollup-plugin-checksum": "1.0.1",
     "rollup-plugin-cleanup": "3.2.1",
     "rollup-plugin-eslint-bundle": "9.0.0",
