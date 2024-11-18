@@ -43,9 +43,10 @@ export default {
           context.url = '/node_modules/@adobe/helix-rum-js/dist/rum-standalone.js';
           await next();
           context.body = context.body
-            .replace(/const weight.*/, 'const weight = 1')
+            .replace(/const weight =/, 'const weight = 1 ||')
             .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon')
-            .replace('.rum/@adobe/helix-rum-enhancer@^2/src/index.js', 'src/index.map.js');
+            // eslint-disable-next-line no-template-curly-in-string
+            .replace('.rum/@adobe/helix-rum-enhancer@${enhancerVersion || \'^2\'}/src/index.js', 'src/index.map.js');
           return true;
         } else if (context.url.startsWith('/.rum/web-vitals')) {
           context.url = '/node_modules/web-vitals/dist/web-vitals.iife.js';
