@@ -5,5 +5,12 @@
   "baseBranches": [
     "main",
     "1.x"
+  ],
+  "packageRules": [
+    {
+      "matchDepTypes": ["devDependencies"],
+      "label": "ignore-psi-check", 
+      "automerge": true
+    }
   ]
 }
