@@ -6,11 +6,9 @@
     "main",
     "1.x"
   ],
-  "packageRules": [
-    {
-      "matchDepTypes": ["devDependencies"],
-      "label": "ignore-psi-check", 
-      "automerge": true
-    }
-  ]
+  "packageRules": [{
+    "matchDepTypes": ["devDependencies"],
+    "labels": ["ignore-psi-check"], 
+    "automerge": true
+  }]
 }
