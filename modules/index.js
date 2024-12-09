@@ -93,10 +93,7 @@ function addCWVTracking() {
         ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
           const metricFn = window.webVitals[`on${metric}`];
           if (typeof metricFn === 'function') {
-            let opts = {};
-            fflags.enabled('eagercwv', () => {
-              opts = { reportAllChanges: isEager(metric) };
-            });
+            const opts = isEager(metric) ? { reportAllChanges: true } : undefined;
             metricFn(storeCWV, opts);
           }
         });
