@@ -15,6 +15,9 @@
         <button class="close-btn-handler banner-close-button close-icon"></button>
       </div>
       <button class="orphan-btn-handler some-button"></button>
+      <button id="btn-id">
+        <span class="btn-icon-label"></span>
+      </button>
     </div>
     <div id="cta-container">
       <input type="button" class="cta cta-1">
@@ -52,6 +55,9 @@
     <button class="normal-btn" type="button">Button in a form</button>
     <button class="reset-btn" type="reset">Button in a form</button>
     <button id="a-form-btn" class="btn" type="reset">Button in a form</button>
+    <button id="btn-id-in-form">
+      <span class="btn-icon-label"></span>
+    </button>
   </form>
 
   <script type="module">
@@ -89,6 +95,10 @@
           expect(sourceSelector(document.querySelector('form button.normal-btn'))).to.be.equal('form button[type=\'button\'].normal-btn');
           expect(sourceSelector(document.querySelector('form button.reset-btn'))).to.be.equal('form button[type=\'reset\'].reset-btn');
           expect(sourceSelector(document.querySelector('#a-form-btn'))).to.be.equal('form button[type=\'reset\']#a-form-btn');
+
+          expect(sourceSelector(document.querySelector('#btn-id-in-form .btn-icon-label'))).to.be.equal('form button#btn-id-in-form .btn-icon-label');
+          expect(sourceSelector(document.querySelector('#btn-id .btn-icon-label'))).to.be.equal('button#btn-id .btn-icon-label');
+
         });
       });
     });
