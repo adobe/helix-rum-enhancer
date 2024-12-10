@@ -138,7 +138,7 @@ function addNavigationTracking() {
       sampleRUM('enter', payload); // enter site
     }
     fflags.enabled('redirect', () => {
-      const from = new URLSearchParams(window.location.search).get('redirect-from');
+      const from = new URLSearchParams(window.location.search).get('redirect_from');
       if (redirectCount || from) {
         sampleRUM('redirect', { source: from, target: redirectCount || 1 });
       }
