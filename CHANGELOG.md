@@ -1,3 +1,10 @@
+## [2.26.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.0...v2.26.1) (2024-12-10)
+
+
+### Bug Fixes
+
+* **redirects:** use underscore in param ([bada92e](https://github.com/adobe/helix-rum-enhancer/commit/bada92e69aaa8f560d61d6264f578eb2958934ec))
+
 # [2.26.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.25.0...v2.26.0) (2024-10-16)
 
 
