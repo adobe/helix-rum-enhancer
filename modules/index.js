@@ -145,13 +145,18 @@ function addNavigationTracking() {
     });
   };
 
+  const processed = new Set(); // avoid processing duplicate types
   new PerformanceObserver((list) => list
-    .getEntries().map((e) => navigate(
-      window.hlx.referrer || document.referrer,
-      e.type,
-      e.redirectCount,
-    )))
-    .observe({ type: 'navigation', buffered: true });
+    .getEntries().forEach((e) => {
+      if (!processed.has(e.type)) {
+        navigate(
+          window.hlx.referrer || document.referrer,
+          e.type,
+          e.redirectCount,
+        );
+        processed.add(e.type);
+      }
+    })).observe({ type: 'navigation', buffered: true });
 }
 
 function addLoadResourceTracking() {
