@@ -147,16 +147,16 @@ function addNavigationTracking() {
 
   const processed = new Set(); // avoid processing duplicate types
   new PerformanceObserver((list) => list
-  .getEntries().filter(({type}) => !processed.has(type))
-  .map((e) => {
-    navigate(
-      window.hlx.referrer || document.referrer,
-      e.type,
-      e.redirectCount,
-    );
-    processed.add(e.type);
-  });
-}).observe({ type: 'navigation', buffered: true });
+    .getEntries()
+    .filter(({ type }) => !processed.has(type))
+    .forEach((e) => {
+      navigate(
+        window.hlx.referrer || document.referrer,
+        e.type,
+        e.redirectCount,
+      );
+      processed.add(e.type);
+    })).observe({ type: 'navigation', buffered: true });
 }
 
 function addLoadResourceTracking() {
