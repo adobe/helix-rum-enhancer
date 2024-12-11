@@ -145,13 +145,16 @@ function addNavigationTracking() {
     });
   };
 
+  const processed = new Set(); // avoid processing duplicate types
   new PerformanceObserver((list) => list
-    .getEntries().map((e) => navigate(
+    .getEntries()
+    .filter(({ type }) => !processed.has(type))
+    .map((e) => [e, processed.add(e.type)])
+    .map(([e]) => navigate(
       window.hlx.referrer || document.referrer,
       e.type,
       e.redirectCount,
-    )))
-    .observe({ type: 'navigation', buffered: true });
+    ))).observe({ type: 'navigation', buffered: true });
 }
 
 function addLoadResourceTracking() {

@@ -1,0 +1,60 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    // we log what's being sent to the "server"
+    window.called = [];
+
+    const navigation = ['enter', 'reload', 'redirect', 'prerender'];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = function (url, payload) {
+      // if payload is a string, we assume it's a JSON string
+      if (typeof payload === 'string') {
+        const data = JSON.parse(payload);
+        if (navigation.includes(data.checkpoint)) {
+          window.called.push(data);
+        }
+      } else {
+        // it's a blob
+        payload.text().then((text) => {
+          const data = JSON.parse(text);
+          if (navigation.includes(data.checkpoint)) {
+            window.called.push(data);
+          }
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <div class="block" data-block-status="loaded">
+    The first block
+  </div>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { assert, expect} from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('Test Enter Navigation', () => {
+
+        it('Can track a single enter navigation checkpoint', async function test() {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 3000);
+          });
+
+          console.log('window.called', window.called);
+          expect(window.called).to.have.lengthOf(1, 'one navigation event');
+          expect(window.called[0].checkpoint).to.equal('enter');
+        });
+      });
+    });
+  </script>
+</body>
