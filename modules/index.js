@@ -149,14 +149,12 @@ function addNavigationTracking() {
   new PerformanceObserver((list) => list
     .getEntries()
     .filter(({ type }) => !processed.has(type))
-    .forEach((e) => {
-      navigate(
-        window.hlx.referrer || document.referrer,
-        e.type,
-        e.redirectCount,
-      );
-      processed.add(e.type);
-    })).observe({ type: 'navigation', buffered: true });
+    .map((e) => [e, processed.add(e.type)])
+    .map(([e]) => navigate(
+      window.hlx.referrer || document.referrer,
+      e.type,
+      e.redirectCount,
+    ))).observe({ type: 'navigation', buffered: true });
 }
 
 function addLoadResourceTracking() {
