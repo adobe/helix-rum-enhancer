@@ -43,9 +43,9 @@
     import { assert, expect} from '@esm-bundle/chai';
 
     runTests(async () => {
-      describe('Test Resource Loading', () => {
+      describe('Test Enter Navigation', () => {
 
-        it('Can track missing resources', async function test() {
+        it('Can track a single enter navigation checkpoint', async function test() {
           await new Promise((resolve) => {
             setTimeout(resolve, 3000);
           });
