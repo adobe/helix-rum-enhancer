@@ -1,3 +1,10 @@
+## [2.26.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.1...v2.26.2) (2024-12-11)
+
+
+### Bug Fixes
+
+* do not process duplicate navigation checkpoints ([#331](https://github.com/adobe/helix-rum-enhancer/issues/331)) ([4b6843f](https://github.com/adobe/helix-rum-enhancer/commit/4b6843f4cbe7b685ffc0c017a46274e505b26b56))
+
 ## [2.26.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.0...v2.26.1) (2024-12-10)
 
 
