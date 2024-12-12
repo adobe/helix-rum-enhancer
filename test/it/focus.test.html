@@ -21,10 +21,15 @@
       } else {
         // it's a blob
         payload.text().then((text) => {
-          console.log(JSON.parse(text));
           window.called.push(JSON.parse(text));
         });
       }
+    };
+
+    window.wait = async function (ms) {
+      return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+      });
     };
   </script>
   <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
@@ -38,12 +43,19 @@
   <div id="focusable-element" tabindex="0">
     Focusable element
   </div>
+  <div id="editable-element-outside-form" contenteditable="true">
+    Editable element outside form
+  </div>
+  <input type="text" id="field-outside-form" name="field-outside-form" />
   <form action="javascript:false;" method="POST">
     <input type="text" name="name" value="John Doe">
     <input type="email" name="email" value="JohnDoe@example.com">
-    <input type="submit" value="Submit">
+    <button type="submit">Submit</button>
     <div id="focusable-element-inside-form" tabindex="0">
       Focusable element inside form
+    </div>
+    <div id="editable-element-inside-form" contenteditable="true">
+      Editable element inside form
     </div>
   </form>
   <script type="module">
@@ -57,75 +69,63 @@
           window.called = [];
         });
 
-        it('Can observe focus on form fields', async () => {
+        it('can observe focus on form fields', async () => {
           const form = document.querySelector('form');
+          // wait for the adding focus event tracking
+          await window.wait(2000);
 
           form.querySelector('input[type="text"]').focus();
 
-          await new Promise((resolve) => {
-            setTimeout(resolve, 0);
-          });
+          await window.wait(100);
 
-          await new Promise((resolve) => {
-            setTimeout(resolve, 100);
-          });
           assert(window.called.some((call) => call.checkpoint === 'click'), 'click checkpoint missing');
         });
 
-        it('Can not observe focus on focusable elements', async () => {
+        it('can not observe focus on elements outside of a form', async () => {
           const focusableElement = document.querySelector('#focusable-element');
-
           focusableElement.focus();
 
-          await new Promise((resolve) => {
-            setTimeout(resolve, 0);
-          });
+          await window.wait(100);
 
-          await new Promise((resolve) => {
-            setTimeout(resolve, 100);
-          });
-          assert(window.called.every((call) => call.checkpoint !== 'click'), 'click checkpoint missing');
+          assert(window.called.every((call) => call.checkpoint !== 'click'), 'click checkpoint is present');
         });
 
-        it('Can observe focus when tabbing between form fields', async () => {
-          const form = document.querySelector('form');
-          const textInput = form.querySelector('input[type="text"]');
-          const emailInput = form.querySelector('input[type="email"]');
+        it('can not observe focus on elements outside of a form', async () => {
+          const fieldOutsideForm = document.querySelector('#field-outside-form');
+          fieldOutsideForm.focus();
 
-          // Focus the text input first
-          textInput.focus();
+          await window.wait(100);
 
-          // Simulate tab key by focusing the next element
-          const tabEvent = new KeyboardEvent('keydown', {
-            key: 'Tab',
-            code: 'Tab',
-            bubbles: true,
-            cancelable: true
-          });
-          textInput.dispatchEvent(tabEvent);
+          const editableElementOutsideForm = document.querySelector('#editable-element-outside-form');
+          editableElementOutsideForm.focus();
 
-          await new Promise((resolve) => {
-            setTimeout(resolve, 100);
-          });
+          await window.wait(100);
 
-          assert(window.called.some((call) => call.checkpoint === 'click'), 'click checkpoint missing');
+          assert(window.called.every((call) => call.checkpoint !== 'click'), 'click checkpoint is present');
         });
 
-        it('can observe focus when focusing a non field element inside a form', async () => {
-          const focusableElementInsideForm = document.querySelector('#focusable-element-inside-form');
+        it('can not observe focus on non editable focusable elements', async () => {
+          const focusableElementInForm = document.querySelector('#focusable-element-inside-form');
 
-          // Focus the text input first
-          focusableElementInsideForm.focus();
+          focusableElementInForm.focus();
 
-          await new Promise((resolve) => {
-            setTimeout(resolve, 100);
-          });
+          await window.wait(100);
+
+          assert(window.called.every((call) => call.checkpoint !== 'click'), 'click checkpoint is present');
+        });
+
+
+        it('can observe focus on contenteditable elements inside a form', async () => {
+          const editableElement = document.querySelector('#editable-element-inside-form');
+          editableElement.focus();
+
+          await window.wait(100);
 
           assert(window.called.some((call) => call.checkpoint === 'click'), 'click checkpoint missing');
         });
 
         it('only one click should be sent on click of a field', async () => {
-          const textInput = document.querySelector('input[type="text"]');
+          const textInput = document.querySelector('form input[type="text"]');
           const rect = textInput.getBoundingClientRect();
           await sendMouse({
             type: 'click',
@@ -135,15 +135,14 @@
             ]
           });
 
-          await new Promise((resolve) => {
-            setTimeout(resolve, 100);
-          });
+          await window.wait(100);
+
           const clicks = window.called.filter((call) => call.checkpoint === 'click');
-          assert(clicks.length === 1, `click is called ${clicks.length} times on a field`);
+          assert(clicks.length === 1, `click is called ${clicks.length} (Expected 1) times on a field`);
         });
 
         it('only one click should be sent on click of a button', async () => {
-          const submitButton = document.querySelector('input[type="submit"]');
+          const submitButton = document.querySelector('button');
           const rect = submitButton.getBoundingClientRect();
           await sendMouse({
             type: 'click',
@@ -153,11 +152,9 @@
             ]
           });
 
-          await new Promise((resolve) => {
-            setTimeout(resolve, 100);
-          });
+          await window.wait(100);
           const clicks = window.called.filter((call) => call.checkpoint === 'click');
-          assert(clicks.length === 1, `click is called ${clicks.length} times on a button`);
+          assert(clicks.length === 1, `click is called ${clicks.length} (Expected 1) times on a button`);
         });
       });
     });
