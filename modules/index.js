@@ -248,11 +248,18 @@ function addViewMediaTracking(parent) {
   }
 }
 
+function addFillTracking(parent) {
+  parent.addEventListener('change', (event) => {
+    sampleRUM('fill', { source: sourceSelector(event.target) });
+  });
+}
+
 function addFormTracking(parent) {
   activateBlocksMO();
   activateMediaMO();
   parent.querySelectorAll('form').forEach((form) => {
     form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
+    addFillTracking(form);
   });
 }
 

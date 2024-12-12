@@ -1,0 +1,137 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin'
+    };
+    // we log what's being sent to the "server"
+    window.called = [];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = function (url, payload) {
+      // if payload is a string, we assume it's a JSON string
+      if (typeof payload === 'string') {
+        window.called.push(JSON.parse(payload));
+      } else {
+        // it's a blob
+        payload.text().then((text) => {
+          const parsed = JSON.parse(text);
+          console.log("ping: ", parsed.checkpoint);
+          window.called.push(parsed);
+        });
+      }
+    };
+
+    window.wait = async function (ms) {
+      return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+      });
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <div class="block" data-block-status="loaded">
+    The first block
+    <img src="/test/fixtures/fire.jpg" height="200" width="200">
+  </div>
+  <div id="focusable-element" tabindex="0">
+    Focusable element
+  </div>
+  <form action="javascript:false;" method="POST">
+    <input type="text" name="name" />
+    <input type="number" name="number" />
+    <button type="submit">Submit</button>
+    <div id="editable-element-inside-form" contenteditable="true">
+      Editable element inside form
+    </div>
+  </form>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendKeys, sendMouse } from '@web/test-runner-commands';
+    import { assert } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('Test Fill Tracking', () => {
+        beforeEach(async () => {
+          window.called = [];
+        });
+
+        it('filling form field', async () => {
+          // wait for the form tracking to get enabled
+          await window.wait(2000);
+
+          const form = document.querySelector('form');
+          const input = form.querySelector('input[type="text"]')
+          input.addEventListener('focusout', (e) => console.log('focusout event'));
+          input.addEventListener('change', (e) => console.log('change event'));
+          input.focus();
+          await window.wait(10);
+
+          await sendKeys({type: 'sample value'});
+          await window.wait(10);
+
+          await sendMouse({type: 'click', position: [0,0]});
+          await window.wait(100);
+
+
+          assert(window.called.some((call) => call.checkpoint === 'fill'), 'fill checkpoint missing');
+        });
+
+        it('filling number field', async () => {
+          // wait for the form tracking to get enabled
+          await window.wait(2000);
+
+          const form = document.querySelector('form');
+          const input = form.querySelector('input[type="number"]')
+          input.addEventListener('focusout', (e) => console.log('focusout event'));
+          input.addEventListener('change', (e) => console.log('change event'));
+          input.focus();
+          await window.wait(10);
+
+          await sendKeys({type: '1234'});
+          await window.wait(10);
+
+          await sendMouse({type: 'click', position: [0,0]});
+          await window.wait(100);
+
+
+          assert(window.called.some((call) => call.checkpoint === 'fill'), 'fill checkpoint missing');
+        });
+
+        it('filling number field using up and down keys', async () => {
+          // wait for the form tracking to get enabled
+          await window.wait(2000);
+
+          const form = document.querySelector('form');
+          const input = form.querySelector('input[type="number"]')
+          input.addEventListener('focusout', (e) => console.log('focusout event'));
+          input.addEventListener('change', (e) => console.log('change event'));
+          input.focus();
+          await window.wait(10);
+
+          await sendKeys({press: 'ArrowUp'});
+          await sendKeys({press: 'ArrowUp'});
+          await sendKeys({press: 'ArrowUp'});
+          await sendKeys({press: 'ArrowUp'});
+          await sendKeys({press: 'ArrowDown'});
+          await sendKeys({press: 'ArrowDown'});
+          await window.wait(10);
+
+          await sendMouse({type: 'click', position: [0,0]});
+          await window.wait(100);
+
+          const fills = window.called.filter((call) => call.checkpoint === 'fill');
+          assert(fills.length === 1, `fill checkpoints (${fills.length}) are more than one`);
+        });
+      });
+    });
+  </script>
+</body>
