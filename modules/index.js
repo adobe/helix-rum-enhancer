@@ -248,11 +248,21 @@ function addViewMediaTracking(parent) {
   }
 }
 
+function addFocusTracking(parent) {
+  parent.addEventListener('focusin', (event) => {
+    if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(event.target.tagName)
+      || event.target.getAttribute('contenteditable') === 'true') {
+      sampleRUM('click', { source: sourceSelector(event.target) });
+    }
+  });
+}
+
 function addFormTracking(parent) {
   activateBlocksMO();
   activateMediaMO();
   parent.querySelectorAll('form').forEach((form) => {
     form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
+    addFocusTracking(form);
   });
 }
 
