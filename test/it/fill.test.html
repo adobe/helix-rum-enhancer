@@ -22,7 +22,6 @@
         // it's a blob
         payload.text().then((text) => {
           const parsed = JSON.parse(text);
-          console.log("ping: ", parsed.checkpoint);
           window.called.push(parsed);
         });
       }
@@ -45,9 +44,10 @@
   <div id="focusable-element" tabindex="0">
     Focusable element
   </div>
-  <form action="javascript:false;" method="POST">
-    <input type="text" name="name" />
-    <input type="number" name="number" />
+  <form action="javascript:false;" method="POST" autocomplete="on">
+    <input type="text" name="name" autocomplete="name"/>
+    <input type="number" name="number"/>
+    <input type="email" name="email" autocomplete="email"/>
     <button type="submit">Submit</button>
     <div id="editable-element-inside-form" contenteditable="true">
       Editable element inside form
@@ -60,18 +60,18 @@
 
     runTests(async () => {
       describe('Test Fill Tracking', () => {
+
+        before(async () => {
+          await window.wait(2000);
+        });
+
         beforeEach(async () => {
           window.called = [];
         });
 
         it('filling form field', async () => {
-          // wait for the form tracking to get enabled
-          await window.wait(2000);
-
           const form = document.querySelector('form');
           const input = form.querySelector('input[type="text"]')
-          input.addEventListener('focusout', (e) => console.log('focusout event'));
-          input.addEventListener('change', (e) => console.log('change event'));
           input.focus();
           await window.wait(10);
 
@@ -86,13 +86,8 @@
         });
 
         it('filling number field', async () => {
-          // wait for the form tracking to get enabled
-          await window.wait(2000);
-
           const form = document.querySelector('form');
           const input = form.querySelector('input[type="number"]')
-          input.addEventListener('focusout', (e) => console.log('focusout event'));
-          input.addEventListener('change', (e) => console.log('change event'));
           input.focus();
           await window.wait(10);
 
@@ -107,9 +102,6 @@
         });
 
         it('filling number field using up and down keys', async () => {
-          // wait for the form tracking to get enabled
-          await window.wait(2000);
-
           const form = document.querySelector('form');
           const input = form.querySelector('input[type="number"]')
           input.addEventListener('focusout', (e) => console.log('focusout event'));
