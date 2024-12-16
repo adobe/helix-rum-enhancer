@@ -59,14 +59,16 @@
           });
 
           assert(window.called.length === 1, '1st click checkpoint missing');
+          assert(window.called[0].source === '.block', 'invalid target - click on block');
 
-          await sendMouse({ type: 'click', position: [10, 10] });
+          await sendMouse({ type: 'click', position: [200, 200] });
 
           await new Promise((resolve) => {
             setTimeout(resolve, 100);
           });
 
           assert(window.called.length === 2, '2nd click checkpoint missing');
+          assert(window.called[1].source === 'img', 'invalid target - click on img');
 
           const a = document.getElementById('alink');
           a.click();
@@ -77,6 +79,14 @@
 
           assert(window.called.length === 3 , 'checkpoint for click on link missing');
           assert(window.called[2].source === 'a#alink', 'invalid target for alink checkpoint');
+
+          a.click();
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          });
+
+          assert(window.called.length === 3 , '2 consecutive clicks on link should not trigger new checkpoint');
 
           const late = document.createElement('a');
           late.id = 'alatelink';
@@ -91,8 +101,6 @@
 
           assert(window.called.length === 4 , 'checkpoint for click on late added link missing');
           assert(window.called[3].source === 'a#alatelink', 'invalid target for alatelink checkpoint');
-
-          console.log('window.called', window.called);
         });
       });
     });
