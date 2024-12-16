@@ -1,3 +1,10 @@
+## [2.26.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.2...v2.26.3) (2024-12-16)
+
+
+### Bug Fixes
+
+* do not track repeating clicks ([#339](https://github.com/adobe/helix-rum-enhancer/issues/339)) ([f511a03](https://github.com/adobe/helix-rum-enhancer/commit/f511a03679188361326fbd3a8d68e650c39bea50))
+
 ## [2.26.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.1...v2.26.2) (2024-12-11)
 
 
