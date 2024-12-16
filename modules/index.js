@@ -285,8 +285,16 @@ function mediaMCB(mutations) {
 }
 
 function addTrackingFromConfig() {
+  let lastSource;
+  let lastTarget;
   document.addEventListener('click', (event) => {
-    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
+    const source = sourceSelector(event.target);
+    const target = targetSelector(event.target);
+    if (source !== lastSource || target !== lastTarget) {
+      sampleRUM('click', { target, source });
+      lastSource = source;
+      lastTarget = target;
+    }
   });
   addCWVTracking();
   addFormTracking(window.document.body);
