@@ -14,16 +14,18 @@
     window.called = [];
     // and navigator.sendBeacon has been replaced with
     // a call to fakeSendBeacon
-    window.fakeSendBeacon = function (url, payload) {
+    window.fakeSendBeacon = async function (url, payload) {
       // if payload is a string, we assume it's a JSON string
+      let payloadObject;
       if (typeof payload === 'string') {
-        window.called.push(JSON.parse(payload));
+        payloadObject = JSON.parse(payload);
       } else {
         // it's a blob
-        payload.text().then((text) => {
-          const parsed = JSON.parse(text);
-          window.called.push(parsed);
-        });
+        const data = await payload.text();
+        payloadObject = JSON.parse(data);
+      }
+      if (payloadObject.checkpoint === 'fill') {
+        window.called.push(payloadObject);
       }
     };
 
@@ -69,22 +71,6 @@
           window.called = [];
         });
 
-        it('filling form field', async () => {
-          const form = document.querySelector('form');
-          const input = form.querySelector('input[type="text"]')
-          input.focus();
-          await window.wait(10);
-
-          await sendKeys({type: 'sample value'});
-          await window.wait(10);
-
-          await sendMouse({type: 'click', position: [0,0]});
-          await window.wait(100);
-
-
-          assert(window.called.some((call) => call.checkpoint === 'fill'), 'fill checkpoint missing');
-        });
-
         it('filling number field', async () => {
           const form = document.querySelector('form');
           const input = form.querySelector('input[type="number"]')
@@ -97,16 +83,34 @@
           await sendMouse({type: 'click', position: [0,0]});
           await window.wait(100);
 
+          assert(window.called.length === 1, `fill is called ${window.called.length} (Expected 1) times`);
+          assert(window.called[0].checkpoint === 'fill', 'checkpoint is not fill');
+          assert(window.called[0].source === `form input[type='number']`,
+            `source ${window.called[0].source} is not form input[type='number']`);
+        });
 
-          assert(window.called.some((call) => call.checkpoint === 'fill'), 'fill checkpoint missing');
+        it('filling form field', async () => {
+          const form = document.querySelector('form');
+          const input = form.querySelector('input[type="text"]')
+          input.focus();
+          await window.wait(10);
+
+          await sendKeys({type: 'sample value'});
+          await window.wait(10);
+
+          await sendMouse({type: 'click', position: [0,0]});
+          await window.wait(100);
+
+          assert(window.called.length === 1, `fill is called ${window.called.length} (Expected 1) times`);
+          assert(window.called[0].checkpoint === 'fill', 'checkpoint is not fill');
+          assert(window.called[0].source === `form input[type='text']`,
+            `source ${window.called[0].source} is not form input[type='text']`);
         });
 
         it('filling number field using up and down keys', async () => {
           const form = document.querySelector('form');
-          const input = form.querySelector('input[type="number"]')
-          input.addEventListener('focusout', (e) => console.log('focusout event'));
-          input.addEventListener('change', (e) => console.log('change event'));
-          input.focus();
+          const numberInput = form.querySelector('input[type="number"]')
+          numberInput.focus();
           await window.wait(10);
 
           await sendKeys({press: 'ArrowUp'});
@@ -120,8 +124,10 @@
           await sendMouse({type: 'click', position: [0,0]});
           await window.wait(100);
 
-          const fills = window.called.filter((call) => call.checkpoint === 'fill');
-          assert(fills.length === 1, `fill checkpoints (${fills.length}) are more than one`);
+          assert(window.called.length === 1, `fill is called ${window.called.length} (Expected 1) times`);
+          assert(window.called[0].checkpoint === 'fill', 'checkpoint is not fill');
+          assert(window.called[0].source === `form input[type='number']`,
+            `source ${window.called[0].source} is not form input[type='number']`);
         });
       });
     });

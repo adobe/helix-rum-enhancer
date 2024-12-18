@@ -249,8 +249,13 @@ function addViewMediaTracking(parent) {
 }
 
 function addFillTracking(parent) {
+  let lastSource;
   parent.addEventListener('change', (event) => {
-    sampleRUM('fill', { source: sourceSelector(event.target) });
+    const source = sourceSelector(event.target);
+    if (source !== lastSource) {
+      sampleRUM('fill', { source });
+      lastSource = source;
+    }
   });
 }
 
