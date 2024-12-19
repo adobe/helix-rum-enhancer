@@ -251,33 +251,25 @@ function addViewMediaTracking(parent) {
   }
 }
 
-function addFillTracking(parent) {
-  let lastSource;
-  parent.addEventListener('change', (event) => {
-    const source = sourceSelector(event.target);
-    if (source !== lastSource) {
-      sampleRUM('fill', { source });
-      lastSource = source;
-    }
-  });
-}
-
-function addFocusTracking(parent) {
-  parent.addEventListener('focusin', (event) => {
-    if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(event.target.tagName)
-      || event.target.getAttribute('contenteditable') === 'true') {
-      sampleRUM('click', { source: sourceSelector(event.target) });
-    }
-  });
-}
-
 function addFormTracking(parent) {
   activateBlocksMO();
   activateMediaMO();
   parent.querySelectorAll('form').forEach((form) => {
     form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
-    addFillTracking(form);
-    addFocusTracking(form);
+    let lastSource;
+    form.addEventListener('change', (e) => {
+      const source = sourceSelector(e.target);
+      if (source !== lastSource) {
+        sampleRUM('fill', { source });
+        lastSource = source;
+      }
+    });
+    form.addEventListener('focusin', (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(e.target.tagName)
+        || e.target.getAttribute('contenteditable') === 'true') {
+        sampleRUM('click', { source: sourceSelector(e.target) });
+      }
+    });
   });
 }
 
