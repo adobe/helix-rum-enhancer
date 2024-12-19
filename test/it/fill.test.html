@@ -1,0 +1,135 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin'
+    };
+    // we log what's being sent to the "server"
+    window.called = [];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = async function (url, payload) {
+      // if payload is a string, we assume it's a JSON string
+      let payloadObject;
+      if (typeof payload === 'string') {
+        payloadObject = JSON.parse(payload);
+      } else {
+        // it's a blob
+        const data = await payload.text();
+        payloadObject = JSON.parse(data);
+      }
+      if (payloadObject.checkpoint === 'fill') {
+        window.called.push(payloadObject);
+      }
+    };
+
+    window.wait = async function (ms) {
+      return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+      });
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <div class="block" data-block-status="loaded">
+    The first block
+    <img src="/test/fixtures/fire.jpg" height="200" width="200">
+  </div>
+  <div id="focusable-element" tabindex="0">
+    Focusable element
+  </div>
+  <form action="javascript:false;" method="POST" autocomplete="on">
+    <input type="text" name="name" autocomplete="name"/>
+    <input type="number" name="number"/>
+    <input type="email" name="email" autocomplete="email"/>
+    <button type="submit">Submit</button>
+    <div id="editable-element-inside-form" contenteditable="true">
+      Editable element inside form
+    </div>
+  </form>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendKeys, sendMouse } from '@web/test-runner-commands';
+    import { assert } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('Test Fill Tracking', () => {
+
+        before(async () => {
+          await window.wait(2000);
+        });
+
+        beforeEach(async () => {
+          window.called = [];
+        });
+
+        it('filling number field', async () => {
+          const form = document.querySelector('form');
+          const input = form.querySelector('input[type="number"]')
+          input.focus();
+          await window.wait(10);
+
+          await sendKeys({type: '1234'});
+          await window.wait(10);
+
+          await sendMouse({type: 'click', position: [0,0]});
+          await window.wait(100);
+
+          assert(window.called.length === 1, `fill is called ${window.called.length} (Expected 1) times`);
+          assert(window.called[0].checkpoint === 'fill', 'checkpoint is not fill');
+          assert(window.called[0].source === `form input[type='number']`,
+            `source ${window.called[0].source} is not form input[type='number']`);
+        });
+
+        it('filling form field', async () => {
+          const form = document.querySelector('form');
+          const input = form.querySelector('input[type="text"]')
+          input.focus();
+          await window.wait(10);
+
+          await sendKeys({type: 'sample value'});
+          await window.wait(10);
+
+          await sendMouse({type: 'click', position: [0,0]});
+          await window.wait(100);
+
+          assert(window.called.length === 1, `fill is called ${window.called.length} (Expected 1) times`);
+          assert(window.called[0].checkpoint === 'fill', 'checkpoint is not fill');
+          assert(window.called[0].source === `form input[type='text']`,
+            `source ${window.called[0].source} is not form input[type='text']`);
+        });
+
+        it('filling number field using up and down keys', async () => {
+          const form = document.querySelector('form');
+          const numberInput = form.querySelector('input[type="number"]')
+          numberInput.focus();
+          await window.wait(10);
+
+          await sendKeys({press: 'ArrowUp'});
+          await sendKeys({press: 'ArrowUp'});
+          await sendKeys({press: 'ArrowUp'});
+          await sendKeys({press: 'ArrowUp'});
+          await sendKeys({press: 'ArrowDown'});
+          await sendKeys({press: 'ArrowDown'});
+          await window.wait(10);
+
+          await sendMouse({type: 'click', position: [0,0]});
+          await window.wait(100);
+
+          assert(window.called.length === 1, `fill is called ${window.called.length} (Expected 1) times`);
+          assert(window.called[0].checkpoint === 'fill', 'checkpoint is not fill');
+          assert(window.called[0].source === `form input[type='number']`,
+            `source ${window.called[0].source} is not form input[type='number']`);
+        });
+      });
+    });
+  </script>
+</body>
