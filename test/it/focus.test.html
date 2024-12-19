@@ -1,0 +1,177 @@
+  <html>
+
+<head>
+  <title>Test Runner</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin'
+    };
+    // we log what's being sent to the "server"
+    window.called = [];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = async function (url, payload) {
+      // if payload is a string, we assume it's a JSON string
+      let payloadObject;
+      if (typeof payload === 'string') {
+        payloadObject = JSON.parse(payload);
+      } else {
+        // it's a blob
+        const data = await payload.text();
+        payloadObject = JSON.parse(data);
+      }
+      if (payloadObject.checkpoint === 'click') {
+        window.called.push(payloadObject);
+      }
+    };
+
+    window.wait = async function (ms) {
+      return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+      });
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <div class="block" data-block-status="loaded">
+    The first block
+    <img src="/test/fixtures/fire.jpg" height="200" width="200">
+  </div>
+  <div id="focusable-element" tabindex="0">
+    Focusable element
+  </div>
+  <div id="editable-element-outside-form" contenteditable="true">
+    Editable element outside form
+  </div>
+  <input type="text" id="field-outside-form" name="field-outside-form" />
+  <form action="javascript:false;" method="POST">
+    <input type="text" name="name" value="John Doe">
+    <input type="email" name="email" value="JohnDoe@example.com">
+    <button type="submit">Submit</button>
+    <div id="focusable-element-inside-form" tabindex="0">
+      Focusable element inside form
+    </div>
+    <div id="editable-element-inside-form" contenteditable="true">
+      Editable element inside form
+    </div>
+  </form>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendMouse, setViewport } from '@web/test-runner-commands';
+    import { assert } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('Test Focus Tracking', () => {
+
+        before(async () => {
+          // wait for enabling form events tracking
+          await window.wait(2000);
+          const form = document.querySelector('form');
+          form.addEventListener('submit', (event) => {
+            event.preventDefault();
+          });
+        })
+
+        beforeEach(async () => {
+          window.called = [];
+        });
+
+        it('can observe focus on form fields', async () => {
+          // wait for enabling form events tracking
+          await window.wait(2000);
+          const form = document.querySelector('form');
+          form.querySelector('input[type="text"]').focus();
+          await window.wait(100);
+          assert(window.called.length === 1, 'no click checkpoint');
+          assert(window.called[0].source === `form input[type='text']`,
+            `source ${window.called[0].source} is not form input[type='text']`);
+        });
+
+        it('can not observe focus on elements outside of a form', async () => {
+          const focusableElement = document.querySelector('#focusable-element');
+          focusableElement.focus();
+          await window.wait(100);
+
+          const fieldOutsideForm = document.querySelector('#field-outside-form');
+          fieldOutsideForm.focus();
+          await window.wait(100);
+
+          const editableElementOutsideForm = document.querySelector('#editable-element-outside-form');
+          editableElementOutsideForm.focus();
+          await window.wait(100);
+
+          assert(window.called.length === 0, 'click checkpoint is present');
+        });
+
+        it('can not observe focus on non editable focusable elements', async () => {
+          const focusableElementInForm = document.querySelector('#focusable-element-inside-form');
+          focusableElementInForm.focus();
+          await window.wait(100);
+
+          assert(window.called.length === 0, 'click checkpoint is present');
+        });
+
+
+        it('can observe focus on contenteditable elements inside a form', async () => {
+          const editableElement = document.querySelector('#editable-element-inside-form');
+          editableElement.focus();
+          await window.wait(100);
+
+          assert(window.called.length === 1, 'click checkpoint missing');
+          assert(window.called[0].source === `form #editable-element-inside-form`,
+            `source ${window.called[0].source} is not form #editable-element-inside-form`);
+        });
+
+        it('would send two click checkpoint on click of a field', async () => {
+          const textInput = document.querySelector('form input[type="text"]');
+          const rect = textInput.getBoundingClientRect();
+          await sendMouse({
+            type: 'click',
+            position: [
+              Math.floor(rect.left + rect.width/2),
+              Math.floor(rect.top + rect.height/2)
+            ]
+          });
+
+          await window.wait(100);
+
+          assert(window.called.length === 2, `click is called ${window.called.length} (Expected 2) times on a field`);
+          assert(window.called[0].source === `form input[type='text']`,
+            `source ${window.called[0].source} is not form input[type='text']`);
+          assert(window.called[1].source === `form input[type='text']`,
+            `source ${window.called[1].source} is not form input[type='text']`);
+        });
+
+        it('would send two click checkpoint on click of a button', async function test() {
+          if (navigator.userAgent.includes('WebKit') && !navigator.userAgent.includes('Chrome')) {
+            // webkit does not focus on buttons/radio-buttons/checkboxes upon click
+            this.skip();
+          }
+          const submitButton = document.querySelector('button');
+          const rect = submitButton.getBoundingClientRect();
+          await sendMouse({
+            type: 'click',
+            position: [
+              Math.floor(rect.left + rect.width/2),
+              Math.floor(rect.top + rect.height/2)
+            ]
+          });
+
+          await window.wait(100);
+          assert(window.called.length === 2, `click is called ${window.called.length} (Expected <=2) times on a button`);
+          assert(window.called[0].source === `form button[type='submit']`,
+            `source ${window.called[0].source} is not form button[type='submit']`);
+          assert(window.called[1].checkpoint === 'click', 'checkpoint is not focus');
+          assert(window.called[1].source === `form button[type='submit']`,
+            `source ${window.called[1].source} is not form button[type='submit']`);
+        });
+      });
+    });
+  </script>
+</body>

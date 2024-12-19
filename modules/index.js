@@ -138,20 +138,23 @@ function addNavigationTracking() {
       sampleRUM('enter', payload); // enter site
     }
     fflags.enabled('redirect', () => {
-      const from = new URLSearchParams(window.location.search).get('redirect-from');
+      const from = new URLSearchParams(window.location.search).get('redirect_from');
       if (redirectCount || from) {
         sampleRUM('redirect', { source: from, target: redirectCount || 1 });
       }
     });
   };
 
+  const processed = new Set(); // avoid processing duplicate types
   new PerformanceObserver((list) => list
-    .getEntries().map((e) => navigate(
+    .getEntries()
+    .filter(({ type }) => !processed.has(type))
+    .map((e) => [e, processed.add(e.type)])
+    .map(([e]) => navigate(
       window.hlx.referrer || document.referrer,
       e.type,
       e.redirectCount,
-    )))
-    .observe({ type: 'navigation', buffered: true });
+    ))).observe({ type: 'navigation', buffered: true });
 }
 
 function addLoadResourceTracking() {
@@ -259,12 +262,22 @@ function addFillTracking(parent) {
   });
 }
 
+function addFocusTracking(parent) {
+  parent.addEventListener('focusin', (event) => {
+    if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(event.target.tagName)
+      || event.target.getAttribute('contenteditable') === 'true') {
+      sampleRUM('click', { source: sourceSelector(event.target) });
+    }
+  });
+}
+
 function addFormTracking(parent) {
   activateBlocksMO();
   activateMediaMO();
   parent.querySelectorAll('form').forEach((form) => {
     form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
     addFillTracking(form);
+    addFocusTracking(form);
   });
 }
 
@@ -294,8 +307,16 @@ function mediaMCB(mutations) {
 }
 
 function addTrackingFromConfig() {
+  let lastSource;
+  let lastTarget;
   document.addEventListener('click', (event) => {
-    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
+    const source = sourceSelector(event.target);
+    const target = targetSelector(event.target);
+    if (source !== lastSource || target !== lastTarget) {
+      sampleRUM('click', { target, source });
+      lastSource = source;
+      lastTarget = target;
+    }
   });
   addCWVTracking();
   addFormTracking(window.document.body);

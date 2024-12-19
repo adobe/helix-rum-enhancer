@@ -1,3 +1,24 @@
+## [2.26.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.2...v2.26.3) (2024-12-16)
+
+
+### Bug Fixes
+
+* do not track repeating clicks ([#339](https://github.com/adobe/helix-rum-enhancer/issues/339)) ([f511a03](https://github.com/adobe/helix-rum-enhancer/commit/f511a03679188361326fbd3a8d68e650c39bea50))
+
+## [2.26.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.1...v2.26.2) (2024-12-11)
+
+
+### Bug Fixes
+
+* do not process duplicate navigation checkpoints ([#331](https://github.com/adobe/helix-rum-enhancer/issues/331)) ([4b6843f](https://github.com/adobe/helix-rum-enhancer/commit/4b6843f4cbe7b685ffc0c017a46274e505b26b56))
+
+## [2.26.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.0...v2.26.1) (2024-12-10)
+
+
+### Bug Fixes
+
+* **redirects:** use underscore in param ([bada92e](https://github.com/adobe/helix-rum-enhancer/commit/bada92e69aaa8f560d61d6264f578eb2958934ec))
+
 # [2.26.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.25.0...v2.26.0) (2024-10-16)
 
 
