@@ -1,3 +1,10 @@
+## [2.26.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.3...v2.26.4) (2024-12-20)
+
+
+### Bug Fixes
+
+* release process ([bdce5c3](https://github.com/adobe/helix-rum-enhancer/commit/bdce5c328037630347f6bc96b64f097c983418e0))
+
 ## [2.26.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.2...v2.26.3) (2024-12-16)
 
 
