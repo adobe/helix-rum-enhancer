@@ -1,3 +1,10 @@
+# [2.27.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.4...v2.27.0) (2024-12-20)
+
+
+### Features
+
+* adding new checkpoint fill ([#336](https://github.com/adobe/helix-rum-enhancer/issues/336)) ([d3887f3](https://github.com/adobe/helix-rum-enhancer/commit/d3887f3b7eb073aa9f9e18f4d4a106bf7fa5b676))
+
 ## [2.26.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.3...v2.26.4) (2024-12-20)
 
 
