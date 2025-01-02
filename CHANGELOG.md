@@ -1,3 +1,10 @@
+# [2.28.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.27.0...v2.28.0) (2025-01-02)
+
+
+### Features
+
+* remove (deprecated) FID ex-CWV ([58e39ae](https://github.com/adobe/helix-rum-enhancer/commit/58e39ae3eae6315562ab9c7aec479e9da2737e7d))
+
 # [2.27.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.4...v2.27.0) (2024-12-20)
 
 
