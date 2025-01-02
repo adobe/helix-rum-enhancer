@@ -90,7 +90,7 @@ function addCWVTracking() {
 
         // When loading `web-vitals` using a classic script, all the public
         // methods can be found on the `webVitals` global namespace.
-        ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
+        ['INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
           const metricFn = window.webVitals[`on${metric}`];
           if (typeof metricFn === 'function') {
             let opts = {};
