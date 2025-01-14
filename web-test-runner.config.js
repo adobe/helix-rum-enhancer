@@ -23,7 +23,6 @@ export default {
       'test/fixtures/**',
       'node_modules/**',
       '.rum/**',
-      'src/**',
     ],
   },
   files: [
@@ -32,7 +31,12 @@ export default {
   ],
   middleware: [
     async function emulateRUM(context, next) {
-      if (context.url.startsWith('/src/index.map.js')) {
+      if (context.url.startsWith('/modules/index.map.js')) {
+        await next();
+        context.body = context.body
+          .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon');
+        return true;
+      } else if (context.url.startsWith('/src/index.map.js')) {
         await next();
         context.body = context.body
           .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon');
@@ -47,7 +51,7 @@ export default {
             .replace(/const weight =/, 'const weight = 1 ||')
             .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon')
             // eslint-disable-next-line no-template-curly-in-string
-            .replace('.rum/@adobe/helix-rum-enhancer@${enhancerVersion || \'^2\'}/src/index.js', 'src/index.map.js');
+            .replace('.rum/@adobe/helix-rum-enhancer@${enhancerVersion || \'^2\'}/src/index.js', 'modules/index.js');
           return true;
         } else if (context.url.startsWith('/.rum/web-vitals')) {
           context.url = '/node_modules/web-vitals/dist/web-vitals.iife.js';
