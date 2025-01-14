@@ -24,8 +24,8 @@ jobs:
         if: success() || failure()    # run this step even if previous step failed
         with:
           name: Tests            # Name of the check run which will be created
-          path: test-results.xml # Path to test results
-          reporter: jest-junit   # Format of test results
+          path: test-results/test-results.json
+          reporter: mocha-json
       - uses: codecov/codecov-action@v5
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
