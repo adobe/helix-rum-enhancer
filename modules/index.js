@@ -168,9 +168,9 @@ function addLoadResourceTracking() {
           sampleRUM('loadresource', { source: e.name, target: Math.round(e.duration) });
         });
       list.getEntries()
-        .filter((e) => e.responseStatus === 404)
+        .filter((e) => e.responseStatus >= 400)
         .forEach((e) => {
-          sampleRUM('missingresource', { source: e.name, target: e.hostname });
+          sampleRUM('missingresource', { source: e.name, target: e.responseStatus });
         });
       /* c8 ignore next 3 */
     } catch (error) {
