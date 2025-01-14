@@ -35,7 +35,7 @@ const hasUrlParameters = ({ urlParameters }) => urlParameters.keys().length > 0;
 // Check for the presence of a given cookie
 const hasCookieKey = (key) => () => document.cookie.split(';').map((c) => c.trim()).some((cookie) => cookie.startsWith(`${key}=`));
 
-const pluginBasePath = '../plugins';
+const pluginBasePath = new URL('.rum/@adobe/helix-rum-enhancer@^2/src/plugins', sampleRUM.baseURL).href;
 
 const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
