@@ -35,17 +35,24 @@ const hasUrlParameters = ({ urlParameters }) => urlParameters.keys().length > 0;
 // Check for the presence of a given cookie
 const hasCookieKey = (key) => () => document.cookie.split(';').map((c) => c.trim()).some((cookie) => cookie.startsWith(`${key}=`));
 
+const pluginBasePath = '../plugins';
+
 const PLUGINS = {
-  cwv: 'cwv.js',
-  navigation: 'navigation.js',
+  cwv: `${pluginBasePath}/cwv.js`,
+  navigation: `${pluginBasePath}/navigation.js`,
   // Interactive elements
-  form: { file: 'form.js', condition: () => document.body.querySelector('form') },
-  video: { file: 'video.js', condition: () => document.body.querySelector('video') },
+  form: { url: `${pluginBasePath}/form.js`, condition: () => document.body.querySelector('form') },
+  video: { url: `${pluginBasePath}/video.js`, condition: () => document.body.querySelector('video') },
   // Martech
-  ads: { file: 'ads.js', condition: hasUrlParameters },
-  email: { file: 'email.js', condition: hasUrlParameters },
-  onetrust: { file: 'onetrust.js', condition: () => hasCookieKey('OptanonAlertBoxClosed') },
-  utm: { file: 'utm.js', condition: hasUrlParameters },
+  ads: { url: `${pluginBasePath}/ads.js`, condition: hasUrlParameters },
+  email: { url: `${pluginBasePath}/email.js`, condition: hasUrlParameters },
+  onetrust: { url: `${pluginBasePath}/onetrust.js`, condition: () => hasCookieKey('OptanonAlertBoxClosed') },
+  utm: { url: `${pluginBasePath}/utm.js`, condition: hasUrlParameters },
+};
+
+const allPlugins = {
+  ...(window.RUM_PLUGINS || {}),
+  PLUGINS,
 };
 
 const PLUGIN_PARAMETERS = {
@@ -59,16 +66,15 @@ const PLUGIN_PARAMETERS = {
 const pluginCache = new Map();
 
 async function loadPlugin(key, params) {
-  const plugin = PLUGINS[key];
+  const plugin = allPlugins[key];
   if (!plugin) return Promise.reject(new Error(`Plugin ${key} not found`));
   const usp = new URLSearchParams(window.location.search);
   if (!pluginCache.has(key) && plugin.condition && !plugin.condition({ urlParameters: usp })) {
     return Promise.reject(new Error(`Condition for plugin ${key} not met`));
   }
-  const basePath = '../plugins/';
   if (!pluginCache.has(key)) {
     try {
-      pluginCache.set(key, import(`${basePath}${plugin.file || plugin}`));
+      pluginCache.set(key, import(`${plugin.url || plugin}`));
     } catch (e) {
       return Promise.reject(new Error(`Error loading plugin ${key}: ${e.message}`));
     }
@@ -244,7 +250,8 @@ function addTrackingFromConfig() {
   addViewMediaTracking(document.body);
 
   // Tracking extensions
-  Object.keys(PLUGINS).filter((key) => loadPlugin(key, PLUGIN_PARAMETERS));
+  Object.keys(allPlugins)
+    .forEach((key) => loadPlugin(key, PLUGIN_PARAMETERS));
 
   fflags.enabled('language', () => {
     const target = navigator.language;
