@@ -28,10 +28,16 @@ const banner = `/*
  */`;
 
 const bundles = [
+  // Core library
   {
     source: 'modules/index.js',
     outputFile: 'src/index',
   },
+  // Library plugins
+  ...['ads', 'cwv', 'email', 'form', 'navigation', 'onetrust', 'utm', 'video'].map((plugin) => ({
+    source: `plugins/${plugin}.js`,
+    outputFile: `src/plugins/${plugin}`,
+  })),
 ];
 
 export default [...bundles.map(({ outputFile, source }) => ({

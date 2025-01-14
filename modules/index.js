@@ -14,12 +14,6 @@
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
-import {
-  addAdsParametersTracking,
-  addCookieConsentTracking,
-  addEmailParameterTracking,
-  addUTMParametersTracking,
-} from './martech.js';
 import { fflags } from './fflags.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
@@ -34,6 +28,52 @@ const blocksMO = window.MutationObserver ? new MutationObserver(blocksMCB)
 // eslint-disable-next-line no-use-before-define, max-len
 const mediaMO = window.MutationObserver ? new MutationObserver(mediaMCB)
   /* c8 ignore next */ : {};
+
+const PLUGINS = {
+  cwv: 'cwv.js',
+  navigation: 'navigation.js',
+  // Interactive elements
+  form: {
+    condition: () => document.body.querySelector('form'),
+    file: 'form.js',
+  },
+  video: {
+    condition: () => document.body.querySelector('video'),
+    file: 'video.js',
+  },
+  // Martech
+  ads: {
+    condition: ({ urlParameters }) => urlParameters.keys().length,
+    file: 'ads.js',
+  },
+  email: {
+    condition: ({ urlParameters }) => urlParameters.keys().length,
+    file: 'email.js',
+  },
+  onetrust: {
+    condition: () => document.cookie.split(';').map((c) => c.trim()).some((cookie) => cookie.startsWith('OptanonAlertBoxClosed=')),
+    file: 'onetrust.js',
+  },
+  utm: {
+    condition: ({ urlParameters }) => urlParameters.keys().length,
+    file: 'utm.js',
+  },
+};
+
+const PLUGIN_PARAMETERS = {
+  sampleRUM,
+  sourceSelector,
+  targetSelector,
+  fflags,
+  context: window.document.body,
+};
+
+async function loadPlugin(key, params) {
+  const urlParameters = new URLSearchParams(window.location.search);
+  return PLUGINS[key] && (!PLUGINS[key].condition || PLUGINS[key].condition({ urlParameters }))
+    ? import(`../plugins/${PLUGINS[key].path || PLUGINS[key]}`).then((p) => p.default && p.default(params))
+    : Promise.reject(new Error(`Plugin ${key} not found`));
+}
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
@@ -62,99 +102,6 @@ function processQueue() {
     const ck = queue.shift();
     trackCheckpoint(...ck);
   }
-}
-
-function addCWVTracking() {
-  setTimeout(() => {
-    try {
-      const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
-      if (document.querySelector(`script[src="${cwvScript}"]`)) {
-        // web vitals script has been loaded already
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = cwvScript;
-      script.onload = () => {
-        const storeCWV = (measurement) => {
-          const data = { cwv: {} };
-          data.cwv[measurement.name] = measurement.value;
-          if (measurement.name === 'LCP' && measurement.entries.length > 0) {
-            const { element } = measurement.entries.pop();
-            data.target = targetSelector(element);
-            data.source = sourceSelector(element) || (element && element.outerHTML.slice(0, 30));
-          }
-          sampleRUM('cwv', data);
-        };
-
-        const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
-
-        // When loading `web-vitals` using a classic script, all the public
-        // methods can be found on the `webVitals` global namespace.
-        ['INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
-          const metricFn = window.webVitals[`on${metric}`];
-          if (typeof metricFn === 'function') {
-            let opts = {};
-            fflags.enabled('eagercwv', () => {
-              opts = { reportAllChanges: isEager(metric) };
-            });
-            metricFn(storeCWV, opts);
-          }
-        });
-      };
-      document.head.appendChild(script);
-      /* c8 ignore next 3 */
-    } catch (error) {
-      // something went wrong
-    }
-  }, 2000); // wait for delayed
-}
-
-function addNavigationTracking() {
-  // enter checkpoint when referrer is not the current page url
-  const navigate = (source, type, redirectCount) => {
-    // target can be 'visible', 'hidden' (background tab) or 'prerendered' (speculation rules)
-    const payload = { source, target: document.visibilityState };
-    /* c8 ignore next 13 */
-    // prerendering cannot be tested yet with headless browsers
-    if (document.prerendering) {
-      // listen for "activation" of the current pre-rendered page
-      document.addEventListener('prerenderingchange', () => {
-        // pre-rendered page is now "activated"
-        payload.target = 'prerendered';
-        sampleRUM('navigate', payload); // prerendered navigation
-      }, {
-        once: true,
-      });
-      if (type === 'navigate') {
-        sampleRUM('prerender', payload); // prerendering page
-      }
-    } else if (type === 'reload' || source === window.location.href) {
-      sampleRUM('reload', payload);
-    } else if (type && type !== 'navigate') {
-      sampleRUM(type, payload); // back, forward, prerender, etc.
-    } else if (source && window.location.origin === new URL(source).origin) {
-      sampleRUM('navigate', payload); // internal navigation
-    } else {
-      sampleRUM('enter', payload); // enter site
-    }
-    fflags.enabled('redirect', () => {
-      const from = new URLSearchParams(window.location.search).get('redirect_from');
-      if (redirectCount || from) {
-        sampleRUM('redirect', { source: from, target: redirectCount || 1 });
-      }
-    });
-  };
-
-  const processed = new Set(); // avoid processing duplicate types
-  new PerformanceObserver((list) => list
-    .getEntries()
-    .filter(({ type }) => !processed.has(type))
-    .map((e) => [e, processed.add(e.type)])
-    .map(([e]) => navigate(
-      window.hlx.referrer || document.referrer,
-      e.type,
-      e.redirectCount,
-    ))).observe({ type: 'navigation', buffered: true });
 }
 
 function addLoadResourceTracking() {
@@ -211,8 +158,6 @@ function getIntersectionObsever(checkpoint) {
   if (!window.IntersectionObserver) {
     return null;
   }
-  activateBlocksMO();
-  activateMediaMO();
   const observer = new IntersectionObserver((entries) => {
     try {
       entries
@@ -251,28 +196,6 @@ function addViewMediaTracking(parent) {
   }
 }
 
-function addFormTracking(parent) {
-  activateBlocksMO();
-  activateMediaMO();
-  parent.querySelectorAll('form').forEach((form) => {
-    form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
-    let lastSource;
-    form.addEventListener('change', (e) => {
-      const source = sourceSelector(e.target);
-      if (source !== lastSource) {
-        sampleRUM('fill', { source });
-        lastSource = source;
-      }
-    });
-    form.addEventListener('focusin', (e) => {
-      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(e.target.tagName)
-        || e.target.getAttribute('contenteditable') === 'true') {
-        sampleRUM('click', { source: sourceSelector(e.target) });
-      }
-    });
-  });
-}
-
 function addObserver(ck, fn, block) {
   return DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
 }
@@ -284,7 +207,7 @@ function blocksMCB(mutations) {
     .filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
     .filter((m) => m.target.dataset.blockStatus === 'loaded')
     .forEach((m) => {
-      addObserver('form', addFormTracking, m.target);
+      addObserver('form', (el) => loadPlugin('form', { ...PLUGIN_PARAMETERS, context: el }), m.target);
       addObserver('viewblock', addViewBlockTracking, m.target);
     });
 }
@@ -299,6 +222,9 @@ function mediaMCB(mutations) {
 }
 
 function addTrackingFromConfig() {
+  activateBlocksMO();
+  activateMediaMO();
+
   let lastSource;
   let lastTarget;
   document.addEventListener('click', (event) => {
@@ -310,16 +236,15 @@ function addTrackingFromConfig() {
       lastTarget = target;
     }
   });
-  addCWVTracking();
-  addFormTracking(window.document.body);
-  addNavigationTracking();
+
+  // Core tracking
   addLoadResourceTracking();
-  addUTMParametersTracking(sampleRUM);
   addViewBlockTracking(window.document.body);
   addViewMediaTracking(window.document.body);
-  addCookieConsentTracking(sampleRUM);
-  addAdsParametersTracking(sampleRUM);
-  addEmailParameterTracking(sampleRUM);
+
+  // Tracking extensions
+  Object.keys(PLUGINS).filter((key) => loadPlugin(key, PLUGIN_PARAMETERS));
+
   fflags.enabled('language', () => {
     const target = navigator.language;
     const source = document.documentElement.lang;
