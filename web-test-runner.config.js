@@ -12,118 +12,15 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defaultReporter } from '@web/test-runner';
-import fs from 'fs';
-
-function myReporter() {
-  let startTime;
-
-  return {
-    start() {
-      startTime = Date.now();
-      console.log('Test run started at:', new Date(startTime).toISOString());
-    },
-
-    stop({ sessions }) {
-      console.log('\nTest run finished. Processing results...');
-      console.log('Number of sessions:', sessions.length);
-      sessions.forEach((session, idx) => {
-        console.log(`\nSession ${idx + 1}:`, {
-          browser: session.browser?.name,
-          testFile: session.testFile,
-          passed: session.passed,
-          failed: session.failed,
-          skipped: session.skipped,
-          error: !!session.error,
-        });
-      });
-
-      const endTime = Date.now();
-      const results = {
-        stats: {
-          suites: sessions.length,
-          tests: 0,
-          passes: 0,
-          pending: 0,
-          failures: 0,
-          start: new Date(startTime).toISOString(),
-          end: new Date(endTime).toISOString(),
-          duration: endTime - startTime,
-        },
-        tests: [],
-      };
-
-      sessions.forEach((session) => {
-        // Each session represents a test file
-        results.stats.tests += 1;
-
-        if (session.passed) {
-          results.stats.passes += 1;
-        } else if (session.skipped) {
-          results.stats.pending += 1;
-        } else {
-          // If not passed and not skipped, it's a failure
-          results.stats.failures += 1;
-        }
-
-        // Add the test result
-        const testName = session.testFile.split('/').pop().replace('.test.html', '').replace('.test.js', '');
-        const error = session.error || (session.passed === false ? {
-          message: `Test failed in ${testName}`,
-          stack: `No stack trace available for ${testName}`,
-        } : null);
-
-        results.tests.push({
-          title: testName,
-          fullTitle: session.testFile,
-          file: session.testFile,
-          duration: session.duration || 0,
-          currentRetry: 0,
-          browser: session.browser?.name || 'unknown',
-          err: error,
-          skipped: session.skipped || false,
-          pending: session.skipped || false,
-          passed: session.passed || false,
-        });
-      });
-
-      console.log('\nFinal stats:', results.stats);
-      console.log('Total test results:', results.tests.length);
-
-      try {
-        if (!fs.existsSync('test-results')) {
-          console.log('Creating test-results directory...');
-          fs.mkdirSync('test-results', { recursive: true });
-        }
-
-        const outputPath = 'test-results/test-results.json';
-        fs.writeFileSync(outputPath, JSON.stringify(results, null, 2));
-        console.log(`\nTest results written to ${outputPath}`);
-
-        // Verify the file was created
-        if (fs.existsSync(outputPath)) {
-          const stats = fs.statSync(outputPath);
-          console.log(`File size: ${stats.size} bytes`);
-        } else {
-          console.error('Failed to create output file!');
-        }
-      } catch (error) {
-        console.error('Error writing test results:', error);
-      }
-    },
-
-    onTestRunStarted() { },
-    onTestRunFinished() { },
-    reportTestFileResults() { },
-    getTestProgress() { return ''; },
-  };
-}
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { junitReporter } from '@web/test-runner-junit-reporter';
 
 export default {
   nodeResolve: true,
   coverage: true,
   reporters: [
     defaultReporter(),
-    myReporter(),
+    junitReporter(),
   ],
   testFramework: {
     type: 'mocha',
