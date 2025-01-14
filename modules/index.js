@@ -19,15 +19,19 @@ import { fflags } from './fflags.js';
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
   /* c8 ignore next */ : {};
 
+const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
+/* c8 ignore next */ : {});
+
 // blocks mutation observer
 // eslint-disable-next-line no-use-before-define, max-len
-const blocksMO = window.MutationObserver ? new MutationObserver(blocksMCB)
-  /* c8 ignore next */ : {};
+const blocksMO = createMO(blocksMCB);
 
 // media mutation observer
 // eslint-disable-next-line no-use-before-define, max-len
-const mediaMO = window.MutationObserver ? new MutationObserver(mediaMCB)
-  /* c8 ignore next */ : {};
+const mediaMO = createMO(mediaMCB);
+
+// Check for the presence of URL parameters
+const hasUrlParameters = ({ urlParameters }) => urlParameters.keys().length > 0;
 
 const PLUGINS = {
   cwv: 'cwv.js',
@@ -43,11 +47,11 @@ const PLUGINS = {
   },
   // Martech
   ads: {
-    condition: ({ urlParameters }) => urlParameters.keys().length,
+    condition: hasUrlParameters,
     file: 'ads.js',
   },
   email: {
-    condition: ({ urlParameters }) => urlParameters.keys().length,
+    condition: hasUrlParameters,
     file: 'email.js',
   },
   onetrust: {
@@ -55,7 +59,7 @@ const PLUGINS = {
     file: 'onetrust.js',
   },
   utm: {
-    condition: ({ urlParameters }) => urlParameters.keys().length,
+    condition: hasUrlParameters,
     file: 'utm.js',
   },
 };
@@ -70,9 +74,12 @@ const PLUGIN_PARAMETERS = {
 
 async function loadPlugin(key, params) {
   const urlParameters = new URLSearchParams(window.location.search);
-  return PLUGINS[key] && (!PLUGINS[key].condition || PLUGINS[key].condition({ urlParameters }))
-    ? import(`../plugins/${PLUGINS[key].path || PLUGINS[key]}`).then((p) => p.default && p.default(params))
-    : Promise.reject(new Error(`Plugin ${key} not found`));
+  const plugin = PLUGINS[key];
+  if (!plugin) return Promise.reject(new Error(`Plugin ${key} not found`));
+  if (!plugin.condition || plugin.condition({ urlParameters })) {
+    return import(`../plugins/${plugin.file || plugin}`).then((p) => p.default && p.default(params));
+  }
+  return Promise.resolve();
 }
 
 function trackCheckpoint(checkpoint, data, t) {
