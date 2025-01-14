@@ -19,4 +19,5 @@ export const fflags = {
   redirect: [620, 1139],
   example: [543, 770, 1136],
   language: [543, 959, 1139, 620],
+  allresources: [1139],
 };
