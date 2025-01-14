@@ -23,63 +23,57 @@ const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
 /* c8 ignore next */ : {});
 
 // blocks mutation observer
-// eslint-disable-next-line no-use-before-define, max-len
+// eslint-disable-next-line no-use-before-define
 const blocksMO = createMO(blocksMCB);
 
 // media mutation observer
-// eslint-disable-next-line no-use-before-define, max-len
+// eslint-disable-next-line no-use-before-define
 const mediaMO = createMO(mediaMCB);
 
 // Check for the presence of URL parameters
 const hasUrlParameters = ({ urlParameters }) => urlParameters.keys().length > 0;
+// Check for the presence of a given cookie
+const hasCookieKey = (key) => () => document.cookie.split(';').map((c) => c.trim()).some((cookie) => cookie.startsWith(`${key}=`));
 
 const PLUGINS = {
   cwv: 'cwv.js',
   navigation: 'navigation.js',
   // Interactive elements
-  form: {
-    condition: () => document.body.querySelector('form'),
-    file: 'form.js',
-  },
-  video: {
-    condition: () => document.body.querySelector('video'),
-    file: 'video.js',
-  },
+  form: { file: 'form.js', condition: () => document.body.querySelector('form') },
+  video: { file: 'video.js', condition: () => document.body.querySelector('video') },
   // Martech
-  ads: {
-    condition: hasUrlParameters,
-    file: 'ads.js',
-  },
-  email: {
-    condition: hasUrlParameters,
-    file: 'email.js',
-  },
-  onetrust: {
-    condition: () => document.cookie.split(';').map((c) => c.trim()).some((cookie) => cookie.startsWith('OptanonAlertBoxClosed=')),
-    file: 'onetrust.js',
-  },
-  utm: {
-    condition: hasUrlParameters,
-    file: 'utm.js',
-  },
+  ads: { file: 'ads.js', condition: hasUrlParameters },
+  email: { file: 'email.js', condition: hasUrlParameters },
+  onetrust: { file: 'onetrust.js', condition: () => hasCookieKey('OptanonAlertBoxClosed') },
+  utm: { file: 'utm.js', condition: hasUrlParameters },
 };
 
 const PLUGIN_PARAMETERS = {
+  context: document.body,
+  fflags,
   sampleRUM,
   sourceSelector,
   targetSelector,
-  fflags,
-  context: window.document.body,
 };
 
+const pluginCache = new Map();
+
 async function loadPlugin(key, params) {
-  const urlParameters = new URLSearchParams(window.location.search);
   const plugin = PLUGINS[key];
   if (!plugin) return Promise.reject(new Error(`Plugin ${key} not found`));
-  if (!plugin.condition || plugin.condition({ urlParameters })) {
-    return import(`../plugins/${plugin.file || plugin}`).then((p) => p.default && p.default(params));
+  const usp = new URLSearchParams(window.location.search);
+  if (!pluginCache.has(key) && plugin.condition && !plugin.condition({ urlParameters: usp })) {
+    return Promise.reject(new Error(`Condition for plugin ${key} not met`));
   }
-  return Promise.resolve();
+  const basePath = '../plugins/';
+  if (!pluginCache.has(key)) {
+    try {
+      pluginCache.set(key, import(`${basePath}${plugin.file || plugin}`));
+    } catch (e) {
+      return Promise.reject(new Error(`Error loading plugin ${key}: ${e.message}`));
+    }
+  }
+  return pluginCache.get(key).then((p) => p.default && p.default(params));
 }
 
 function trackCheckpoint(checkpoint, data, t) {
@@ -246,8 +240,8 @@ function addTrackingFromConfig() {
 
   // Core tracking
   addLoadResourceTracking();
-  addViewBlockTracking(window.document.body);
-  addViewMediaTracking(window.document.body);
+  addViewBlockTracking(document.body);
+  addViewMediaTracking(document.body);
 
   // Tracking extensions
   Object.keys(PLUGINS).filter((key) => loadPlugin(key, PLUGIN_PARAMETERS));
