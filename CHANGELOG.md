@@ -1,3 +1,10 @@
+# [2.30.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.29.0...v2.30.0) (2025-01-15)
+
+
+### Features
+
+* **missingresource:** report all resource error with http status code ([e238136](https://github.com/adobe/helix-rum-enhancer/commit/e238136c46a9801be1e3ce7887c7b4b292cbcf5b))
+
 # [2.29.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.28.0...v2.29.0) (2025-01-15)
 
 
