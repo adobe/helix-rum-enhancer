@@ -1,3 +1,10 @@
+# [2.29.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.28.0...v2.29.0) (2025-01-15)
+
+
+### Features
+
+* **loadresource:** add `allresources` feature flag that enables tracking all resources, not just same host ([7c536d7](https://github.com/adobe/helix-rum-enhancer/commit/7c536d7b8ec77c40c4b9868dd3dff53c39529699))
+
 # [2.28.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.27.0...v2.28.0) (2025-01-02)
 
 
