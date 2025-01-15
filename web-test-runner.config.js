@@ -9,7 +9,19 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { defaultReporter } from '@web/test-runner';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { junitReporter } from '@web/test-runner-junit-reporter';
+
 export default {
+  nodeResolve: true,
+  coverage: true,
+  reporters: [
+    defaultReporter(),
+    junitReporter(),
+  ],
   testFramework: {
     type: 'mocha',
     config: {
@@ -23,7 +35,7 @@ export default {
       'test/fixtures/**',
       'node_modules/**',
       '.rum/**',
-      'src/**',
+      'src/index.js',
     ],
   },
   files: [

@@ -10,3 +10,4 @@ test-results.xml
 .env
 .idea
 src
+test-results/test-results.json
