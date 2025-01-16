@@ -47,7 +47,16 @@ export default {
       if (context.url.startsWith('/src/index.map.js')) {
         await next();
         context.body = context.body
-          .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon');
+          .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon')
+          // rewriting dynamic plugins base url
+          .replace(/document\.currentScript\.src/g, '"http://localhost:8000/plugins"');
+        return true;
+      } else if (context.url.startsWith('/src/index.js')
+          || context.url.startsWith('/modules/index.js')) {
+        await next();
+        context.body = context.body
+          // rewriting dynamic plugins base url
+          .replace(/document\.currentScript\.src/g, '"http://localhost:8000/plugins"');
         return true;
       } else if (context.url.startsWith('/.rum')) {
         if (context.url.startsWith('/.rum/@adobe/helix-rum-js@%5E2/dist/')

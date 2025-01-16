@@ -14,26 +14,66 @@
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
-import {
-  addAdsParametersTracking,
-  addCookieConsentTracking,
-  addEmailParameterTracking,
-  addUTMParametersTracking,
-} from './martech.js';
 import { fflags } from './fflags.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
   /* c8 ignore next */ : {};
 
-// blocks mutation observer
-// eslint-disable-next-line no-use-before-define, max-len
-const blocksMO = window.MutationObserver ? new MutationObserver(blocksMCB)
-  /* c8 ignore next */ : {};
+const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
+/* c8 ignore next */ : {});
 
-// media mutation observer
-// eslint-disable-next-line no-use-before-define, max-len
-const mediaMO = window.MutationObserver ? new MutationObserver(mediaMCB)
-  /* c8 ignore next */ : {};
+// blocks & media mutation observer
+// eslint-disable-next-line no-use-before-define
+const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
+
+// Check for the presence of a given cookie
+const hasCookieKey = (key) => () => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
+
+const pluginBasePath = new URL(document.currentScript.src).href.replace(/index\.(map\.)js/, 'plugins');
+
+const PLUGINS = {
+  cwv: `${pluginBasePath}/cwv.js`,
+  // Interactive elements
+  form: { url: `${pluginBasePath}/form.js`, condition: () => document.querySelector('form'), isBlockDependent: true },
+  video: { url: `${pluginBasePath}/video.js`, condition: () => document.querySelector('video'), isBlockDependent: true },
+  // Martech
+  martech: { url: `${pluginBasePath}/martech.js`, condition: ({ urlParameters }) => urlParameters.size > 0 },
+  onetrust: { url: `${pluginBasePath}/onetrust.js`, condition: () => (document.querySelector('#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
+};
+
+const PLUGIN_PARAMETERS = {
+  context: document.body,
+  fflags,
+  sampleRUM,
+  sourceSelector,
+  targetSelector,
+};
+
+const pluginCache = new Map();
+
+function loadPlugin(key, params) {
+  const plugin = PLUGINS[key];
+  const usp = new URLSearchParams(window.location.search);
+  if (!pluginCache.has(key) && plugin.condition && !plugin.condition({ urlParameters: usp })) {
+    return null;
+  }
+  if (!pluginCache.has(key)) {
+    try {
+      pluginCache.set(key, import(`${plugin.url || plugin}`));
+    } catch (e) {
+      return null;
+    }
+  }
+  const pluginLoadPromise = pluginCache.get(key);
+  return pluginLoadPromise
+    .then((p) => (p.default && p.default(params)) || (typeof p === 'function' && p(params)));
+}
+
+function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
+  Object.entries(PLUGINS)
+    .filter(([, plugin]) => filter(plugin))
+    .map(([key]) => loadPlugin(key, params));
+}
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
@@ -62,51 +102,6 @@ function processQueue() {
     const ck = queue.shift();
     trackCheckpoint(...ck);
   }
-}
-
-function addCWVTracking() {
-  setTimeout(() => {
-    try {
-      const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
-      if (document.querySelector(`script[src="${cwvScript}"]`)) {
-        // web vitals script has been loaded already
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = cwvScript;
-      script.onload = () => {
-        const storeCWV = (measurement) => {
-          const data = { cwv: {} };
-          data.cwv[measurement.name] = measurement.value;
-          if (measurement.name === 'LCP' && measurement.entries.length > 0) {
-            const { element } = measurement.entries.pop();
-            data.target = targetSelector(element);
-            data.source = sourceSelector(element) || (element && element.outerHTML.slice(0, 30));
-          }
-          sampleRUM('cwv', data);
-        };
-
-        const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
-
-        // When loading `web-vitals` using a classic script, all the public
-        // methods can be found on the `webVitals` global namespace.
-        ['INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
-          const metricFn = window.webVitals[`on${metric}`];
-          if (typeof metricFn === 'function') {
-            let opts = {};
-            fflags.enabled('eagercwv', () => {
-              opts = { reportAllChanges: isEager(metric) };
-            });
-            metricFn(storeCWV, opts);
-          }
-        });
-      };
-      document.head.appendChild(script);
-      /* c8 ignore next 3 */
-    } catch (error) {
-      // something went wrong
-    }
-  }, 2000); // wait for delayed
 }
 
 function addNavigationTracking() {
@@ -210,8 +205,6 @@ function getIntersectionObsever(checkpoint) {
   if (!window.IntersectionObserver) {
     return null;
   }
-  activateBlocksMO();
-  activateMediaMO();
   const observer = new IntersectionObserver((entries) => {
     try {
       entries
@@ -250,28 +243,6 @@ function addViewMediaTracking(parent) {
   }
 }
 
-function addFormTracking(parent) {
-  activateBlocksMO();
-  activateMediaMO();
-  parent.querySelectorAll('form').forEach((form) => {
-    form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
-    let lastSource;
-    form.addEventListener('change', (e) => {
-      const source = sourceSelector(e.target);
-      if (source !== lastSource) {
-        sampleRUM('fill', { source });
-        lastSource = source;
-      }
-    });
-    form.addEventListener('focusin', (e) => {
-      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(e.target.tagName)
-        || e.target.getAttribute('contenteditable') === 'true') {
-        sampleRUM('click', { source: sourceSelector(e.target) });
-      }
-    });
-  });
-}
-
 function addObserver(ck, fn, block) {
   return DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
 }
@@ -283,7 +254,7 @@ function blocksMCB(mutations) {
     .filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
     .filter((m) => m.target.dataset.blockStatus === 'loaded')
     .forEach((m) => {
-      addObserver('form', addFormTracking, m.target);
+      addObserver('form', (el) => loadPlugins((p) => p.isBlockDependent, { ...PLUGIN_PARAMETERS, context: el }), m.target);
       addObserver('viewblock', addViewBlockTracking, m.target);
     });
 }
@@ -298,6 +269,9 @@ function mediaMCB(mutations) {
 }
 
 function addTrackingFromConfig() {
+  activateBlocksMO();
+  activateMediaMO();
+
   let lastSource;
   let lastTarget;
   document.addEventListener('click', (event) => {
@@ -309,16 +283,16 @@ function addTrackingFromConfig() {
       lastTarget = target;
     }
   });
-  addCWVTracking();
-  addFormTracking(window.document.body);
+
+  // Core tracking
   addNavigationTracking();
   addLoadResourceTracking();
-  addUTMParametersTracking(sampleRUM);
-  addViewBlockTracking(window.document.body);
-  addViewMediaTracking(window.document.body);
-  addCookieConsentTracking(sampleRUM);
-  addAdsParametersTracking(sampleRUM);
-  addEmailParameterTracking(sampleRUM);
+  addViewBlockTracking(document.body);
+  addViewMediaTracking(document.body);
+
+  // Tracking extensions
+  loadPlugins();
+
   fflags.enabled('language', () => {
     const target = navigator.language;
     const source = document.documentElement.lang;
