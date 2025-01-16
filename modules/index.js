@@ -22,27 +22,23 @@ const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window
 const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
 /* c8 ignore next */ : {});
 
-// blocks mutation observer
+// blocks & media mutation observer
 // eslint-disable-next-line no-use-before-define
-const blocksMO = createMO(blocksMCB);
-
-// media mutation observer
-// eslint-disable-next-line no-use-before-define
-const mediaMO = createMO(mediaMCB);
+const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 
 // Check for the presence of a given cookie
-const hasCookieKey = (key) => () => document.cookie.split(';').map((c) => c.trim()).some((cookie) => cookie.startsWith(`${key}=`));
+const hasCookieKey = (key) => () => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
 
 const pluginBasePath = '../plugins';
 
 const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
   // Interactive elements
-  form: { url: `${pluginBasePath}/form.js`, condition: () => document.body.querySelector('form'), isBlockDependent: true },
-  video: { url: `${pluginBasePath}/video.js`, condition: () => document.body.querySelector('video'), isBlockDependent: true },
+  form: { url: `${pluginBasePath}/form.js`, condition: () => document.querySelector('form'), isBlockDependent: true },
+  video: { url: `${pluginBasePath}/video.js`, condition: () => document.querySelector('video'), isBlockDependent: true },
   // Martech
-  martech: { url: `${pluginBasePath}/martech.js`, condition: ({ urlParameters }) => [...urlParameters.keys()].length > 0 },
-  onetrust: { url: `${pluginBasePath}/onetrust.js`, condition: () => (document.body.querySelector('body > div#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
+  martech: { url: `${pluginBasePath}/martech.js`, condition: ({ urlParameters }) => urlParameters.size > 0 },
+  onetrust: { url: `${pluginBasePath}/onetrust.js`, condition: () => (document.querySelector('#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
 };
 
 const PLUGIN_PARAMETERS = {
@@ -55,9 +51,8 @@ const PLUGIN_PARAMETERS = {
 
 const pluginCache = new Map();
 
-async function loadPlugin(key, params) {
+function loadPlugin(key, params) {
   const plugin = PLUGINS[key];
-  if (!plugin) return null;
   const usp = new URLSearchParams(window.location.search);
   if (!pluginCache.has(key) && plugin.condition && !plugin.condition({ urlParameters: usp })) {
     return null;
@@ -74,15 +69,10 @@ async function loadPlugin(key, params) {
     .then((p) => (p.default && p.default(params)) || (typeof p === 'function' && p(params)));
 }
 
-async function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
-  return Promise.all(
-    Object.entries(PLUGINS)
-      .filter(([, plugin]) => filter(plugin))
-      .map(([key]) => loadPlugin(key, params)),
-  ).catch((err) => {
-    // eslint-disable-next-line no-console
-    console.error('Failed to load plugins', err.message);
-  });
+function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
+  Object.entries(PLUGINS)
+    .filter(([, plugin]) => filter(plugin))
+    .map(([key]) => loadPlugin(key, params));
 }
 
 function trackCheckpoint(checkpoint, data, t) {
