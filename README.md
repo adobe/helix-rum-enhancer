@@ -62,10 +62,6 @@ All three parts are optional
 Even if an `identifier` is provided, having a `context` and `element` is recommended, as it makes the `source` parameter more readable and easier to understand.
 
 
-#### Examples
-
-- ``
-
 ## Development
 
 ### Build
@@ -85,3 +81,6 @@ $ npm test
 ```bash
 $ npm run lint
 ```
+### Cutting a Pre-Release
+
+Releases are handled by [semantic-release](https://github.com/semantic-release/semantic-release), and will happen automatically when a PR is merged into the `main` or the `1.x` branch. By merging into `beta`, a pre-release will be created.
