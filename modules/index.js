@@ -40,6 +40,7 @@ const PLUGINS = {
   // Martech
   martech: { url: `${pluginBasePath}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
   onetrust: { url: `${pluginBasePath}/onetrust.js`, when: () => (document.querySelector('#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
+  // test: broken-plugin
 };
 
 const PLUGIN_PARAMETERS = {
@@ -59,16 +60,12 @@ function loadPlugin(key, params) {
     return null;
   }
   if (!pluginCache.has(key)) {
-    try {
-      pluginCache.set(key, import(`${plugin.url || plugin}`));
-    /* c8 ignore next 3 */
-    } catch (e) {
-      return null;
-    }
+    pluginCache.set(key, import(`${plugin.url || plugin}`));
   }
   const pluginLoadPromise = pluginCache.get(key);
   return pluginLoadPromise
-    .then((p) => (p.default && p.default(params)) || (typeof p === 'function' && p(params)));
+    .then((p) => (p.default && p.default(params)) || (typeof p === 'function' && p(params)))
+    .catch(() => { /* silent plugin error catching */ });
 }
 
 function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
