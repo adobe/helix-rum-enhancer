@@ -10,7 +10,8 @@
  * governing permissions and limitations under the License.
  */
 
-import cleanup from 'rollup-plugin-cleanup';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { babel } from '@rollup/plugin-babel';
 import pkg from 'rollup-plugin-checksum';
 
 const checksum = pkg.default;
@@ -59,9 +60,9 @@ export default [...bundles.map(({ outputFile, source }) => ({
     },
   ],
   plugins: [
-    cleanup({
-      comments: [],
-      maxEmptyLines: 0,
+    babel({
+      babelHelpers: 'bundled',
+      comments: false,
     }),
     checksum({
       filename: `${outputFile.split('/').pop()}.md5`,
