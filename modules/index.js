@@ -29,7 +29,7 @@ const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 // Check for the presence of a given cookie
 const hasCookieKey = (key) => () => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
 
-const pluginBasePath = '../plugins';
+const pluginBasePath = new URL(document.currentScript.src).href.replace(/index\.(map\.)js/, 'plugins');
 
 const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
