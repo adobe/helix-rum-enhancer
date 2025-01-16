@@ -41,12 +41,10 @@ function isDialog(el) {
   // doing it well
   if (el.tagName === 'DIALOG') return true;
   // making the best of it
-  if (el.getAttribute('role') === 'dialog') return true;
-  if (el.getAttribute('role') === 'alertdialog') return true;
-  if (el.getAttribute('aria-modal') === 'true') return true;
-  // doing it wrong
   const cs = window.getComputedStyle(el);
-  return (cs && cs.position === 'fixed' && cs.zIndex > 100);
+  return ['dialog', 'alertdialog'].find((r) => el.getAttribute('role') === r)
+    || el.getAttribute('aria-modal') === 'true'
+    || (cs && cs.position === 'fixed' && cs.zIndex > 100);
 }
 
 function isButton(el) {
@@ -65,13 +63,10 @@ function getSourceContext(el) {
     return `form${formEl.id ? `#${formEl.id}` : ''}`;
   }
   const block = el.closest('.block[data-block-name]');
-  if (block) return `.${block.getAttribute('data-block-name')}`;
-  if (walk(el, isDialog)) return 'dialog';
-  if (el.closest('nav')) return 'nav';
-  if (el.closest('header')) return 'header';
-  if (el.closest('footer')) return 'footer';
-  if (el.closest('aside')) return 'aside';
-  return (walk(el, (e) => e.id && `#${e.id}`));
+  return ((block && `.${block.getAttribute('data-block-name')}`)
+    || walk(el, isDialog)
+    || ['nav', 'header', 'footer', 'aside'].find((t) => el.closest(t))
+    || walk(el, (e) => e.id && `#${e.id}`));
 }
 
 function getSourceElement(el) {
