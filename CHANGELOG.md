@@ -1,3 +1,10 @@
+# [2.31.0-beta.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.1...v2.31.0-beta.2) (2025-01-16)
+
+
+### Reverts
+
+* Revert "feat: handle pre-rendering" ([6471af5](https://github.com/adobe/helix-rum-enhancer/commit/6471af5cce4d895ca036a7b04a33530a3715b810))
+
 # [2.31.0-beta.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.0...v2.31.0-beta.1) (2025-01-16)
 
 
