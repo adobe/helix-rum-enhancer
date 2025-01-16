@@ -33,7 +33,7 @@ const mediaMO = createMO(mediaMCB);
 // Check for the presence of a given cookie
 const hasCookieKey = (key) => () => document.cookie.split(';').map((c) => c.trim()).some((cookie) => cookie.startsWith(`${key}=`));
 
-const pluginBasePath = new URL('.rum/@adobe/helix-rum-enhancer@^2/src/plugins', sampleRUM.baseURL).href;
+const pluginBasePath = '../plugins';
 
 const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
@@ -41,8 +41,8 @@ const PLUGINS = {
   form: { url: `${pluginBasePath}/form.js`, condition: () => document.body.querySelector('form'), isBlockDependent: true },
   video: { url: `${pluginBasePath}/video.js`, condition: () => document.body.querySelector('video'), isBlockDependent: true },
   // Martech
-  martech: { url: `${pluginBasePath}/martech.js`, condition: ({ urlParameters }) => urlParameters.keys().length > 0 },
-  onetrust: { url: `${pluginBasePath}/onetrust.js`, condition: () => hasCookieKey('OptanonAlertBoxClosed') || document.querySelector('body > div#onetrust-consent-sdk'), isBlockDependent: true },
+  martech: { url: `${pluginBasePath}/martech.js`, condition: ({ urlParameters }) => urlParameters.keys().toArray().length > 0 },
+  onetrust: { url: `${pluginBasePath}/onetrust.js`, condition: () => (document.body.querySelector('body > div#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
 };
 
 const PLUGIN_PARAMETERS = {
@@ -57,29 +57,31 @@ const pluginCache = new Map();
 
 async function loadPlugin(key, params) {
   const plugin = PLUGINS[key];
-  if (!plugin) return Promise.reject(new Error(`Plugin ${key} not found`));
+  if (!plugin) return null;
   const usp = new URLSearchParams(window.location.search);
   if (!pluginCache.has(key) && plugin.condition && !plugin.condition({ urlParameters: usp })) {
-    return Promise.reject(new Error(`Condition for plugin ${key} not met`));
+    return null;
   }
   if (!pluginCache.has(key)) {
     try {
       pluginCache.set(key, import(`${plugin.url || plugin}`));
     } catch (e) {
-      return Promise.reject(new Error(`Error loading plugin ${key}: ${e.message}`));
+      return null;
     }
   }
-  return pluginCache.get(key).then((p) => p.default && p.default(params));
+  const pluginLoadPromise = pluginCache.get(key);
+  return pluginLoadPromise
+    .then((p) => (p.default && p.default(params)) || (typeof p === 'function' && p(params)));
 }
 
 async function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
   return Promise.all(
-    Object.values(PLUGINS)
+    Object.entries(PLUGINS)
       .filter(([, plugin]) => filter(plugin))
       .map(([key]) => loadPlugin(key, params)),
   ).catch((err) => {
     // eslint-disable-next-line no-console
-    console.error('Failed to load plugins', err);
+    console.error('Failed to load plugins', err.message);
   });
 }
 

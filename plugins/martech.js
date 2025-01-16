@@ -46,7 +46,7 @@ function addUTMParametersTracking(usp, { sampleRUM }) {
     .forEach(([source, target]) => sampleRUM('utm', { source, target }));
 }
 
-export function addMartechTraking({ sampleRUM }) {
+export default function addMartechTraking({ sampleRUM }) {
   const usp = new URLSearchParams(window.location.search);
   addAdsParametersTracking(usp, { sampleRUM });
   addEmailParameterTracking(usp, { sampleRUM });

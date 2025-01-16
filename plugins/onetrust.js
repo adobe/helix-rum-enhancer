@@ -9,7 +9,7 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-export function addCookieConsentTracking({ sampleRUM }) {
+export default function addCookieConsentTracking({ sampleRUM }) {
   const cmpCookie = document.cookie.split(';')
     .map((c) => c.trim())
     .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
