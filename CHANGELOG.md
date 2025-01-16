@@ -1,3 +1,66 @@
+# [2.30.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.29.0...v2.30.0) (2025-01-15)
+
+
+### Features
+
+* **missingresource:** report all resource error with http status code ([e238136](https://github.com/adobe/helix-rum-enhancer/commit/e238136c46a9801be1e3ce7887c7b4b292cbcf5b))
+
+# [2.29.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.28.0...v2.29.0) (2025-01-15)
+
+
+### Features
+
+* **loadresource:** add `allresources` feature flag that enables tracking all resources, not just same host ([7c536d7](https://github.com/adobe/helix-rum-enhancer/commit/7c536d7b8ec77c40c4b9868dd3dff53c39529699))
+
+# [2.28.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.27.0...v2.28.0) (2025-01-02)
+
+
+### Features
+
+* remove (deprecated) FID ex-CWV ([58e39ae](https://github.com/adobe/helix-rum-enhancer/commit/58e39ae3eae6315562ab9c7aec479e9da2737e7d))
+
+# [2.27.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.4...v2.27.0) (2024-12-20)
+
+
+### Features
+
+* adding new checkpoint fill ([#336](https://github.com/adobe/helix-rum-enhancer/issues/336)) ([d3887f3](https://github.com/adobe/helix-rum-enhancer/commit/d3887f3b7eb073aa9f9e18f4d4a106bf7fa5b676))
+
+## [2.26.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.3...v2.26.4) (2024-12-20)
+
+
+### Bug Fixes
+
+* release process ([bdce5c3](https://github.com/adobe/helix-rum-enhancer/commit/bdce5c328037630347f6bc96b64f097c983418e0))
+
+## [2.26.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.2...v2.26.3) (2024-12-16)
+
+
+### Bug Fixes
+
+* do not track repeating clicks ([#339](https://github.com/adobe/helix-rum-enhancer/issues/339)) ([f511a03](https://github.com/adobe/helix-rum-enhancer/commit/f511a03679188361326fbd3a8d68e650c39bea50))
+
+## [2.26.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.1...v2.26.2) (2024-12-11)
+
+
+### Bug Fixes
+
+* do not process duplicate navigation checkpoints ([#331](https://github.com/adobe/helix-rum-enhancer/issues/331)) ([4b6843f](https://github.com/adobe/helix-rum-enhancer/commit/4b6843f4cbe7b685ffc0c017a46274e505b26b56))
+
+## [2.26.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.0...v2.26.1) (2024-12-10)
+
+
+### Bug Fixes
+
+* **redirects:** use underscore in param ([bada92e](https://github.com/adobe/helix-rum-enhancer/commit/bada92e69aaa8f560d61d6264f578eb2958934ec))
+
+# [2.26.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.25.0...v2.26.0) (2024-10-16)
+
+
+### Features
+
+* handle pre-speculation rules and rendering ([#301](https://github.com/adobe/helix-rum-enhancer/issues/301)) ([196d404](https://github.com/adobe/helix-rum-enhancer/commit/196d404f3f90a247a223e8ddc7c667592a87319f))
+
 # [2.26.0-beta.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.25.0...v2.26.0-beta.1) (2024-10-09)
 
 

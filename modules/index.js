@@ -25,14 +25,14 @@ import { fflags } from './fflags.js';
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
   /* c8 ignore next */ : {};
 
-const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
-
+// blocks mutation observer
 // eslint-disable-next-line no-use-before-define, max-len
-const blocksMutationObserver = window.MutationObserver ? new MutationObserver(blocksMutationsCallback)
+const blocksMO = window.MutationObserver ? new MutationObserver(blocksMCB)
   /* c8 ignore next */ : {};
 
+// media mutation observer
 // eslint-disable-next-line no-use-before-define, max-len
-const mediaMutationObserver = window.MutationObserver ? new MutationObserver(mediaMutationsCallback)
+const mediaMO = window.MutationObserver ? new MutationObserver(mediaMCB)
   /* c8 ignore next */ : {};
 
 function trackCheckpoint(checkpoint, data, t) {
@@ -90,7 +90,7 @@ function addCWVTracking() {
 
         // When loading `web-vitals` using a classic script, all the public
         // methods can be found on the `webVitals` global namespace.
-        ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
+        ['INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
           const metricFn = window.webVitals[`on${metric}`];
           if (typeof metricFn === 'function') {
             let opts = {};
@@ -114,6 +114,8 @@ function addNavigationTracking() {
   const navigate = (source, type, redirectCount) => {
     // target can be 'visible', 'hidden' (background tab) or 'prerendered' (speculation rules)
     const payload = { source, target: document.visibilityState };
+    /* c8 ignore next 13 */
+    // prerendering cannot be tested yet with headless browsers
     if (document.prerendering) {
       // listen for "activation" of the current pre-rendered page
       document.addEventListener('prerenderingchange', () => {
@@ -136,36 +138,39 @@ function addNavigationTracking() {
       sampleRUM('enter', payload); // enter site
     }
     fflags.enabled('redirect', () => {
-      const from = new URLSearchParams(window.location.search).get('redirect-from');
+      const from = new URLSearchParams(window.location.search).get('redirect_from');
       if (redirectCount || from) {
         sampleRUM('redirect', { source: from, target: redirectCount || 1 });
       }
     });
   };
 
+  const processed = new Set(); // avoid processing duplicate types
   new PerformanceObserver((list) => list
-    .getEntries().map((entry) => navigate(
+    .getEntries()
+    .filter(({ type }) => !processed.has(type))
+    .map((e) => [e, processed.add(e.type)])
+    .map(([e]) => navigate(
       window.hlx.referrer || document.referrer,
-      entry.type,
-      entry.redirectCount,
-    )))
-    .observe({ type: 'navigation', buffered: true });
+      e.type,
+      e.redirectCount,
+    ))).observe({ type: 'navigation', buffered: true });
 }
 
 function addLoadResourceTracking() {
   const observer = new PerformanceObserver((list) => {
     try {
       list.getEntries()
-        .filter((entry) => !entry.responseStatus || entry.responseStatus < 400)
-        .filter((entry) => window.location.hostname === new URL(entry.name).hostname)
-        .filter((entry) => new URL(entry.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)'))
-        .forEach((entry) => {
-          sampleRUM('loadresource', { source: entry.name, target: Math.round(entry.duration) });
+        .filter((e) => !e.responseStatus || e.responseStatus < 400)
+        .filter((e) => window.location.hostname === new URL(e.name).hostname || fflags.has('allresources'))
+        .filter((e) => new URL(e.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)'))
+        .forEach((e) => {
+          sampleRUM('loadresource', { source: e.name, target: Math.round(e.duration) });
         });
       list.getEntries()
-        .filter((entry) => entry.responseStatus === 404)
-        .forEach((entry) => {
-          sampleRUM('missingresource', { source: entry.name, target: entry.hostname });
+        .filter((e) => e.responseStatus >= 400)
+        .forEach((e) => {
+          sampleRUM('missingresource', { source: e.name, target: e.responseStatus });
         });
       /* c8 ignore next 3 */
     } catch (error) {
@@ -175,24 +180,26 @@ function addLoadResourceTracking() {
   observer.observe({ type: 'resource', buffered: true });
 }
 
-function activateBlocksMutationObserver() {
-  if (!blocksMutationObserver || blocksMutationObserver.active) {
+// activate blocks mutation observer
+function activateBlocksMO() {
+  if (!blocksMO || blocksMO.active) {
     return;
   }
-  blocksMutationObserver.active = true;
-  blocksMutationObserver.observe(
+  blocksMO.active = true;
+  blocksMO.observe(
     document.body,
     // eslint-disable-next-line object-curly-newline
     { subtree: true, attributes: true, attributeFilter: ['data-block-status'] },
   );
 }
 
-function activateMediaMutationObserver() {
-  if (!mediaMutationObserver || mediaMutationObserver.active) {
+// activate media mutation observer
+function activateMediaMO() {
+  if (!mediaMO || mediaMO.active) {
     return;
   }
-  mediaMutationObserver.active = true;
-  mediaMutationObserver.observe(
+  mediaMO.active = true;
+  mediaMO.observe(
     document.body,
     // eslint-disable-next-line object-curly-newline
     { subtree: true, attributes: false, childList: true },
@@ -204,16 +211,16 @@ function getIntersectionObsever(checkpoint) {
   if (!window.IntersectionObserver) {
     return null;
   }
-  activateBlocksMutationObserver();
-  activateMediaMutationObserver();
+  activateBlocksMO();
+  activateMediaMO();
   const observer = new IntersectionObserver((entries) => {
     try {
       entries
-        .filter((entry) => entry.isIntersecting)
-        .forEach((entry) => {
-          observer.unobserve(entry.target); // observe only once
-          const target = targetSelector(entry.target);
-          const source = sourceSelector(entry.target);
+        .filter((e) => e.isIntersecting)
+        .forEach((e) => {
+          observer.unobserve(e.target); // observe only once
+          const target = targetSelector(e.target);
+          const source = sourceSelector(e.target);
           sampleRUM(checkpoint, { target, source });
         });
       /* c8 ignore next 3 */
@@ -245,11 +252,24 @@ function addViewMediaTracking(parent) {
 }
 
 function addFormTracking(parent) {
-  activateBlocksMutationObserver();
-  activateMediaMutationObserver();
+  activateBlocksMO();
+  activateMediaMO();
   parent.querySelectorAll('form').forEach((form) => {
-    form.removeEventListener('submit', formSubmitListener); // listen only once
-    form.addEventListener('submit', formSubmitListener);
+    form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
+    let lastSource;
+    form.addEventListener('change', (e) => {
+      const source = sourceSelector(e.target);
+      if (source !== lastSource) {
+        sampleRUM('fill', { source });
+        lastSource = source;
+      }
+    });
+    form.addEventListener('focusin', (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON'].includes(e.target.tagName)
+        || e.target.getAttribute('contenteditable') === 'true') {
+        sampleRUM('click', { source: sourceSelector(e.target) });
+      }
+    });
   });
 }
 
@@ -257,7 +277,8 @@ function addObserver(ck, fn, block) {
   return DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
 }
 
-function blocksMutationsCallback(mutations) {
+// blocks mutation observer callback
+function blocksMCB(mutations) {
   // block specific mutations
   mutations
     .filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
@@ -268,7 +289,8 @@ function blocksMutationsCallback(mutations) {
     });
 }
 
-function mediaMutationsCallback(mutations) {
+// media mutation observer callback
+function mediaMCB(mutations) {
   // media mutations
   mutations
     .forEach((m) => {
@@ -277,8 +299,16 @@ function mediaMutationsCallback(mutations) {
 }
 
 function addTrackingFromConfig() {
+  let lastSource;
+  let lastTarget;
   document.addEventListener('click', (event) => {
-    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
+    const source = sourceSelector(event.target);
+    const target = targetSelector(event.target);
+    if (source !== lastSource || target !== lastTarget) {
+      sampleRUM('click', { target, source });
+      lastSource = source;
+      lastTarget = target;
+    }
   });
   addCWVTracking();
   addFormTracking(window.document.body);

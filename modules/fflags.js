@@ -9,16 +9,15 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+const h = (s, a) => [...s].reduce((p, c) => p + c.charCodeAt(0), a) % 1371;
+
 export const fflags = {
-  has: (flag) => fflags[flag].indexOf(Array.from(window.origin)
-    .map((a) => a.charCodeAt(0))
-    .reduce((a, b) => a + b, 1) % 1371) !== -1
-    || !!window.origin.match(/localhost/),
-  enabled: (flag, callback) => fflags.has(flag) && callback(),
-  /* c8 ignore next */
-  disabled: (flag, callback) => !fflags.has(flag) && callback(),
+  has: (f) => fflags[f].includes(h(window.origin, 1)) || /localhost/.test(window.origin),
+  enabled: (f, c) => fflags.has(f) && c(),
+  disabled: (f, c) => !fflags.has(f) && c(),
   eagercwv: [683],
   redirect: [620, 1139],
   example: [543, 770, 1136],
   language: [543, 959, 1139, 620],
+  allresources: [1139],
 };

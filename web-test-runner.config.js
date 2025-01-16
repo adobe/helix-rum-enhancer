@@ -9,7 +9,19 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { defaultReporter } from '@web/test-runner';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { junitReporter } from '@web/test-runner-junit-reporter';
+
 export default {
+  nodeResolve: true,
+  coverage: true,
+  reporters: [
+    defaultReporter(),
+    junitReporter(),
+  ],
   testFramework: {
     type: 'mocha',
     config: {
@@ -23,6 +35,7 @@ export default {
       'test/fixtures/**',
       'node_modules/**',
       '.rum/**',
+      'src/index.js',
     ],
   },
   files: [
@@ -43,9 +56,10 @@ export default {
           context.url = '/node_modules/@adobe/helix-rum-js/dist/rum-standalone.js';
           await next();
           context.body = context.body
-            .replace(/const weight.*/, 'const weight = 1')
+            .replace(/const weight =/, 'const weight = 1 ||')
             .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon')
-            .replace('.rum/@adobe/helix-rum-enhancer@^2/src/index.js', 'src/index.map.js');
+            // eslint-disable-next-line no-template-curly-in-string
+            .replace('.rum/@adobe/helix-rum-enhancer@${enhancerVersion || \'^2\'}/src/index.js', 'src/index.map.js');
           return true;
         } else if (context.url.startsWith('/.rum/web-vitals')) {
           context.url = '/node_modules/web-vitals/dist/web-vitals.iife.js';

@@ -38,7 +38,7 @@
     runTests(async () => {
       beforeEach(() => {
         const usp = new URLSearchParams(window.location.search);
-        usp.append('redirect-from', 'https://www.example.com');
+        usp.append('redirect_from', 'https://www.example.com');
         window.history.replaceState({}, '', `${window.location.pathname}?${usp.toString()}`);
         const script = document.createElement('script');
         script.type = 'text/javascript';

@@ -19,7 +19,7 @@ export function addCookieConsentTracking(sampleRUM) {
     return;
   }
 
-  let consentMutationObserver;
+  let consentMO; // consent mutation observer
   const trackShowConsent = () => {
     const otsdk = document.querySelector('body > div#onetrust-consent-sdk');
     if (otsdk) {
@@ -28,8 +28,8 @@ export function addCookieConsentTracking(sampleRUM) {
       } else {
         sampleRUM('consent', { source: 'onetrust', target: 'show' });
       }
-      if (consentMutationObserver) {
-        consentMutationObserver.disconnect();
+      if (consentMO) {
+        consentMO.disconnect();
       }
       return true;
     }
@@ -38,11 +38,11 @@ export function addCookieConsentTracking(sampleRUM) {
 
   if (!trackShowConsent()) {
     // eslint-disable-next-line max-len
-    consentMutationObserver = window.MutationObserver
+    consentMO = window.MutationObserver
       ? new MutationObserver(trackShowConsent)
       : /* c8 ignore next */ null;
-    if (consentMutationObserver) {
-      consentMutationObserver.observe(
+    if (consentMO) {
+      consentMO.observe(
         document.body,
         // eslint-disable-next-line object-curly-newline
         { attributes: false, childList: true, subtree: false },
