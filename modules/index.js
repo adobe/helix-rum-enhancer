@@ -29,16 +29,17 @@ const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 // Check for the presence of a given cookie
 const hasCookieKey = (key) => () => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
 
+// Set the base path for the plugins
 const pluginBasePath = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
 
 const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
   // Interactive elements
-  form: { url: `${pluginBasePath}/form.js`, condition: () => document.querySelector('form'), isBlockDependent: true },
-  video: { url: `${pluginBasePath}/video.js`, condition: () => document.querySelector('video'), isBlockDependent: true },
+  form: { url: `${pluginBasePath}/form.js`, when: () => document.querySelector('form'), isBlockDependent: true },
+  video: { url: `${pluginBasePath}/video.js`, when: () => document.querySelector('video'), isBlockDependent: true },
   // Martech
-  martech: { url: `${pluginBasePath}/martech.js`, condition: ({ urlParameters }) => urlParameters.size > 0 },
-  onetrust: { url: `${pluginBasePath}/onetrust.js`, condition: () => (document.querySelector('#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
+  martech: { url: `${pluginBasePath}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
+  onetrust: { url: `${pluginBasePath}/onetrust.js`, when: () => (document.querySelector('#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
 };
 
 const PLUGIN_PARAMETERS = {
@@ -54,12 +55,13 @@ const pluginCache = new Map();
 function loadPlugin(key, params) {
   const plugin = PLUGINS[key];
   const usp = new URLSearchParams(window.location.search);
-  if (!pluginCache.has(key) && plugin.condition && !plugin.condition({ urlParameters: usp })) {
+  if (!pluginCache.has(key) && plugin.when && !plugin.when({ urlParameters: usp })) {
     return null;
   }
   if (!pluginCache.has(key)) {
     try {
       pluginCache.set(key, import(`${plugin.url || plugin}`));
+    /* c8 ignore next 3 */
     } catch (e) {
       return null;
     }
