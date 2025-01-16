@@ -64,7 +64,7 @@ function getSourceContext(el) {
   }
   const block = el.closest('.block[data-block-name]');
   return ((block && `.${block.getAttribute('data-block-name')}`)
-    || walk(el, isDialog)
+    || (walk(el, isDialog) && 'dialog')
     || ['nav', 'header', 'footer', 'aside'].find((t) => el.closest(t))
     || walk(el, (e) => e.id && `#${e.id}`));
 }
