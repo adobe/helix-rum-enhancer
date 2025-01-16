@@ -30,8 +30,6 @@ const blocksMO = createMO(blocksMCB);
 // eslint-disable-next-line no-use-before-define
 const mediaMO = createMO(mediaMCB);
 
-// Check for the presence of URL parameters
-const hasUrlParameters = ({ urlParameters }) => urlParameters.keys().length > 0;
 // Check for the presence of a given cookie
 const hasCookieKey = (key) => () => document.cookie.split(';').map((c) => c.trim()).some((cookie) => cookie.startsWith(`${key}=`));
 
@@ -39,20 +37,12 @@ const pluginBasePath = new URL('.rum/@adobe/helix-rum-enhancer@^2/src/plugins', 
 
 const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
-  navigation: `${pluginBasePath}/navigation.js`,
   // Interactive elements
-  form: { url: `${pluginBasePath}/form.js`, condition: () => document.body.querySelector('form') },
-  video: { url: `${pluginBasePath}/video.js`, condition: () => document.body.querySelector('video') },
+  form: { url: `${pluginBasePath}/form.js`, condition: () => document.body.querySelector('form'), isBlockDependent: true },
+  video: { url: `${pluginBasePath}/video.js`, condition: () => document.body.querySelector('video'), isBlockDependent: true },
   // Martech
-  ads: { url: `${pluginBasePath}/ads.js`, condition: hasUrlParameters },
-  email: { url: `${pluginBasePath}/email.js`, condition: hasUrlParameters },
-  onetrust: { url: `${pluginBasePath}/onetrust.js`, condition: () => hasCookieKey('OptanonAlertBoxClosed') },
-  utm: { url: `${pluginBasePath}/utm.js`, condition: hasUrlParameters },
-};
-
-const allPlugins = {
-  ...(window.RUM_PLUGINS || {}),
-  PLUGINS,
+  martech: { url: `${pluginBasePath}/martech.js`, condition: ({ urlParameters }) => urlParameters.keys().length > 0 },
+  onetrust: { url: `${pluginBasePath}/onetrust.js`, condition: () => hasCookieKey('OptanonAlertBoxClosed') || document.querySelector('body > div#onetrust-consent-sdk'), isBlockDependent: true },
 };
 
 const PLUGIN_PARAMETERS = {
@@ -66,7 +56,7 @@ const PLUGIN_PARAMETERS = {
 const pluginCache = new Map();
 
 async function loadPlugin(key, params) {
-  const plugin = allPlugins[key];
+  const plugin = PLUGINS[key];
   if (!plugin) return Promise.reject(new Error(`Plugin ${key} not found`));
   const usp = new URLSearchParams(window.location.search);
   if (!pluginCache.has(key) && plugin.condition && !plugin.condition({ urlParameters: usp })) {
@@ -80,6 +70,17 @@ async function loadPlugin(key, params) {
     }
   }
   return pluginCache.get(key).then((p) => p.default && p.default(params));
+}
+
+async function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
+  return Promise.all(
+    Object.values(PLUGINS)
+      .filter(([, plugin]) => filter(plugin))
+      .map(([key]) => loadPlugin(key, params)),
+  ).catch((err) => {
+    // eslint-disable-next-line no-console
+    console.error('Failed to load plugins', err);
+  });
 }
 
 function trackCheckpoint(checkpoint, data, t) {
@@ -109,6 +110,54 @@ function processQueue() {
     const ck = queue.shift();
     trackCheckpoint(...ck);
   }
+}
+
+function addNavigationTracking() {
+  // enter checkpoint when referrer is not the current page url
+  const navigate = (source, type, redirectCount) => {
+    // target can be 'visible', 'hidden' (background tab) or 'prerendered' (speculation rules)
+    const payload = { source, target: document.visibilityState };
+    /* c8 ignore next 13 */
+    // prerendering cannot be tested yet with headless browsers
+    if (document.prerendering) {
+      // listen for "activation" of the current pre-rendered page
+      document.addEventListener('prerenderingchange', () => {
+        // pre-rendered page is now "activated"
+        payload.target = 'prerendered';
+        sampleRUM('navigate', payload); // prerendered navigation
+      }, {
+        once: true,
+      });
+      if (type === 'navigate') {
+        sampleRUM('prerender', payload); // prerendering page
+      }
+    } else if (type === 'reload' || source === window.location.href) {
+      sampleRUM('reload', payload);
+    } else if (type && type !== 'navigate') {
+      sampleRUM(type, payload); // back, forward, prerender, etc.
+    } else if (source && window.location.origin === new URL(source).origin) {
+      sampleRUM('navigate', payload); // internal navigation
+    } else {
+      sampleRUM('enter', payload); // enter site
+    }
+    fflags.enabled('redirect', () => {
+      const from = new URLSearchParams(window.location.search).get('redirect_from');
+      if (redirectCount || from) {
+        sampleRUM('redirect', { source: from, target: redirectCount || 1 });
+      }
+    });
+  };
+
+  const processed = new Set(); // avoid processing duplicate types
+  new PerformanceObserver((list) => list
+    .getEntries()
+    .filter(({ type }) => !processed.has(type))
+    .map((e) => [e, processed.add(e.type)])
+    .map(([e]) => navigate(
+      window.hlx.referrer || document.referrer,
+      e.type,
+      e.redirectCount,
+    ))).observe({ type: 'navigation', buffered: true });
 }
 
 function addLoadResourceTracking() {
@@ -214,7 +263,7 @@ function blocksMCB(mutations) {
     .filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
     .filter((m) => m.target.dataset.blockStatus === 'loaded')
     .forEach((m) => {
-      addObserver('form', (el) => loadPlugin('form', { ...PLUGIN_PARAMETERS, context: el }), m.target);
+      addObserver('form', (el) => loadPlugins((p) => p.isBlockDependent, { ...PLUGIN_PARAMETERS, context: el }), m.target);
       addObserver('viewblock', addViewBlockTracking, m.target);
     });
 }
@@ -245,13 +294,13 @@ function addTrackingFromConfig() {
   });
 
   // Core tracking
+  addNavigationTracking();
   addLoadResourceTracking();
   addViewBlockTracking(document.body);
   addViewMediaTracking(document.body);
 
   // Tracking extensions
-  Object.keys(allPlugins)
-    .forEach((key) => loadPlugin(key, PLUGIN_PARAMETERS));
+  loadPlugins();
 
   fflags.enabled('language', () => {
     const target = navigator.language;

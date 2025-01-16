@@ -10,6 +10,8 @@
  * governing permissions and limitations under the License.
  */
 
-export function addVideoTracking() {
-  // TODO: Add video tracking
+export function addVideoTracking({ context }) {
+  context.querySelectorAll('video').forEach(() => {
+    // TODO: Add video tracking
+  });
 }
