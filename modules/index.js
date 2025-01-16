@@ -112,7 +112,6 @@ function addCWVTracking() {
 function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
   const navigate = (source, type, redirectCount) => {
-    // target can be 'visible', 'hidden' (background tab) or 'prerendered' (speculation rules)
     const payload = { source, target: document.visibilityState };
     /* c8 ignore next 13 */
     // prerendering cannot be tested yet with headless browsers
