@@ -9,6 +9,10 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+// eslint-disable-next-line max-len
+// eslint-disable-next-line import/no-extraneous-dependencies, import/no-relative-packages, no-unused-vars
+import * as webVitals from '../node_modules/web-vitals/dist/web-vitals.iife.js';
+
 export default function addCWVTracking({
   sampleRUM, sourceSelector, targetSelector, fflags,
 }) {
