@@ -58,6 +58,15 @@ export default {
           // rewriting dynamic plugins base url
           .replace(/document\.currentScript\.src/g, '"http://localhost:8000/plugins"');
         return true;
+      } else if (context.url.startsWith('/modules/index-broken.js')) {
+        const [_, search] = context.url.split('?');
+        context.url = `/modules/index.js?${search}`;
+        await next();
+        context.body = context.body
+          // rewriting dynamic plugins base url
+          .replace(/document\.currentScript\.src/g, '"http://localhost:8000/plugins"')
+          .replace(/\/\/ test: broken-plugin/g, 'foo: "foo.js",');
+        return true;
       } else if (context.url.startsWith('/.rum')) {
         if (context.url.startsWith('/.rum/@adobe/helix-rum-js@%5E2/dist/')
           || context.url.startsWith('/.rum/@adobe/helix-rum-js@^2/dist/')
