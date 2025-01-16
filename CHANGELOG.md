@@ -1,3 +1,10 @@
+# [2.31.0-beta.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.3...v2.31.0-beta.4) (2025-01-16)
+
+
+### Bug Fixes
+
+* plugin path resolution ([f464652](https://github.com/adobe/helix-rum-enhancer/commit/f464652df5bef5f42e0b32c1f10bebef013dd1b0))
+
 # [2.31.0-beta.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.2...v2.31.0-beta.3) (2025-01-16)
 
 
