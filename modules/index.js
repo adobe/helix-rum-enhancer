@@ -41,7 +41,7 @@ const PLUGINS = {
   form: { url: `${pluginBasePath}/form.js`, condition: () => document.body.querySelector('form'), isBlockDependent: true },
   video: { url: `${pluginBasePath}/video.js`, condition: () => document.body.querySelector('video'), isBlockDependent: true },
   // Martech
-  martech: { url: `${pluginBasePath}/martech.js`, condition: ({ urlParameters }) => urlParameters.keys().toArray().length > 0 },
+  martech: { url: `${pluginBasePath}/martech.js`, condition: ({ urlParameters }) => [...urlParameters.keys()].length > 0 },
   onetrust: { url: `${pluginBasePath}/onetrust.js`, condition: () => (document.body.querySelector('body > div#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
 };
 
