@@ -1,3 +1,21 @@
+# [2.31.0-beta.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.2...v2.31.0-beta.3) (2025-01-16)
+
+
+### Bug Fixes
+
+* bugs and failing tests ([5c9adbc](https://github.com/adobe/helix-rum-enhancer/commit/5c9adbc2502203495a05d4fd2be6e05cc11102df))
+* cross-browser compatibility ([1c21afd](https://github.com/adobe/helix-rum-enhancer/commit/1c21afd8cd982d4c33feba863d2251311f36e153))
+* set proper url base for plugins ([9726dc8](https://github.com/adobe/helix-rum-enhancer/commit/9726dc8f98bd71936c8a8f430cae73b6a8f5d63f))
+* use proper fully qualified URLs for plugin path to avoid CORS ([c73eb31](https://github.com/adobe/helix-rum-enhancer/commit/c73eb31461115529922b82c3a8b678f21052b918))
+
+
+### Features
+
+* allow external extension via window.RUM_PLUGINS ([4613b00](https://github.com/adobe/helix-rum-enhancer/commit/4613b004c617f4d503355b5c43008149df9101ef))
+* inline web-vitals.js ([7d89e9f](https://github.com/adobe/helix-rum-enhancer/commit/7d89e9f664686d3a475ce829d7fb4f68f29ed71b))
+* introduce minimal plugin system to offset non-essenial logic ([8642557](https://github.com/adobe/helix-rum-enhancer/commit/8642557beaef5161d1d4d51d2b04ce06bf7dbeb7))
+* introduce minimal plugin system to offset non-essenial logic ([6066f0b](https://github.com/adobe/helix-rum-enhancer/commit/6066f0bd56393a10391e190b9a338f9a65b772b0))
+
 # [2.31.0-beta.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.1...v2.31.0-beta.2) (2025-01-16)
 
 
