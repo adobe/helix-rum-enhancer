@@ -1,3 +1,10 @@
+# [2.31.0-beta.5](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.4...v2.31.0-beta.5) (2025-01-17)
+
+
+### Bug Fixes
+
+* just forcing a release ([84ab687](https://github.com/adobe/helix-rum-enhancer/commit/84ab68734b5862816a532d4847df0ffa753b0717))
+
 # [2.31.0-beta.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.3...v2.31.0-beta.4) (2025-01-16)
 
 
