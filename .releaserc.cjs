@@ -29,5 +29,5 @@ module.exports = {
       slackChannel: "rum-explorers",
     }],
   ],
-  branches: ['main', { name: 'beta', prerelease: true }],
+  branches: ['main'],
 };
