@@ -14,7 +14,7 @@
     "build-bundle": "rollup --config",
     "prepack": "npm run build-bundle",
     "semantic-release": "semantic-release",
-    "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH 1.x main beta",
+    "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH 1.x main",
     "prepare": "husky"
   },
   "repository": {
