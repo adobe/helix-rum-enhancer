@@ -19,6 +19,7 @@ export default function addCWVTracking({
   setTimeout(() => {
     try {
       const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
+      /* c8 ignore next 3 */
       if (document.querySelector(`script[src="${cwvScript}"]`)) {
         // web vitals script has been loaded already
         return;
