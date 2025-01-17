@@ -38,22 +38,23 @@ const bundles = [
   ...['cwv', 'form', 'martech', 'onetrust', 'video'].map((plugin) => ({
     source: `plugins/${plugin}.js`,
     outputFile: `src/plugins/${plugin}`,
+    format: 'es',
   })),
 ];
 
-export default [...bundles.map(({ outputFile, source }) => ({
+export default [...bundles.map(({ outputFile, source, format }) => ({
   input: source,
   output: [
     {
       file: `${outputFile}.map.js`,
-      format: 'iife',
+      format: format || 'iife',
       sourcemap: 'inline',
       exports: 'auto',
       banner,
     },
     {
       file: `${outputFile}.js`,
-      format: 'iife',
+      format: format || 'iife',
       sourcemap: false,
       exports: 'auto',
       banner,
