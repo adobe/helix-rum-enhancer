@@ -1,3 +1,10 @@
+## [2.30.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.0...v2.30.1) (2025-01-17)
+
+
+### Bug Fixes
+
+* form elements having name/id as id breaks the sourceSelector logic. ([37bd0ab](https://github.com/adobe/helix-rum-enhancer/commit/37bd0ab4c6bb1aac1326bc9be0097a7ccf038870))
+
 # [2.30.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.29.0...v2.30.0) (2025-01-15)
 
 
