@@ -12,7 +12,7 @@
 /* eslint-env browser */
 
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
-import { urlSanitizers } from './utils.js';
+import { dataValidator, dataPreProcessor, urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
 import {
   addAdsParametersTracking,
@@ -230,6 +230,7 @@ function getIntersectionObsever(checkpoint) {
   });
   return observer;
 }
+
 function addViewBlockTracking(element) {
   const blockobserver = getIntersectionObsever('viewblock');
   if (blockobserver) {
@@ -273,6 +274,51 @@ function addFormTracking(parent) {
       }
     });
   });
+}
+
+function addDataAttributeTracking(
+  checkpoint,
+  attrs,
+  conditionFn = () => true,
+  mapFn = (el) => ({ target: targetSelector(el), source: sourceSelector(el) }),
+) {
+  const handler = (mutations) => {
+    mutations
+      .filter(conditionFn)
+      .forEach((m) => {
+        let data = mapFn(m.target);
+        if (!dataValidator[checkpoint] || dataValidator[checkpoint](data)) {
+          if (dataPreProcessor[checkpoint]) {
+            data = dataPreProcessor[checkpoint](data);
+          }
+          sampleRUM(checkpoint, data);
+        }
+      });
+  };
+  const observer = window.MutationObserver ? new MutationObserver(handler) : null;
+  if (observer) {
+    observer.observe(document.body, {
+      childList: true, subtree: true, attributes: true, attributeFilter: attrs,
+    });
+  }
+}
+
+function addExperimentTracking() {
+  addDataAttributeTracking(
+    'experiment',
+    ['data-experiment', 'data-variant'],
+    (el) => el.dataset && el.dataset.experiment && el.dataset.variant,
+    (el) => ({ source: el.dataset.experiment, target: el.dataset.variant }),
+  );
+}
+
+function addAudienceTracking() {
+  addDataAttributeTracking(
+    'audience',
+    ['data-audience'],
+    (el) => el.dataset && document.body.dataset.audiences && el.dataset.audience,
+    (el) => ({ source: document.body.dataset.audiences, target: el.dataset.audience }),
+  );
 }
 
 function addObserver(ck, fn, block) {
@@ -322,6 +368,8 @@ function addTrackingFromConfig() {
   addCookieConsentTracking(sampleRUM);
   addAdsParametersTracking(sampleRUM);
   addEmailParameterTracking(sampleRUM);
+  addExperimentTracking();
+  addAudienceTracking();
   fflags.enabled('language', () => {
     const target = navigator.language;
     const source = document.documentElement.lang;
