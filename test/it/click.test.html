@@ -80,13 +80,15 @@
           assert(window.called.length === 3 , 'checkpoint for click on link missing');
           assert(window.called[2].source === 'a#alink', 'invalid target for alink checkpoint');
 
-          a.click();
+           // Test multiple clicks on link
+          for (let i = 0; i < 11; i++) {
+            a.click();
+            await new Promise((resolve) => setTimeout(resolve, 10));
+          }
 
-          await new Promise((resolve) => {
-            setTimeout(resolve, 100);
-          });
+          console.log(`window.called: ${window.called.length}`);
 
-          assert(window.called.length === 3 , '2 consecutive clicks on link should not trigger new checkpoint');
+          assert(window.called.length === 12 , '11th consecutive clicks on link should not trigger new checkpoint');
 
           const late = document.createElement('a');
           late.id = 'alatelink';
@@ -99,8 +101,8 @@
             setTimeout(resolve, 100);
           });
 
-          assert(window.called.length === 4 , 'checkpoint for click on late added link missing');
-          assert(window.called[3].source === 'a#alatelink', 'invalid target for alatelink checkpoint');
+          assert(window.called.length === 13 , 'checkpoint for click on late added link missing');
+          assert(window.called[12].source === 'a#alatelink', 'invalid target for alatelink checkpoint');
         });
       });
     });
