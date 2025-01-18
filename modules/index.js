@@ -34,6 +34,8 @@ const blocksMO = window.MutationObserver ? new MutationObserver(blocksMCB)
 // eslint-disable-next-line no-use-before-define, max-len
 const mediaMO = window.MutationObserver ? new MutationObserver(mediaMCB)
   /* c8 ignore next */ : {};
+// Collecting at least 10 clicks to identify blind clicks efficiently
+const MAX_CLICKS_PER_SELECTOR = 10;
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
@@ -301,17 +303,19 @@ function mediaMCB(mutations) {
 }
 
 function addTrackingFromConfig() {
-  let lastSource;
-  let lastTarget;
+  const clickCounts = new Map();
+
   document.addEventListener('click', (event) => {
     const source = sourceSelector(event.target);
     const target = targetSelector(event.target);
-    if (source !== lastSource || target !== lastTarget) {
+    const key = `${source}|${target}`;
+    const count = (clickCounts.get(key) || 0) + 1;
+    if (count <= MAX_CLICKS_PER_SELECTOR) {
       sampleRUM('click', { target, source });
-      lastSource = source;
-      lastTarget = target;
+      clickCounts.set(key, count);
     }
   });
+
   addCWVTracking();
   addFormTracking(window.document.body);
   addNavigationTracking();
