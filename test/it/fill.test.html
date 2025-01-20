@@ -2,6 +2,11 @@
 
 <head>
   <title>Test Runner</title>
+  <style>
+    .hidden-div {
+      display: none;
+    }
+  </style>
   <script>
     // we load from localhost, and have the ability to
     // change the scripts that are being served. Check the
@@ -54,6 +59,10 @@
     <div id="editable-element-inside-form" contenteditable="true">
       Editable element inside form
     </div>
+    <div class="hidden-div">
+      <input type="text" name="hidden-field" id="hidden-field"/>
+    </div>
+    <input type="hidden" name="hidden-field-2" id="hidden-field-2"/>
   </form>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
@@ -128,6 +137,21 @@
           assert(window.called[0].checkpoint === 'fill', 'checkpoint is not fill');
           assert(window.called[0].source === `form input[type='number']`,
             `source ${window.called[0].source} is not form input[type='number']`);
+        });
+
+        it('filling hidden field dispatching change event', async () => {
+          const form = document.querySelector('form');
+          const hiddenField = form.querySelector('#hidden-field');
+          hiddenField.dispatchEvent(new Event('change', { bubbles: true }));
+          await window.wait(10);
+
+          assert(window.called.length === 0, `fill is called ${window.called.length} (Expected 0) times`);
+
+          const hiddenField2 = form.querySelector('#hidden-field-2');
+          hiddenField2.dispatchEvent(new Event('change', { bubbles: true }));
+          await window.wait(10);
+
+          assert(window.called.length === 0, `fill is called ${window.called.length} (Expected 0) times`);
         });
       });
     });

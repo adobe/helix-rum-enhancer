@@ -16,10 +16,12 @@ export default function addFormTracking({
     form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
     let lastSource;
     form.addEventListener('change', (e) => {
-      const source = sourceSelector(e.target);
-      if (source !== lastSource) {
-        sampleRUM('fill', { source });
-        lastSource = source;
+      if (e.target.checkVisibility()) {
+        const source = sourceSelector(e.target);
+        if (source !== lastSource) {
+          sampleRUM('fill', { source });
+          lastSource = source;
+        }
       }
     });
     form.addEventListener('focusin', (e) => {
