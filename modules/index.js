@@ -34,12 +34,13 @@ const blocksMO = window.MutationObserver ? new MutationObserver(blocksMCB)
 // eslint-disable-next-line no-use-before-define, max-len
 const mediaMO = window.MutationObserver ? new MutationObserver(mediaMCB)
   /* c8 ignore next */ : {};
-// Collecting at least 10 clicks to identify blind clicks efficiently
-const MAX_CLICKS_PER_SELECTOR = 10;
+
+let maxEvents = 1023;
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  if (isSelected) {
+  if (isSelected && maxEvents > 0) {
+    maxEvents -= 1;
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
@@ -303,17 +304,8 @@ function mediaMCB(mutations) {
 }
 
 function addTrackingFromConfig() {
-  const clickCounts = new Map();
-
   document.addEventListener('click', (event) => {
-    const source = sourceSelector(event.target);
-    const target = targetSelector(event.target);
-    const key = `${source}|${target}`;
-    const count = (clickCounts.get(key) || 0) + 1;
-    if (count <= MAX_CLICKS_PER_SELECTOR) {
-      sampleRUM('click', { target, source });
-      clickCounts.set(key, count);
-    }
+    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
   });
 
   addCWVTracking();
