@@ -86,8 +86,8 @@ function addCWVTracking() {
           if (measurement.name === 'INP' && fflags.has('inpsource')) {
             const sortedEvents = measurement.entries.sort((a, b) => ((a.duration === b.duration)
               ? !!b.target : a.duration < b.duration));
-            const possibleTarget = sortedEvents.pop()?.target;
-            data.source = sourceSelector(possibleTarget);
+            const element = sortedEvents.pop()?.target;
+            data.source = sourceSelector(element) || (element && element.outerHTML.slice(0, 30));
           }
           sampleRUM('cwv', data);
         };
