@@ -104,3 +104,13 @@ export const sourceSelector = (el) => {
     return null;
   }
 };
+
+export const getFormType = (el) => {
+  if (el.tagName !== 'FORM') return null;
+  if (el.getAttribute('role') === 'search') return 'search';
+  if (el.querySelector('input[type="search"]') || el.querySelectorAll('input').filter((e) => e.getAttribute('role') === 'searchbox').length > 0) return 'search';
+  const password = el.querySelectorAll('input[type="password"]');
+  if (password.length === 1) return 'login';
+  if (password.length > 1) return 'signup';
+  return el.getAttribute('id');
+};

@@ -13,7 +13,7 @@
 
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { urlSanitizers } from './utils.js';
-import { targetSelector, sourceSelector } from './dom.js';
+import { targetSelector, sourceSelector, getFormType } from './dom.js';
 import {
   addAdsParametersTracking,
   addCookieConsentTracking,
@@ -206,7 +206,7 @@ function activateMediaMO() {
   );
 }
 
-function getIntersectionObsever(checkpoint) {
+function getIntersectionObsever(checkpoint, src = sourceSelector, trgt = targetSelector) {
   /* c8 ignore next 3 */
   if (!window.IntersectionObserver) {
     return null;
@@ -219,8 +219,8 @@ function getIntersectionObsever(checkpoint) {
         .filter((e) => e.isIntersecting)
         .forEach((e) => {
           observer.unobserve(e.target); // observe only once
-          const target = targetSelector(e.target);
-          const source = sourceSelector(e.target);
+          const target = trgt(e.target);
+          const source = src(e.target);
           sampleRUM(checkpoint, { target, source });
         });
       /* c8 ignore next 3 */
@@ -255,7 +255,14 @@ function addFormTracking(parent) {
   activateBlocksMO();
   activateMediaMO();
   parent.querySelectorAll('form').forEach((form) => {
-    form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
+    const intersectionObserver = getIntersectionObsever(
+      'viewblock',
+      () => 'form',
+      (e) => getFormType(e.target),
+    );
+    if (intersectionObserver) {
+      intersectionObserver.observe(form);
+    }
     let lastSource;
     form.addEventListener('change', (e) => {
       if (e.target.checkVisibility()) {
