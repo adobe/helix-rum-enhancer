@@ -106,7 +106,7 @@ export const sourceSelector = (el) => {
 };
 
 export const getFormType = (el) => {
-  if (el.tagName !== 'FORM') return null;
+  if (!el || el.tagName !== 'FORM') return undefined;
   // if the form has a search role or a search field, it's a search form
   if (el.getAttribute('role') === 'search'
     || el.querySelector('input[type="search"]')
