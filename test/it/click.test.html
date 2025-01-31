@@ -97,12 +97,12 @@
           assert(window.called.length === 4 , 'checkpoint for click on late added link missing');
           assert(window.called[3].source === 'a#alatelink', 'invalid target for alatelink checkpoint');
           // Test max events
-          const maxEvents = 1025 - window.events.length;
+          const maxEvents = 1026 - window.events.length;
           for (let i = 0; i < maxEvents; i++) {
             a.click();
             await new Promise((resolve) => setTimeout(resolve, 1));
           }
-          assert(window.events.length === 1024 , '1024th event should not trigger new checkpoint');
+          assert(window.events.length === 1024 , '1025th event should not trigger new checkpoint');
         });
       });
     });

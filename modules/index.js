@@ -39,7 +39,7 @@ let maxEvents = 1023;
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  if (isSelected && maxEvents > 0) {
+  if (isSelected && maxEvents) {
     maxEvents -= 1;
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
