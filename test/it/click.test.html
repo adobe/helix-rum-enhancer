@@ -12,12 +12,15 @@
     };
     // we log what's being sent to the "server"
     window.called = [];
+    // we need to track the number of events that have been sent
+    window.events = [];
     // and navigator.sendBeacon has been replaced with
     // a call to fakeSendBeacon
     window.fakeSendBeacon = function (url, payload) {
       // if payload is a string, we assume it's a JSON string
       if (typeof payload === 'string') {
         const data = JSON.parse(payload);
+        window.events.push(data);
         if (data.checkpoint === 'click') {
           window.called.push(data);
         }
@@ -25,6 +28,7 @@
         // it's a blob
         payload.text().then((text) => {
           const data = JSON.parse(text);
+          window.events.push(data);
           if (data.checkpoint === 'click') {
             window.called.push(data);
           }
@@ -80,14 +84,6 @@
           assert(window.called.length === 3 , 'checkpoint for click on link missing');
           assert(window.called[2].source === 'a#alink', 'invalid target for alink checkpoint');
 
-          a.click();
-
-          await new Promise((resolve) => {
-            setTimeout(resolve, 100);
-          });
-
-          assert(window.called.length === 3 , '2 consecutive clicks on link should not trigger new checkpoint');
-
           const late = document.createElement('a');
           late.id = 'alatelink';
           late.onclick = (e) => { e.preventDefault(); };
@@ -98,9 +94,15 @@
           await new Promise((resolve) => {
             setTimeout(resolve, 100);
           });
-
           assert(window.called.length === 4 , 'checkpoint for click on late added link missing');
           assert(window.called[3].source === 'a#alatelink', 'invalid target for alatelink checkpoint');
+          // Test max events
+          const maxEvents = 1026 - window.events.length;
+          for (let i = 0; i < maxEvents; i++) {
+            a.click();
+            await new Promise((resolve) => setTimeout(resolve, 1));
+          }
+          assert(window.events.length === 1024 , '1025th event should not trigger new checkpoint');
         });
       });
     });
