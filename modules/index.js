@@ -34,7 +34,10 @@ const blocksMO = window.MutationObserver ? new MutationObserver(blocksMCB)
 // eslint-disable-next-line no-use-before-define, max-len
 const mediaMO = window.MutationObserver ? new MutationObserver(mediaMCB)
   /* c8 ignore next */ : {};
-
+/**
+ * Maximum number of events. The first call will be made by rum-js,
+ * leaving 1023 events for the enhancer to track
+ */
 let maxEvents = 1023;
 
 function trackCheckpoint(checkpoint, data, t) {
