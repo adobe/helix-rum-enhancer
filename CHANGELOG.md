@@ -1,3 +1,14 @@
+## [2.30.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.2...v2.30.3) (2025-02-03)
+
+
+### Bug Fixes
+
+* collect repeating clicks upto max configuration ([6daba19](https://github.com/adobe/helix-rum-enhancer/commit/6daba19b6dcf3717e8330a923a0d87e61e3080ee))
+* comment for max events tracking ([b4b1c6d](https://github.com/adobe/helix-rum-enhancer/commit/b4b1c6da79a31485bb2165382f9fb9ece611a716))
+* implement flood control with 1024 max events ([e06e1e5](https://github.com/adobe/helix-rum-enhancer/commit/e06e1e51b6dd3db0a015f4dcccb3ab8dcfb11b9f))
+* Implement flood control with 1024 max events ([ddfdb1e](https://github.com/adobe/helix-rum-enhancer/commit/ddfdb1e9dd58ff41cbd761774af9ad616290aae0))
+* review feedback ([f4e6dd1](https://github.com/adobe/helix-rum-enhancer/commit/f4e6dd1b3fae8e37024045156c85923e776f40c3))
+
 ## [2.30.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.1...v2.30.2) (2025-01-17)
 
 
