@@ -13,7 +13,7 @@
 
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { urlSanitizers } from './utils.js';
-import { targetSelector, sourceSelector } from './dom.js';
+import { targetSelector, sourceSelector, getFormSubmitType } from './dom.js';
 import {
   addAdsParametersTracking,
   addCookieConsentTracking,
@@ -261,7 +261,12 @@ function addFormTracking(parent) {
   activateBlocksMO();
   activateMediaMO();
   parent.querySelectorAll('form').forEach((form) => {
-    form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
+    form.addEventListener('submit', (e) => {
+      sampleRUM(
+        getFormSubmitType(e.target),
+        { target: targetSelector(e.target), source: sourceSelector(e.target) },
+      );
+    }, { once: true });
     let lastSource;
     form.addEventListener('change', (e) => {
       if (e.target.checkVisibility()) {
