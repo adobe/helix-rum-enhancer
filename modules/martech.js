@@ -10,45 +10,46 @@
  * governing permissions and limitations under the License.
  */
 export function addCookieConsentTracking(sampleRUM) {
-  const cmpCookie = document.cookie.split(';')
-    .map((c) => c.trim())
-    .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
-
-  if (cmpCookie) {
-    sampleRUM('consent', { source: 'onetrust', target: 'hidden' });
+  if (sampleRUM.oneTrustTrackingSet) {
     return;
   }
+  // eslint-disable-next-line no-param-reassign
+  sampleRUM.oneTrustTrackingSet = true;
 
-  let consentMO; // consent mutation observer
-  const trackShowConsent = () => {
-    const otsdk = document.querySelector('body > div#onetrust-consent-sdk');
-    if (otsdk) {
-      if (otsdk.checkVisibility && !otsdk.checkVisibility()) {
-        sampleRUM('consent', { source: 'onetrust', target: 'suppressed' });
-      } else {
-        sampleRUM('consent', { source: 'onetrust', target: 'show' });
-      }
-      if (consentMO) {
-        consentMO.disconnect();
-      }
-      return true;
+  function waitForOneTrust(callback) {
+    if (window.OneTrust) {
+      callback(window.OneTrust);
+      return;
     }
-    return false;
-  };
-
-  if (!trackShowConsent()) {
-    // eslint-disable-next-line max-len
-    consentMO = window.MutationObserver
-      ? new MutationObserver(trackShowConsent)
-      : /* c8 ignore next */ null;
-    if (consentMO) {
-      consentMO.observe(
-        document.body,
-        // eslint-disable-next-line object-curly-newline
-        { attributes: false, childList: true, subtree: false },
-      );
-    }
+    Object.defineProperty(window, 'OneTrust', {
+      configurable: true,
+      set(value) {
+        delete window.OneTrust;
+        window.OneTrust = value; // restores normal behavior
+        callback(window.OneTrust);
+      },
+    });
   }
+
+  waitForOneTrust((oneTrust) => {
+    if (!oneTrust || typeof oneTrust.IsAlertBoxClosed !== 'function' || typeof oneTrust.OnConsentChanged !== 'function') {
+      return;
+    }
+
+    if (oneTrust.IsAlertBoxClosed()) {
+      sampleRUM('consent', { source: 'onetrust', target: 'hidden' });
+    } else {
+      let hasBannerShown = false;
+      oneTrust.OnConsentChanged(() => {
+        if (!hasBannerShown) {
+          sampleRUM('consent', { source: 'onetrust', target: 'show' });
+          hasBannerShown = true;
+        } else {
+          sampleRUM('consent', { source: 'onetrust', target: 'closed' });
+        }
+      });
+    }
+  });
 }
 
 export function addUTMParametersTracking(sampleRUM) {
