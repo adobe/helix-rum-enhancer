@@ -16,7 +16,7 @@ export function addCookieConsentTracking(sampleRUM) {
   // eslint-disable-next-line no-param-reassign
   sampleRUM.oneTrustTrackingSet = true;
 
-  function waitForOneTrust(callback) {
+  function onOneTrustLoaded(callback) {
     if (window.OneTrust) {
       callback(window.OneTrust);
       return;
@@ -31,7 +31,7 @@ export function addCookieConsentTracking(sampleRUM) {
     });
   }
 
-  waitForOneTrust((oneTrust) => {
+  onOneTrustLoaded((oneTrust) => {
     if (!oneTrust || typeof oneTrust.IsAlertBoxClosed !== 'function' || typeof oneTrust.OnConsentChanged !== 'function') {
       return;
     }
