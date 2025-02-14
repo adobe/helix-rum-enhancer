@@ -27,6 +27,11 @@ export function addCookieConsentTracking(sampleRUM) {
         sampleRUM('consent', { source: 'onetrust', target: 'suppressed' });
       } else {
         sampleRUM('consent', { source: 'onetrust', target: 'show' });
+        if (window.OneTrust && typeof window.OneTrust.OnConsentChanged === 'function') {
+          window.OneTrust.OnConsentChanged(() => {
+            sampleRUM('consent', { source: 'onetrust', target: 'closed' });
+          });
+        }
       }
       if (consentMO) {
         consentMO.disconnect();
