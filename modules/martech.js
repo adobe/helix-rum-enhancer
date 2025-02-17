@@ -23,6 +23,9 @@ export function addCookieConsentTracking(sampleRUM) {
     }
     Object.defineProperty(window, 'OneTrust', {
       configurable: true,
+      get() {
+        return undefined; // return undefined until it's explicitly set
+      },
       set(value) {
         delete window.OneTrust;
         window.OneTrust = value; // restores normal behavior
