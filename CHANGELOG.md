@@ -1,55 +1,27 @@
-# [2.31.0-beta.6](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.5...v2.31.0-beta.6) (2025-01-17)
+## [2.30.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.2...v2.30.3) (2025-02-03)
 
 
 ### Bug Fixes
 
-* plugins are not executing because they are exported as iife ([6e30eb5](https://github.com/adobe/helix-rum-enhancer/commit/6e30eb57efe19c15f2ea453f9c97477dec79c3d2))
+* collect repeating clicks upto max configuration ([6daba19](https://github.com/adobe/helix-rum-enhancer/commit/6daba19b6dcf3717e8330a923a0d87e61e3080ee))
+* comment for max events tracking ([b4b1c6d](https://github.com/adobe/helix-rum-enhancer/commit/b4b1c6da79a31485bb2165382f9fb9ece611a716))
+* implement flood control with 1024 max events ([e06e1e5](https://github.com/adobe/helix-rum-enhancer/commit/e06e1e51b6dd3db0a015f4dcccb3ab8dcfb11b9f))
+* Implement flood control with 1024 max events ([ddfdb1e](https://github.com/adobe/helix-rum-enhancer/commit/ddfdb1e9dd58ff41cbd761774af9ad616290aae0))
+* review feedback ([f4e6dd1](https://github.com/adobe/helix-rum-enhancer/commit/f4e6dd1b3fae8e37024045156c85923e776f40c3))
 
-# [2.31.0-beta.5](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.4...v2.31.0-beta.5) (2025-01-17)
-
-
-### Bug Fixes
-
-* just forcing a release ([84ab687](https://github.com/adobe/helix-rum-enhancer/commit/84ab68734b5862816a532d4847df0ffa753b0717))
-
-# [2.31.0-beta.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.3...v2.31.0-beta.4) (2025-01-16)
+## [2.30.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.1...v2.30.2) (2025-01-17)
 
 
 ### Bug Fixes
 
-* plugin path resolution ([f464652](https://github.com/adobe/helix-rum-enhancer/commit/f464652df5bef5f42e0b32c1f10bebef013dd1b0))
+* do not trigger fill checkpoint for hidden fields ([f6f4c51](https://github.com/adobe/helix-rum-enhancer/commit/f6f4c519d38c48740ace4ba64f47cafc6cea2f47))
 
-# [2.31.0-beta.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.2...v2.31.0-beta.3) (2025-01-16)
+## [2.30.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.0...v2.30.1) (2025-01-17)
 
 
 ### Bug Fixes
 
-* bugs and failing tests ([5c9adbc](https://github.com/adobe/helix-rum-enhancer/commit/5c9adbc2502203495a05d4fd2be6e05cc11102df))
-* cross-browser compatibility ([1c21afd](https://github.com/adobe/helix-rum-enhancer/commit/1c21afd8cd982d4c33feba863d2251311f36e153))
-* set proper url base for plugins ([9726dc8](https://github.com/adobe/helix-rum-enhancer/commit/9726dc8f98bd71936c8a8f430cae73b6a8f5d63f))
-* use proper fully qualified URLs for plugin path to avoid CORS ([c73eb31](https://github.com/adobe/helix-rum-enhancer/commit/c73eb31461115529922b82c3a8b678f21052b918))
-
-
-### Features
-
-* allow external extension via window.RUM_PLUGINS ([4613b00](https://github.com/adobe/helix-rum-enhancer/commit/4613b004c617f4d503355b5c43008149df9101ef))
-* inline web-vitals.js ([7d89e9f](https://github.com/adobe/helix-rum-enhancer/commit/7d89e9f664686d3a475ce829d7fb4f68f29ed71b))
-* introduce minimal plugin system to offset non-essenial logic ([8642557](https://github.com/adobe/helix-rum-enhancer/commit/8642557beaef5161d1d4d51d2b04ce06bf7dbeb7))
-* introduce minimal plugin system to offset non-essenial logic ([6066f0b](https://github.com/adobe/helix-rum-enhancer/commit/6066f0bd56393a10391e190b9a338f9a65b772b0))
-
-# [2.31.0-beta.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.1...v2.31.0-beta.2) (2025-01-16)
-
-
-### Reverts
-
-* Revert "feat: handle pre-rendering" ([6471af5](https://github.com/adobe/helix-rum-enhancer/commit/6471af5cce4d895ca036a7b04a33530a3715b810))
-
-# [2.31.0-beta.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.0...v2.31.0-beta.1) (2025-01-16)
-
-
-### Features
-
-* handle pre-rendering ([bb11187](https://github.com/adobe/helix-rum-enhancer/commit/bb11187058b8cb521a270c316323b66414a8d817))
+* form elements having name/id as id breaks the sourceSelector logic. ([37bd0ab](https://github.com/adobe/helix-rum-enhancer/commit/37bd0ab4c6bb1aac1326bc9be0097a7ccf038870))
 
 # [2.30.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.29.0...v2.30.0) (2025-01-15)
 
