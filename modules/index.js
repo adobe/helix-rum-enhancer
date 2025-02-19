@@ -73,10 +73,16 @@ function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
     .filter(([, plugin]) => filter(plugin))
     .map(([key]) => loadPlugin(key, params));
 }
+/**
+ * Maximum number of events. The first call will be made by rum-js,
+ * leaving 1023 events for the enhancer to track
+ */
+let maxEvents = 1023;
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  if (isSelected) {
+  if (isSelected && maxEvents) {
+    maxEvents -= 1;
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
@@ -271,16 +277,8 @@ function addTrackingFromConfig() {
   activateBlocksMO();
   activateMediaMO();
 
-  let lastSource;
-  let lastTarget;
   document.addEventListener('click', (event) => {
-    const source = sourceSelector(event.target);
-    const target = targetSelector(event.target);
-    if (source !== lastSource || target !== lastTarget) {
-      sampleRUM('click', { target, source });
-      lastSource = source;
-      lastTarget = target;
-    }
+    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
   });
 
   // Core tracking
