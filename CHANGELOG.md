@@ -1,3 +1,31 @@
+# [2.31.0-beta.7](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0-beta.6...v2.31.0-beta.7) (2025-02-19)
+
+
+### Bug Fixes
+
+* collect repeating clicks upto max configuration ([6daba19](https://github.com/adobe/helix-rum-enhancer/commit/6daba19b6dcf3717e8330a923a0d87e61e3080ee))
+* comment for max events tracking ([b4b1c6d](https://github.com/adobe/helix-rum-enhancer/commit/b4b1c6da79a31485bb2165382f9fb9ece611a716))
+* do not trigger fill checkpoint for hidden fields ([f6f4c51](https://github.com/adobe/helix-rum-enhancer/commit/f6f4c519d38c48740ace4ba64f47cafc6cea2f47))
+* form elements having name/id as id breaks the sourceSelector logic. ([37bd0ab](https://github.com/adobe/helix-rum-enhancer/commit/37bd0ab4c6bb1aac1326bc9be0097a7ccf038870))
+* implement flood control with 1024 max events ([e06e1e5](https://github.com/adobe/helix-rum-enhancer/commit/e06e1e51b6dd3db0a015f4dcccb3ab8dcfb11b9f))
+* Implement flood control with 1024 max events ([ddfdb1e](https://github.com/adobe/helix-rum-enhancer/commit/ddfdb1e9dd58ff41cbd761774af9ad616290aae0))
+* just forcing a release ([0a643d5](https://github.com/adobe/helix-rum-enhancer/commit/0a643d55440216adc5ca8b66e5cf70b31997b800))
+* plugin path resolution ([f77d736](https://github.com/adobe/helix-rum-enhancer/commit/f77d736a5e52b6e01fb83defe74b5e0f9622c127))
+* plugins are not executing because they are exported as iife ([dfc1eea](https://github.com/adobe/helix-rum-enhancer/commit/dfc1eea7bf230d95456ee2f7ee200e6a37c2f8c3))
+* review feedback ([f4e6dd1](https://github.com/adobe/helix-rum-enhancer/commit/f4e6dd1b3fae8e37024045156c85923e776f40c3))
+
+
+### Features
+
+* handle pre-rendering ([3181698](https://github.com/adobe/helix-rum-enhancer/commit/3181698ea202ebb389dd82ab35a8d206a82b2006))
+* **loadresource:** add `allresources` feature flag that enables tracking all resources, not just same host ([a8fa936](https://github.com/adobe/helix-rum-enhancer/commit/a8fa936035f56b13ff8db66f32db17c828318972))
+* **missingresource:** report all resource error with http status code ([e3ad482](https://github.com/adobe/helix-rum-enhancer/commit/e3ad482454e5fe874e5cef5842a08915c53dbad4))
+
+
+### Reverts
+
+* Revert "feat: handle pre-rendering" ([9603927](https://github.com/adobe/helix-rum-enhancer/commit/9603927774966fcfadb3ba3f8f7b42a0c003fd2e))
+
 ## [2.30.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.2...v2.30.3) (2025-02-03)
 
 
