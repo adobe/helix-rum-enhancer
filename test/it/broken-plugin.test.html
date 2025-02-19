@@ -1,0 +1,62 @@
+<html lang="en-NZ">
+
+<head>
+  <title>Test Runner</title>
+</head>
+
+<body>
+  <p>Some content</p>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+                      import { sendMouse } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('HTML Index Tests with broken Plugins', () => {
+
+        it('can load rum enhancer as a script', async () => {
+          let called = [];
+          window.hlx = {
+            rum: {
+              sampleRUM: (...args) => {
+                called.push(args);
+              }
+            }
+          };
+
+
+          const script = document.createElement('script');
+          script.src = new URL('/modules/index-broken.js', window.location).href;
+          script.type = 'module';
+          document.head.appendChild(script);
+
+          await new Promise((resolve) => {
+            script.onload = resolve;
+          });
+          // wait one second for the script to run
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          // click anywhere
+          await sendMouse({ type: 'click', position: [10, 10] });
+
+          // the order is not stable across browsers, so we
+          // sort called by the first argument
+          called.sort((a, b) => a[0].localeCompare(b[0]));
+
+          expect(called).to.have.lengthOf(3);
+          expect(called[0][0]).to.equal('click');
+
+          expect(called[1][0]).to.equal('enter');
+
+          expect(called[2][0]).to.equal('language');
+          expect(called[2][1].source).to.equal('en-NZ');
+        });
+
+      });
+    });
+  </script>
+</body>
+
+</html>
