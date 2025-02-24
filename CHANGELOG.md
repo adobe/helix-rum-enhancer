@@ -1,3 +1,10 @@
+## [2.30.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.3...v2.30.4) (2025-02-24)
+
+
+### Bug Fixes
+
+* **missingresource:** exclude specific RUM tracking resources from missing resource reports ([be1f077](https://github.com/adobe/helix-rum-enhancer/commit/be1f077e6aff202071ea3e5974b4092d6610d66e))
+
 ## [2.30.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.2...v2.30.3) (2025-02-03)
 
 
