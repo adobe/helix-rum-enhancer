@@ -168,6 +168,7 @@ function addLoadResourceTracking() {
         });
       list.getEntries()
         .filter((e) => e.responseStatus >= 400)
+        .filter((e) => !(new URL(e.name).pathname.match('.*(/\\.rum/1[0-9]{0,3})')))
         .forEach((e) => {
           sampleRUM('missingresource', { source: e.name, target: e.responseStatus });
         });

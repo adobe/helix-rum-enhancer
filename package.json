@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-rum-enhancer",
-  "version": "2.31.0-beta.7",
+  "version": "2.31.0",
   "description": "Helix RUM Enhancer",
   "main": "src/index.js",
   "type": "module",
@@ -56,7 +56,7 @@
     "lint-staged": "15.4.3",
     "mocha": "11.1.0",
     "mocha-multi-reporters": "1.5.1",
-    "rollup": "4.34.8",
+    "rollup": "4.34.9",
     "rollup-plugin-checksum": "1.0.1",
     "rollup-plugin-eslint-bundle": "9.0.0",
     "semantic-release": "24.2.3",
