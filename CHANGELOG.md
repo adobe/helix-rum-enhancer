@@ -1,3 +1,12 @@
+## [2.31.1-beta.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0...v2.31.1-beta.1) (2025-03-04)
+
+
+### Bug Fixes
+
+* just forcing a release ([84ab687](https://github.com/adobe/helix-rum-enhancer/commit/84ab68734b5862816a532d4847df0ffa753b0717))
+* plugin path resolution ([f464652](https://github.com/adobe/helix-rum-enhancer/commit/f464652df5bef5f42e0b32c1f10bebef013dd1b0))
+* plugins are not executing because they are exported as iife ([6e30eb5](https://github.com/adobe/helix-rum-enhancer/commit/6e30eb57efe19c15f2ea453f9c97477dec79c3d2))
+
 # [2.31.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.4...v2.31.0) (2025-03-04)
 
 
