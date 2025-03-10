@@ -79,7 +79,7 @@ function getSourceElement(el) {
           : ''));
   }
   if (walk(el, isButton)) return 'button';
-  return el.tagName.toLowerCase().match(/^(a|img|video)$/) && el.tagName.toLowerCase();
+  return el.tagName.toLowerCase().match(/^(a|img|video|form)$/) && el.tagName.toLowerCase();
 }
 
 function getSourceIdentifier(el) {
@@ -103,18 +103,4 @@ export const sourceSelector = (el) => {
   } catch (error) {
     return null;
   }
-};
-
-export const getFormType = (el) => {
-  if (!el || el.tagName !== 'FORM') return undefined;
-  // if the form has a search role or a search field, it's a search form
-  if (el.getAttribute('role') === 'search'
-    || el.querySelector('input[type="search"]')
-    || el.querySelectorAll('input').filter((e) => e.getAttribute('role') === 'searchbox').length > 0) return 'search';
-  const password = el.querySelectorAll('input[type="password"]');
-  // if the form has one password input, it's a login form
-  if (password.length === 1) return 'login';
-  // if the form has more than one password input, it's a signup form
-  if (password.length > 1) return 'signup';
-  return el.getAttribute('id');
 };
