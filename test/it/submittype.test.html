@@ -96,13 +96,19 @@
 
     runTests(async () => {
       describe('Test Form Submit Events', () => {
+        before(async () => {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 2000);
+          });
+        });
+
         beforeEach(() => {
           window.called = [];
         });
 
-        const submitAndWait = async (form) => {
+        const submitAndWait = async (form, wait = 1000) => {
           form.querySelector('input[type="submit"]').click();
-          await new Promise((resolve) => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, wait));
         };
 
         it('Tracks basic form submit as "formsubmit"', async () => {

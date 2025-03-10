@@ -10,7 +10,8 @@
  * governing permissions and limitations under the License.
  */
 
-import cleanup from 'rollup-plugin-cleanup';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { babel } from '@rollup/plugin-babel';
 import pkg from 'rollup-plugin-checksum';
 
 const checksum = pkg.default;
@@ -28,34 +29,41 @@ const banner = `/*
  */`;
 
 const bundles = [
+  // Core library
   {
     source: 'modules/index.js',
     outputFile: 'src/index',
   },
+  // Library plugins
+  ...['cwv', 'form', 'martech', 'onetrust', 'video'].map((plugin) => ({
+    source: `plugins/${plugin}.js`,
+    outputFile: `src/plugins/${plugin}`,
+    format: 'es',
+  })),
 ];
 
-export default [...bundles.map(({ outputFile, source }) => ({
+export default [...bundles.map(({ outputFile, source, format }) => ({
   input: source,
   output: [
     {
       file: `${outputFile}.map.js`,
-      format: 'iife',
+      format: format || 'iife',
       sourcemap: 'inline',
       exports: 'auto',
       banner,
     },
     {
       file: `${outputFile}.js`,
-      format: 'iife',
+      format: format || 'iife',
       sourcemap: false,
       exports: 'auto',
       banner,
     },
   ],
   plugins: [
-    cleanup({
-      comments: [],
-      maxEmptyLines: 0,
+    babel({
+      babelHelpers: 'bundled',
+      comments: false,
     }),
     checksum({
       filename: `${outputFile.split('/').pop()}.md5`,

@@ -51,43 +51,44 @@
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
-    import { getFormSubmitType } from '../../modules/dom.js';
+    import { getSubmitType } from '../../plugins/form.js';
 
     runTests(async () => {
       describe('getFormSubmitType', () => {
         it('returns undefined for non-form elements', () => {
-          expect(getFormSubmitType(null)).to.be.undefined;
-          expect(getFormSubmitType(document.createElement('div'))).to.be.undefined;
+          expect(getSubmitType(null)).to.be.undefined;
+          expect(getSubmitType(document.createElement('div'))).to.be.undefined;
         });
+
 
         it('returns "formsubmit" for basic form with no special fields', () => {
           const form = document.querySelector('#basic-form');
-          expect(getFormSubmitType(form)).to.equal('formsubmit');
+          expect(getSubmitType(form)).to.equal('formsubmit');
         });
 
         it('returns "search" for form with search role', () => {
           const form = document.querySelector('#search-form-role');
-          expect(getFormSubmitType(form)).to.equal('search');
+          expect(getSubmitType(form)).to.equal('search');
         });
 
         it('returns "search" for form with search input type', () => {
           const form = document.querySelector('#search-form-type');
-          expect(getFormSubmitType(form)).to.equal('search');
+          expect(getSubmitType(form)).to.equal('search');
         });
 
         it('returns "search" for form with searchbox role input', () => {
           const form = document.querySelector('#search-form-searchbox');
-          expect(getFormSubmitType(form)).to.equal('search');
+          expect(getSubmitType(form)).to.equal('search');
         });
 
         it('returns "login" for form with single password field', () => {
           const form = document.querySelector('#login-form');
-          expect(getFormSubmitType(form)).to.equal('login');
+          expect(getSubmitType(form)).to.equal('login');
         });
 
         it('returns "signup" for form with multiple password fields', () => {
           const form = document.querySelector('#signup-form');
-          expect(getFormSubmitType(form)).to.equal('signup');
+          expect(getSubmitType(form)).to.equal('signup');
         });
       });
     });
