@@ -1,0 +1,171 @@
+<html>
+
+<head>
+  <title>Form Submit Test Runner</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    // we log what's being sent to the "server"
+    window.called = [];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = function (url, payload) {
+      // if payload is a string, we assume it's a JSON string
+      if (typeof payload === 'string') {
+        window.called.push(JSON.parse(payload));
+      } else {
+        // it's a blob
+        payload.text().then((text) => {
+          window.called.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <div class="block" data-block-status="loaded">
+    <!-- Basic form -->
+    <form id="basic-form" action="javascript:false;" method="POST">
+      <input type="text" name="name" value="John Doe">
+      <input type="submit" value="Submit">
+    </form>
+
+    <!-- Search forms - different variations -->
+    <form id="search-form-role" role="search" action="javascript:false;">
+      <input type="text" name="q">
+      <input type="submit" value="Search">
+    </form>
+
+    <form id="search-form-input" action="javascript:false;">
+      <input type="search" name="q">
+      <input type="submit" value="Search">
+    </form>
+
+    <form id="search-form-searchbox" action="javascript:false;">
+      <input type="text" role="searchbox" name="q">
+      <input type="submit" value="Search">
+    </form>
+
+    <!-- Login forms - different variations -->
+    <form id="login-form-simple" action="javascript:false;">
+      <input type="text" name="username">
+      <input type="password" name="password">
+      <input type="submit" value="Login">
+    </form>
+
+    <form id="login-form-complex" action="javascript:false;">
+      <input type="email" name="email">
+      <input type="text" name="username">
+      <input type="password" name="password">
+      <input type="submit" value="Login">
+    </form>
+
+    <!-- Signup forms - different variations -->
+    <form id="signup-form-simple" action="javascript:false;">
+      <input type="text" name="username">
+      <input type="password" name="password">
+      <input type="password" name="confirm">
+      <input type="submit" value="Sign Up">
+    </form>
+
+    <form id="signup-form-complex" action="javascript:false;">
+      <input type="text" name="username">
+      <input type="email" name="email">
+      <input type="password" name="password">
+      <input type="password" name="confirm">
+      <input type="password" name="pin">
+      <input type="submit" value="Sign Up">
+    </form>
+
+    <script>
+      document.querySelectorAll('form').forEach(form => {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+        });
+      });
+    </script>
+  </div>
+
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { assert } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('Test Form Submit Events', () => {
+        before(async () => {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 2000);
+          });
+        });
+
+        beforeEach(() => {
+          window.called = [];
+        });
+
+        const submitAndWait = async (form, wait = 1000) => {
+          form.querySelector('input[type="submit"]').click();
+          await new Promise((resolve) => setTimeout(resolve, wait));
+        };
+
+        it('Tracks basic form submit as "formsubmit"', async () => {
+          await submitAndWait(document.querySelector('#basic-form'));
+          assert(window.called.some(call => call.checkpoint === 'formsubmit'),
+            'formsubmit checkpoint missing');
+        });
+
+        describe('Search Forms', () => {
+          it('Tracks form with search role as "search"', async () => {
+            await submitAndWait(document.querySelector('#search-form-role'));
+            assert(window.called.some(call => call.checkpoint === 'search'),
+              'search checkpoint missing for role=search');
+          });
+
+          it('Tracks form with search input type as "search"', async () => {
+            await submitAndWait(document.querySelector('#search-form-input'));
+            assert(window.called.some(call => call.checkpoint === 'search'),
+              'search checkpoint missing for input type=search');
+          });
+
+          it('Tracks form with searchbox role input as "search"', async () => {
+            await submitAndWait(document.querySelector('#search-form-searchbox'));
+            assert(window.called.some(call => call.checkpoint === 'search'),
+              'search checkpoint missing for role=searchbox');
+          });
+        });
+
+        describe('Login Forms', () => {
+          it('Tracks simple login form as "login"', async () => {
+            await submitAndWait(document.querySelector('#login-form-simple'));
+            assert(window.called.some(call => call.checkpoint === 'login'),
+              'login checkpoint missing for simple form');
+          });
+
+          it('Tracks complex login form as "login"', async () => {
+            await submitAndWait(document.querySelector('#login-form-complex'));
+            assert(window.called.some(call => call.checkpoint === 'login'),
+              'login checkpoint missing for complex form');
+          });
+        });
+
+        describe('Signup Forms', () => {
+          it('Tracks simple signup form as "signup"', async () => {
+            await submitAndWait(document.querySelector('#signup-form-simple'));
+            assert(window.called.some(call => call.checkpoint === 'signup'),
+              'signup checkpoint missing for simple form');
+          });
+
+          it('Tracks complex signup form as "signup"', async () => {
+            await submitAndWait(document.querySelector('#signup-form-complex'));
+            assert(window.called.some(call => call.checkpoint === 'signup'),
+              'signup checkpoint missing for complex form');
+          });
+        });
+      });
+    });
+  </script>
+</body>
+</body>
