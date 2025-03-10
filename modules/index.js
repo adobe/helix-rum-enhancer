@@ -43,12 +43,36 @@ const PLUGINS = {
   // test: broken-plugin
 };
 
+function getIntersectionObsever(checkpoint) {
+  /* c8 ignore next 3 */
+  if (!window.IntersectionObserver) {
+    return null;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    try {
+      entries
+        .filter((e) => e.isIntersecting)
+        .forEach((e) => {
+          observer.unobserve(e.target); // observe only once
+          const target = targetSelector(e.target);
+          const source = sourceSelector(e.target);
+          sampleRUM(checkpoint, { target, source });
+        });
+      /* c8 ignore next 3 */
+    } catch (error) {
+      // something went wrong
+    }
+  });
+  return observer;
+}
+
 const PLUGIN_PARAMETERS = {
   context: document.body,
   fflags,
   sampleRUM,
   sourceSelector,
   targetSelector,
+  getIntersectionObsever,
 };
 
 const pluginCache = new Map();
@@ -206,28 +230,6 @@ function activateMediaMO() {
   );
 }
 
-export function getIntersectionObsever(checkpoint) {
-  /* c8 ignore next 3 */
-  if (!window.IntersectionObserver) {
-    return null;
-  }
-  const observer = new IntersectionObserver((entries) => {
-    try {
-      entries
-        .filter((e) => e.isIntersecting)
-        .forEach((e) => {
-          observer.unobserve(e.target); // observe only once
-          const target = targetSelector(e.target);
-          const source = sourceSelector(e.target);
-          sampleRUM(checkpoint, { target, source });
-        });
-      /* c8 ignore next 3 */
-    } catch (error) {
-      // something went wrong
-    }
-  });
-  return observer;
-}
 function addViewBlockTracking(element) {
   const blockobserver = getIntersectionObsever('viewblock');
   if (blockobserver) {

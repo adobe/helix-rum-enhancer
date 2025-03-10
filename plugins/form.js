@@ -10,36 +10,12 @@
  * governing permissions and limitations under the License.
  */
 
-// todo: fix this
-function getIntersectionObsever(checkpoint, targetSelector, sourceSelector, sampleRUM) {
-  /* c8 ignore next 3 */
-  if (!window.IntersectionObserver) {
-    return null;
-  }
-  const observer = new IntersectionObserver((entries) => {
-    try {
-      entries
-        .filter((e) => e.isIntersecting)
-        .forEach((e) => {
-          observer.unobserve(e.target); // observe only once
-          const target = targetSelector(e.target);
-          const source = sourceSelector(e.target);
-          sampleRUM(checkpoint, { target, source });
-        });
-      /* c8 ignore next 3 */
-    } catch (error) {
-      // something went wrong
-    }
-  });
-  return observer;
-}
-
 export default function addFormTracking({
-  sampleRUM, sourceSelector, targetSelector, context,
+  sampleRUM, sourceSelector, targetSelector, context, getIntersectionObsever,
 }) {
   context.querySelectorAll('form').forEach((form) => {
     form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
-    getIntersectionObsever('viewblock', targetSelector, sourceSelector, sampleRUM).observe(form);
+    getIntersectionObsever('viewblock').observe(form);
     let lastSource;
     form.addEventListener('change', (e) => {
       if (e.target.checkVisibility()) {
