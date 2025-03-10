@@ -1,0 +1,78 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    // we log what's being sent to the "server"
+    window.called = [];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = async function (url, payload) {
+      let data;
+      // if payload is a string, we assume it's a JSON string
+      if (typeof payload === 'string') {
+        data = JSON.parse(payload);
+        // console.log('fakeSendBeacon blob', data.checkpoint);
+      } else {
+        // it's a blob
+        const text = await payload.text();
+        data = JSON.parse(text);
+        // console.log('fakeSendBeacon blob', data.checkpoint);
+      }
+      console.log('fakeSendBeacon ', data.checkpoint);
+
+      if (data.checkpoint === 'viewblock') {
+        window.called.push(data);
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <nav>
+    <form id="form-in-header">
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input type="submit" value="Submit" />
+    </form>
+  </nav>
+  <form id="basic-form">
+    <input type="text" name="name" />
+    <input type="email" name="email" />
+    <input type="submit" value="Submit" />
+  </form>
+  <footer>
+    <form id="form-in-footer">
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+        <input type="submit" value="Submit" />
+    </form>
+  </footer>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { setViewport } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('Test Block Loading', () => {
+        it('Can observe form that enter the viewport', async () => {
+          await setViewport({ width: 800, height: 600 });
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 2000);
+          });
+          console.log('testing');
+          expect(window.called.length).to.equal(3);
+          const actual = new Set(window.called.map((c) => c.source));
+          const expected = new Set(['nav form#form-in-header', 'form#basic-form', 'footer form#form-in-footer']);
+          expect(actual).to.deep.equal(expected);
+        });
+      });
+    });
+  </script>
+</body>

@@ -9,11 +9,13 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+
 export default function addFormTracking({
-  sampleRUM, sourceSelector, targetSelector, context,
+  sampleRUM, sourceSelector, targetSelector, context, getIntersectionObsever,
 }) {
   context.querySelectorAll('form').forEach((form) => {
     form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
+    getIntersectionObsever('viewblock').observe(form);
     let lastSource;
     form.addEventListener('change', (e) => {
       if (e.target.checkVisibility()) {

@@ -79,7 +79,7 @@ function getSourceElement(el) {
           : ''));
   }
   if (walk(el, isButton)) return 'button';
-  return el.tagName.toLowerCase().match(/^(a|img|video)$/) && el.tagName.toLowerCase();
+  return el.tagName.toLowerCase().match(/^(a|img|video|form)$/) && el.tagName.toLowerCase();
 }
 
 function getSourceIdentifier(el) {
