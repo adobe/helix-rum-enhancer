@@ -12,7 +12,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { babel } from '@rollup/plugin-babel';
-import pkg from 'rollup-plugin-checksum';
+import pkg from '@trieloff/rollup-plugin-checksum';
 
 const checksum = pkg.default;
 
@@ -28,33 +28,69 @@ const banner = `/*
  * governing permissions and limitations under the License.
  */`;
 
-const bundles = [
-  // Core library
-  {
-    source: 'modules/index.js',
-    outputFile: 'src/index',
+// Core library - index.js with sourcemap
+const indexMapConfig = {
+  input: 'modules/index.js',
+  output: {
+    file: 'src/index.map.js',
+    format: 'iife',
+    sourcemap: 'inline',
+    exports: 'auto',
+    banner,
   },
-  // Library plugins
-  ...['cwv', 'form', 'martech', 'onetrust', 'video'].map((plugin) => ({
-    source: `plugins/${plugin}.js`,
-    outputFile: `src/plugins/${plugin}`,
-    format: 'es',
-  })),
-];
+  plugins: [
+    babel({
+      babelHelpers: 'bundled',
+      comments: false,
+    }),
+    checksum({
+      filename: 'index.md5',
+      includeAssets: false,
+    }),
+  ],
+};
 
-export default [...bundles.map(({ outputFile, source, format }) => ({
-  input: source,
+// Core library - index.js without sourcemap, with MD5 and SRI
+const indexConfig = {
+  input: 'modules/index.js',
+  output: {
+    file: 'src/index.js',
+    format: 'iife',
+    sourcemap: false,
+    exports: 'auto',
+    banner,
+  },
+  plugins: [
+    babel({
+      babelHelpers: 'bundled',
+      comments: false,
+    }),
+    checksum({
+      filename: 'index.md5',
+      includeAssets: false,
+    }),
+    checksum({
+      filename: 'index',
+      includeAssets: false,
+      sri: 'sha384',
+    }),
+  ],
+};
+
+// Plugins
+const pluginBundles = [...['cwv', 'form', 'martech', 'onetrust', 'video'].map((plugin) => ({
+  input: `plugins/${plugin}.js`,
   output: [
     {
-      file: `${outputFile}.map.js`,
-      format: format || 'iife',
+      file: `src/plugins/${plugin}.map.js`,
+      format: 'es',
       sourcemap: 'inline',
       exports: 'auto',
       banner,
     },
     {
-      file: `${outputFile}.js`,
-      format: format || 'iife',
+      file: `src/plugins/${plugin}.js`,
+      format: 'es',
       sourcemap: false,
       exports: 'auto',
       banner,
@@ -66,8 +102,14 @@ export default [...bundles.map(({ outputFile, source, format }) => ({
       comments: false,
     }),
     checksum({
-      filename: `${outputFile.split('/').pop()}.md5`,
+      filename: `${plugin}.md5`,
       includeAssets: false,
     }),
   ],
 }))];
+
+export default [
+  indexMapConfig,
+  indexConfig,
+  ...pluginBundles,
+];
