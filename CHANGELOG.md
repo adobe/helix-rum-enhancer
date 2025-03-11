@@ -1,3 +1,10 @@
+## [2.31.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0...v2.31.1) (2025-03-11)
+
+
+### Bug Fixes
+
+* **onetrust:** prevent duplicate consent tracking events ([41ff1c3](https://github.com/adobe/helix-rum-enhancer/commit/41ff1c383d063f05ec5edd00084cd959436de31b))
+
 # [2.31.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.4...v2.31.0) (2025-03-04)
 
 
