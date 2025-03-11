@@ -32,10 +32,10 @@ export default function addFormTracking({
     let lastSource;
     form.addEventListener('change', (e) => {
       if (e.target.checkVisibility()) {
-        const src = sourceSelector(e.target);
-        if (src !== lastSource) {
-          sampleRUM('fill', { source: src });
-          lastSource = src;
+        const source = sourceSelector(e.target);
+        if (source !== lastSource) {
+          sampleRUM('fill', { source });
+          lastSource = source;
         }
       }
     });
