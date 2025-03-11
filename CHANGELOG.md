@@ -1,3 +1,10 @@
+# [2.32.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.1...v2.32.0) (2025-03-11)
+
+
+### Features
+
+* bringing back some more checkpoints: search, login and signup ([#372](https://github.com/adobe/helix-rum-enhancer/issues/372)) ([0a3ef75](https://github.com/adobe/helix-rum-enhancer/commit/0a3ef754666355adadf063f7230e9436f5f128ce))
+
 ## [2.31.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0...v2.31.1) (2025-03-11)
 
 
