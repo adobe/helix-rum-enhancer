@@ -13,6 +13,8 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { babel } from '@rollup/plugin-babel';
 import pkg from '@trieloff/rollup-plugin-checksum';
+import fs from 'fs';
+import path from 'path';
 
 const checksum = pkg.default;
 
@@ -27,6 +29,10 @@ const banner = `/*
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */`;
+
+// Get list of plugins from the file system
+const pluginFiles = fs.readdirSync('plugins').filter((file) => file.endsWith('.js'));
+const plugins = pluginFiles.map((file) => path.basename(file, '.js'));
 
 // Core library - index.js with sourcemap
 const indexMapConfig = {
@@ -78,7 +84,7 @@ const indexConfig = {
 };
 
 // Plugins
-const pluginBundles = [...['cwv', 'form', 'martech', 'onetrust', 'video'].map((plugin) => ({
+const pluginBundles = plugins.map((plugin) => ({
   input: `plugins/${plugin}.js`,
   output: [
     {
@@ -106,7 +112,7 @@ const pluginBundles = [...['cwv', 'form', 'martech', 'onetrust', 'video'].map((p
       includeAssets: false,
     }),
   ],
-}))];
+}));
 
 export default [
   indexMapConfig,
