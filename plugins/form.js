@@ -10,11 +10,24 @@
  * governing permissions and limitations under the License.
  */
 
+export const getSubmitType = (el) => {
+  if (!el || el.tagName !== 'FORM') return undefined;
+  // if the form has a search role or a search field, it's a search form
+  if (el.getAttribute('role') === 'search'
+    || el.querySelector('input[type="search"], input[role="searchbox"]')) return 'search';
+  // if the form has one password input, it's a login form
+  // if the form has more than one password input, it's a signup form
+  const pwCount = el.querySelectorAll('input[type="password"]').length;
+  if (pwCount === 1) return 'login';
+  if (pwCount > 1) return 'signup';
+  return 'formsubmit';
+};
+
 export default function addFormTracking({
   sampleRUM, sourceSelector, targetSelector, context, getIntersectionObsever,
 }) {
   context.querySelectorAll('form').forEach((form) => {
-    form.addEventListener('submit', (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
+    form.addEventListener('submit', (e) => sampleRUM(getSubmitType(e.target), { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
     getIntersectionObsever('viewblock').observe(form);
     let lastSource;
     form.addEventListener('change', (e) => {
