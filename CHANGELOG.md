@@ -1,3 +1,10 @@
+# [2.33.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.32.0...v2.33.0) (2025-03-24)
+
+
+### Features
+
+* track all resources loaded on ups.com ([285a495](https://github.com/adobe/helix-rum-enhancer/commit/285a49565b0b96d182cb19923b8e6b93b53c9b00))
+
 # [2.32.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.1...v2.32.0) (2025-03-11)
 
 
