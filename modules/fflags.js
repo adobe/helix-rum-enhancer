@@ -21,4 +21,3 @@ export const fflags = {
   language: [543, 959, 1139, 620],
   allresources: [1139, 457],
 };
-
