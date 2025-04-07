@@ -185,13 +185,14 @@ function addLoadResourceTracking() {
     try {
       list.getEntries()
         .filter((e) => !e.responseStatus || e.responseStatus < 400)
+        .filter((e) => window.location.hostname === new URL(e.name).hostname || fflags.has('allresources'))
         .filter((e) => {
           const url = new URL(e.name);
-          if (fflags.has('allresources')) {
-            return url.pathname.match('.*(\\.plain\\.html$|\\.js(on)?|graphql|api)');
+          if (window.location.hostname !== url.hostname) {
+            return url.pathname.match('.*(\\.html$|\\.json|\\.js|graphql|api)');
           }
 
-          return window.location.hostname === url.hostname && url.pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)');
+          return url.pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)');
         })
         .forEach((e) => {
           sampleRUM('loadresource', { source: e.name, target: Math.round(e.duration) });
