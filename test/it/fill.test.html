@@ -51,7 +51,7 @@
   <div id="focusable-element" tabindex="0">
     Focusable element
   </div>
-  <form action="javascript:false;" method="POST" autocomplete="on">
+  <form class="form-class" action="javascript:false;" method="POST" autocomplete="on">
     <input type="text" name="name" autocomplete="name"/>
     <input type="number" name="number"/>
     <input type="email" name="email" autocomplete="email"/>
@@ -94,8 +94,8 @@
 
           assert(window.called.length === 1, `fill is called ${window.called.length} (Expected 1) times`);
           assert(window.called[0].checkpoint === 'fill', 'checkpoint is not fill');
-          assert(window.called[0].source === `form input[type='number']`,
-            `source ${window.called[0].source} is not form input[type='number']`);
+          assert(window.called[0].source === `form.form-class input[type='number']`,
+            `source ${window.called[0].source} is not form.form-class input[type='number']`);
         });
 
         it('filling form field', async () => {
@@ -112,8 +112,8 @@
 
           assert(window.called.length === 1, `fill is called ${window.called.length} (Expected 1) times`);
           assert(window.called[0].checkpoint === 'fill', 'checkpoint is not fill');
-          assert(window.called[0].source === `form input[type='text']`,
-            `source ${window.called[0].source} is not form input[type='text']`);
+          assert(window.called[0].source === `form.form-class input[type='text']`,
+            `source ${window.called[0].source} is not form.form-class input[type='text']`);
         });
 
         it('filling number field using up and down keys', async () => {
@@ -135,8 +135,8 @@
 
           assert(window.called.length === 1, `fill is called ${window.called.length} (Expected 1) times`);
           assert(window.called[0].checkpoint === 'fill', 'checkpoint is not fill');
-          assert(window.called[0].source === `form input[type='number']`,
-            `source ${window.called[0].source} is not form input[type='number']`);
+          assert(window.called[0].source === `form.form-class input[type='number']`,
+            `source ${window.called[0].source} is not form.form-class input[type='number']`);
         });
 
         it('filling hidden field dispatching change event', async () => {
