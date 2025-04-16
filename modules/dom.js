@@ -61,7 +61,10 @@ function getSourceContext(el) {
   const formEl = el.closest('form');
   if (formEl) {
     const id = formEl.getAttribute('id');
-    return `form${id ? `#${id}` : ''}`;
+    if (id) {
+      return `form#${id}`;
+    }
+    return `form${formEl.classList.length > 0 ? `.${formEl.classList[0]}` : ''}`;
   }
   const block = el.closest('.block[data-block-name]');
   return ((block && `.${block.getAttribute('data-block-name')}`)

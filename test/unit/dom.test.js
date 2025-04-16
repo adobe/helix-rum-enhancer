@@ -108,4 +108,19 @@ describe('test dom#sourceSelector', () => {
     // eslint-disable-next-line no-unused-expressions
     expect(sourceSelector()).to.be.undefined;
   });
+
+  it('sourceSelector - select form by class', () => {
+    const form = document.createElement('form');
+    form.classList.add('form-class');
+    form.classList.add('form-class-2');
+    document.body.append(form);
+    expect(sourceSelector(form)).to.be.equal('form.form-class');
+  });
+
+  it('sourceSelector - select form by id', () => {
+    const form = document.createElement('form');
+    form.id = 'form-id';
+    document.body.append(form);
+    expect(sourceSelector(form)).to.be.equal('form#form-id');
+  });
 });
