@@ -1,3 +1,10 @@
+# [2.34.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.33.0...v2.34.0) (2025-04-16)
+
+
+### Features
+
+* add class in source  selector ([#398](https://github.com/adobe/helix-rum-enhancer/issues/398)) ([c72aa0d](https://github.com/adobe/helix-rum-enhancer/commit/c72aa0d66074a66b2ebeed4a625989c040112eee))
+
 # [2.33.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.32.0...v2.33.0) (2025-03-24)
 
 
