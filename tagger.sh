@@ -129,10 +129,10 @@ create_or_update_branch() {
     done
     
     # Commit changes
-    git commit -m "$COMMIT_MSG"
+    git commit --no-verify --allow-empty -m "$COMMIT_MSG"
   else
     # Create an empty commit when no files are specified
-    git commit --allow-empty -m "$COMMIT_MSG"
+    git commit --no-verify --allow-empty -m "$COMMIT_MSG"
   fi
   
   # Push if requested
