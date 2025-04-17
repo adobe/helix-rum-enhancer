@@ -29,7 +29,7 @@ module.exports = {
       notifyOnSuccess: true,
       notifyOnFail: true,
       markdownReleaseNotes: true,
-      slackChannel: "rum-explorers",
+      slackChannel: "optel-explorers",
     }],
   ],
   branches: ['main'],
