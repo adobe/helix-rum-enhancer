@@ -1,3 +1,10 @@
+## [2.34.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.1...v2.34.2) (2025-04-17)
+
+
+### Bug Fixes
+
+* **release:** ignore hooks, force add ([4fda7f0](https://github.com/adobe/helix-rum-enhancer/commit/4fda7f074cf790bda3ea7c5c129a90884d64aa74))
+
 ## [2.34.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.0...v2.34.1) (2025-04-17)
 
 
