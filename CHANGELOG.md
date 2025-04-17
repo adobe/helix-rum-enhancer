@@ -1,3 +1,10 @@
+## [2.34.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.0...v2.34.1) (2025-04-17)
+
+
+### Bug Fixes
+
+* trigger release ([fd3b7c1](https://github.com/adobe/helix-rum-enhancer/commit/fd3b7c135f376d60e5f7444f05692354258ac73e))
+
 # [2.34.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.33.0...v2.34.0) (2025-04-16)
 
 
