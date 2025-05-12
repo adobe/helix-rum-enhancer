@@ -1,3 +1,10 @@
+## [2.34.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.2...v2.34.3) (2025-05-12)
+
+
+### Reverts
+
+* Revert "chore: ignore psi check not needed ([#383](https://github.com/adobe/helix-rum-enhancer/issues/383))" ([c9d577f](https://github.com/adobe/helix-rum-enhancer/commit/c9d577f535a937f515319431ec56d972188840b4))
+
 ## [2.34.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.1...v2.34.2) (2025-04-17)
 
 
