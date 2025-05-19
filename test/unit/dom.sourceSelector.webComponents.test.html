@@ -1,0 +1,80 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+</head>
+
+<body>
+  <div class="outer-container">
+    <web-component-shadow></web-component-shadow>
+    <web-component-no-shadow>
+      <div class="wc-noshadow-container">
+        <button class="button no-shadow" id="no-shadow-button">Button</button>
+      </div>
+    </web-component-no-shadow>
+  </div>
+
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+    import { sourceSelector } from '../../modules/dom.js';
+    import { sendMouse } from '@web/test-runner-commands';
+
+    class WebComponentShadow extends HTMLElement {
+      constructor() {
+        super();
+        const shadow = this.attachShadow({ mode: 'open' });
+        const container = document.createElement('div');
+        container.className = 'wc-shadow-container';
+
+        const btn = document.createElement('button');
+        btn.className = 'button shadow';
+        btn.id = 'shadow-button';
+        btn.innerText = 'Shadow Button';
+        container.appendChild(btn);
+        shadow.appendChild(container);
+      }
+    }
+    customElements.define('web-component-shadow', WebComponentShadow);
+
+    class WebComponentNoShadow extends HTMLElement { }
+    customElements.define('web-component-no-shadow', WebComponentNoShadow);
+
+    function testElementClick(element) {
+      // find bounding box, click it, return promise that resolves when the click bubbles to document
+      return new Promise((resolve) => {
+        document.addEventListener('click', (event) => {
+          resolve(sourceSelector(event.target));
+        }, { once: true });
+
+        const pos = element.getBoundingClientRect();
+        sendMouse({
+          type: 'click', position: [
+            Math.round(pos.x + (pos.width / 2)),
+            Math.round(pos.y + (pos.height / 2))
+          ]
+        }).catch(console.error);
+      });
+    }
+
+    runTests(async () => {
+      describe('dom#sourceSelector', () => {
+        it('webcomponent - no shadow root', async () => {
+          const element = document.querySelector('web-component-no-shadow');
+          const button = element.querySelector('button');
+          const selector = await testElementClick(button);
+          expect(selector).to.equal('#no-shadow-button'); // finds the button
+        });
+
+        it('webcomponent - shadow root', async () => {
+          const element = document.querySelector('web-component-shadow');
+          const button = element.shadowRoot.querySelector('button');
+          const selector = await testElementClick(button);
+          expect(selector).to.equal('web-component-shadow'); // only finds the web component tagname
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

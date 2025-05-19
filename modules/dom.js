@@ -69,6 +69,10 @@ export const sourceSelector = (element) => {
       return blockName ? `.${blockName} ${labelWithClass}` : labelWithClass;
     }
 
+    if (typeof element.shadowRoot === 'object' && !!element.shadowRoot) {
+      return labelWithClass;
+    }
+
     const parent = sourceSelector(element.parentElement);
     if (parent) return parent;
 
