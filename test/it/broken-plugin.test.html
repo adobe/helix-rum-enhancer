@@ -12,7 +12,7 @@
     import { expect } from '@esm-bundle/chai';
 
     runTests(async () => {
-      describe('HTML Index Tests', () => {
+      describe('HTML Index Tests with broken Plugins', () => {
 
         it('can load rum enhancer as a script', async () => {
           let called = [];
@@ -26,7 +26,7 @@
 
 
           const script = document.createElement('script');
-          script.src = new URL('/modules/index.js', window.location).href;
+          script.src = new URL('/modules/index-broken.js', window.location).href;
           script.type = 'module';
           document.head.appendChild(script);
 

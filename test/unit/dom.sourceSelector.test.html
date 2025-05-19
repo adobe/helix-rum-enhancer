@@ -2,9 +2,33 @@
 
 <head>
   <title>Test Runner</title>
+  <style>
+    #fixed {
+      position: fixed;
+      z-index: 1000;
+    }
+    #fixed-2 {
+      position: fixed;
+      z-index: 90;
+    }
+  </style>
 </head>
 
 <body>
+  <header>
+    <div id="header-element">header element</div>
+  </header>
+  <nav>
+    <div id="nav-element">nav element</div>
+  </nav>
+
+  <footer>
+    <div id="footer-element">footer element</div>
+  </footer>
+  <aside>
+    <div id="aside-element">aside element</div>
+  </aside>
+
   <a href="page.html" class="one">a link</a>
   <div>a div</div>
   <div class="with-one-class">a div</div>
@@ -16,14 +40,50 @@
   <form id="a-form">
     <input type="text" class="a-text"></input>
     <input type="checkbox" class="a-checkbox"></input>
+    <input type="text" id="id" class="a-text-with-id-id"></input>
     <textarea class="a-textarea"></textarea>
+    <input class="a-none"></input>
+    <div id="form-element">
+      <input type="text" class="a-text-inside-div"></input>
+    </div>
+  </form>
+
+  <form id="b-form">
+    <input type="text" class="a-text"></input>
+    <input type="text" name="id" class="b-text"></input>
   </form>
 
   <div class="with-classes a-block block" data-block-name="a-block">
     <div id="a-div-in-block">a div</div>
   </div>
 
-  
+  <div class="not-a-block block">
+    <div id="not-a-div-in-block">a div, not inside a block</div>
+  </div>
+
+  <dialog>
+    <div id="dialog-element">dialog element</div>
+  </dialog>
+
+  <div role="dialog">
+    <div id="dialog-role-element">dialog element</div>
+  </div>
+
+  <div role="alertdialog">
+    <div id="alertdialog-role-element">dialog element</div>
+  </div>
+
+  <div aria-modal="true">
+    <div id="aria-modal-element">dialog element</div>
+  </div>
+
+  <div id="fixed">
+    <div id="element-inside-fixed">fixed element</div>
+  </div>
+  <div id="fixed-2">
+    <div id="element-inside-fixed-2">fixed element 2</div>
+  </div>
+
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
@@ -33,21 +93,35 @@
       describe('dom#sourceSelector', () => {
         it('sourceSelector - generic', () => {
           expect(sourceSelector(document.querySelector('a.one'))).to.be.equal('a.one');
-          expect(sourceSelector(document.querySelector('body > div:first-of-type'))).to.be.equal('div');
-          expect(sourceSelector(document.querySelector('div.with-one-class'))).to.be.equal('div.with-one-class');
-          expect(sourceSelector(document.querySelector('div.with-classes'))).to.be.equal('div.with-classes');
+          expect(sourceSelector(document.querySelector('body > div:first-of-type'))).to.be.equal('"a div"');
+          expect(sourceSelector(document.querySelector('div.with-one-class'))).to.be.equal('.with-one-class');
+          expect(sourceSelector(document.querySelector('div.with-classes'))).to.be.equal('.with-classes');
           expect(sourceSelector(document.querySelector('div.multi-1'))).to.be.equal('has-priority');
           expect(sourceSelector(document.querySelector('div.multi-2'))).to.be.equal('has-priority-too');
           expect(sourceSelector(document.querySelector('div.multi-3'))).to.be.equal('#id-has-priority');
 
-          expect(sourceSelector(document.querySelector('input[type="text"'))).to.be.equal('form input[type=\'text\']');
-          expect(sourceSelector(document.querySelector('input[type="checkbox"'))).to.be.equal('form input[type=\'checkbox\']');
-          expect(sourceSelector(document.querySelector('textarea'))).to.be.equal('form textarea');
+          expect(sourceSelector(document.querySelector('input[type="text"'))).to.be.equal('form#a-form input[type=\'text\'].a-text');
+          expect(sourceSelector(document.querySelector('input[type="checkbox"'))).to.be.equal('form#a-form input[type=\'checkbox\'].a-checkbox');
+          expect(sourceSelector(document.querySelector('input.a-none'))).to.be.equal('form#a-form input[type=\'\'].a-none');
+          expect(sourceSelector(document.querySelector('textarea'))).to.be.equal('form#a-form textarea.a-textarea');
+          expect(sourceSelector(document.querySelector('input.a-text-inside-div'))).to.be.equal('form#a-form input[type=\'text\'].a-text-inside-div');
 
           expect(sourceSelector(document.querySelector('.a-block'))).to.be.equal('.a-block');
           expect(sourceSelector(document.querySelector('#a-div-in-block'))).to.be.equal('.a-block #a-div-in-block');
-          
-          
+          expect(sourceSelector(document.querySelector('.not-a-block'))).to.be.equal('.not-a-block');
+          expect(sourceSelector(document.querySelector('#not-a-div-in-block'))).to.be.equal('#not-a-div-in-block');
+
+          expect(sourceSelector(document.querySelector('form#b-form input'))).to.be.equal('form#b-form input[type=\'text\'].a-text');
+          expect(sourceSelector(document.querySelector('#dialog-element'))).to.be.equal('dialog #dialog-element');
+          expect(sourceSelector(document.querySelector('#dialog-role-element'))).to.be.equal('dialog #dialog-role-element');
+          expect(sourceSelector(document.querySelector('#alertdialog-role-element'))).to.be.equal('dialog #alertdialog-role-element');
+          expect(sourceSelector(document.querySelector('#aria-modal-element'))).to.be.equal('dialog #aria-modal-element');
+          expect(sourceSelector(document.querySelector('#element-inside-fixed'))).to.be.equal('dialog #element-inside-fixed');
+          expect(sourceSelector(document.querySelector('#element-inside-fixed-2'))).to.be.equal('#fixed-2 #element-inside-fixed-2');
+          expect(sourceSelector(document.querySelector('#header-element'))).to.be.equal('header #header-element');
+          expect(sourceSelector(document.querySelector('#nav-element'))).to.be.equal('nav #nav-element');
+          expect(sourceSelector(document.querySelector('#footer-element'))).to.be.equal('footer #footer-element');
+          expect(sourceSelector(document.querySelector('#aside-element'))).to.be.equal('aside #aside-element');
         });
       });
     });

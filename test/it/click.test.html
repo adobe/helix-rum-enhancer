@@ -1,0 +1,110 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin'
+    };
+    // we log what's being sent to the "server"
+    window.called = [];
+    // we need to track the number of events that have been sent
+    window.events = [];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = function (url, payload) {
+      // if payload is a string, we assume it's a JSON string
+      if (typeof payload === 'string') {
+        const data = JSON.parse(payload);
+        window.events.push(data);
+        if (data.checkpoint === 'click') {
+          window.called.push(data);
+        }
+      } else {
+        // it's a blob
+        payload.text().then((text) => {
+          const data = JSON.parse(text);
+          window.events.push(data);
+          if (data.checkpoint === 'click') {
+            window.called.push(data);
+          }
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <div class="block" data-block-status="loaded">
+    The first block
+    <img src="/test/fixtures/fire.jpg" height="200" width="200">
+    <a href="#" onclick="(e) => { e.preventDefault()}" id="alink">A link</a>
+  </div>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendMouse, setViewport } from '@web/test-runner-commands';
+    import { assert } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('Test Click Tracking', () => {
+        it('Can observe clicks', async () => {
+
+          await setViewport({ width: 800, height: 600 });
+
+          await sendMouse({ type: 'click', position: [100, 100] });
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          });
+
+          assert(window.called.length === 1, '1st click checkpoint missing');
+          assert(window.called[0].source === '.block', 'invalid target - click on block');
+
+          await sendMouse({ type: 'click', position: [200, 200] });
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          });
+
+          assert(window.called.length === 2, '2nd click checkpoint missing');
+          assert(window.called[1].source === 'img', 'invalid target - click on img');
+
+          const a = document.getElementById('alink');
+          a.click();
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          });
+
+          assert(window.called.length === 3 , 'checkpoint for click on link missing');
+          assert(window.called[2].source === 'a#alink', 'invalid target for alink checkpoint');
+
+          const late = document.createElement('a');
+          late.id = 'alatelink';
+          late.onclick = (e) => { e.preventDefault(); };
+          document.body.append(late);
+
+          late.click();
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 100);
+          });
+          assert(window.called.length === 4 , 'checkpoint for click on late added link missing');
+          assert(window.called[3].source === 'a#alatelink', 'invalid target for alatelink checkpoint');
+          // Test max events
+          const maxEvents = 1026 - window.events.length;
+          for (let i = 0; i < maxEvents; i++) {
+            a.click();
+            await new Promise((resolve) => setTimeout(resolve, 1));
+          }
+          assert(window.events.length === 1024 , '1025th event should not trigger new checkpoint');
+        });
+      });
+    });
+  </script>
+</body>

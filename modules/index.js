@@ -12,35 +12,106 @@
 /* eslint-env browser */
 
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
-import { fflags } from './fflags.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector } from './dom.js';
+import { fflags } from './fflags.js';
 
-const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum : {};
+const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
+  /* c8 ignore next */ : {};
 
-const formSubmitListener = (e) => sampleRUM('formsubmit', { target: targetSelector(e.target), source: sourceSelector(e.target) });
+const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
+/* c8 ignore next */ : {});
+
+// blocks & media mutation observer
 // eslint-disable-next-line no-use-before-define
-const mutationObserver = window.MutationObserver ? new MutationObserver(mutationsCallback) : null;
+const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 
-// eslint-disable-next-line no-unused-vars
-function optedIn(checkpoint, data) {
-  // TODO: check config service to know if
-  return true;
+// Check for the presence of a given cookie
+const hasCookieKey = (key) => () => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
+
+// Set the base path for the plugins
+const pluginBasePath = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
+
+const PLUGINS = {
+  cwv: `${pluginBasePath}/cwv.js`,
+  // Interactive elements
+  form: { url: `${pluginBasePath}/form.js`, when: () => document.querySelector('form'), isBlockDependent: true },
+  video: { url: `${pluginBasePath}/video.js`, when: () => document.querySelector('video'), isBlockDependent: true },
+  // Martech
+  martech: { url: `${pluginBasePath}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
+  onetrust: { url: `${pluginBasePath}/onetrust.js`, when: () => (document.querySelector('#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
+  // test: broken-plugin
+};
+
+function getIntersectionObsever(checkpoint) {
+  /* c8 ignore next 3 */
+  if (!window.IntersectionObserver) {
+    return null;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    try {
+      entries
+        .filter((e) => e.isIntersecting)
+        .forEach((e) => {
+          observer.unobserve(e.target); // observe only once
+          const target = targetSelector(e.target);
+          const source = sourceSelector(e.target);
+          sampleRUM(checkpoint, { target, source });
+        });
+      /* c8 ignore next 3 */
+    } catch (error) {
+      // something went wrong
+    }
+  });
+  return observer;
 }
-// Gets configured collection from the config service for the current domain
-function getCollectionConfig() {
-  // eslint-disable-next-line max-len
-  fflags.enabled('onetrust', () => DEFAULT_TRACKING_EVENTS.push('consent'));
-  return DEFAULT_TRACKING_EVENTS;
+
+const PLUGIN_PARAMETERS = {
+  context: document.body,
+  fflags,
+  sampleRUM,
+  sourceSelector,
+  targetSelector,
+  getIntersectionObsever,
+};
+
+const pluginCache = new Map();
+
+function loadPlugin(key, params) {
+  const plugin = PLUGINS[key];
+  const usp = new URLSearchParams(window.location.search);
+  if (!pluginCache.has(key) && plugin.when && !plugin.when({ urlParameters: usp })) {
+    return null;
+  }
+  if (!pluginCache.has(key)) {
+    pluginCache.set(key, import(`${plugin.url || plugin}`));
+  }
+  const pluginLoadPromise = pluginCache.get(key);
+  return pluginLoadPromise
+    .then((p) => (p.default && p.default(params)) || (typeof p === 'function' && p(params)))
+    .catch(() => { /* silent plugin error catching */ });
 }
+
+function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
+  Object.entries(PLUGINS)
+    .filter(([, plugin]) => filter(plugin))
+    .map(([key]) => loadPlugin(key, params));
+}
+/**
+ * Maximum number of events. The first call will be made by rum-js,
+ * leaving 1023 events for the enhancer to track
+ */
+let maxEvents = 1023;
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
-  if (optedIn(checkpoint, data) && isSelected) {
+  if (isSelected && maxEvents) {
+    maxEvents -= 1;
     const sendPing = (pdata = data) => {
       // eslint-disable-next-line object-curly-newline, max-len
       const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
-      const { href: url, origin } = new URL(`.rum/${weight}`, sampleRUM.collectBaseURL || sampleRUM.baseURL);
+      const urlParams = window.RUM_PARAMS ? `?${new URLSearchParams(window.RUM_PARAMS).toString()}` : '';
+      const { href: url, origin } = new URL(`.rum/${weight}${urlParams}`, sampleRUM.collectBaseURL);
       if (window.location.origin === origin) {
         const headers = { type: 'application/json' };
         navigator.sendBeacon(url, new Blob([body], headers));
@@ -56,61 +127,31 @@ function trackCheckpoint(checkpoint, data, t) {
 }
 
 function processQueue() {
-  while (queue.length) {
+  while (queue && queue.length) {
     const ck = queue.shift();
     trackCheckpoint(...ck);
   }
 }
 
-function addCWVTracking() {
-  setTimeout(() => {
-    try {
-      const cwvScript = new URL('.rum/web-vitals/dist/web-vitals.iife.js', sampleRUM.baseURL).href;
-      if (document.querySelector(`script[src="${cwvScript}"]`)) {
-        // web vitals script has been loaded already
-        return;
-      }
-      const script = document.createElement('script');
-      script.src = cwvScript;
-      script.onload = () => {
-        const storeCWV = (measurement) => {
-          const data = { cwv: {} };
-          data.cwv[measurement.name] = measurement.value;
-          if (measurement.name === 'LCP' && measurement.entries.length > 0) {
-            const { element } = measurement.entries.pop();
-            data.target = targetSelector(element);
-            data.source = sourceSelector(element) || (element && element.outerHTML.slice(0, 30));
-          }
-          sampleRUM('cwv', data);
-        };
-
-        const featureToggle = () => window.location.hostname === 'blog.adobe.com';
-        const isEager = (metric) => ['CLS', 'LCP'].includes(metric);
-
-        // When loading `web-vitals` using a classic script, all the public
-        // methods can be found on the `webVitals` global namespace.
-        ['FID', 'INP', 'TTFB', 'CLS', 'LCP'].forEach((metric) => {
-          const metricFn = window.webVitals[`on${metric}`];
-          if (typeof metricFn === 'function') {
-            const opts = isEager(metric) ? { reportAllChanges: featureToggle() } : undefined;
-            metricFn(storeCWV, opts);
-          }
-        });
-      };
-      document.head.appendChild(script);
-      /* c8 ignore next 3 */
-    } catch (error) {
-      // something went wrong
-    }
-  }, 2000); // wait for delayed
-}
-
-function addEnterLeaveTracking() {
+function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
-  const navigate = (source, type) => {
+  const navigate = (source, type, redirectCount) => {
     const payload = { source, target: document.visibilityState };
-    // reload: same page, navigate: same origin, enter: everything else
-    if (type === 'reload' || source === window.location.href) {
+    /* c8 ignore next 13 */
+    // prerendering cannot be tested yet with headless browsers
+    if (document.prerendering) {
+      // listen for "activation" of the current pre-rendered page
+      document.addEventListener('prerenderingchange', () => {
+        // pre-rendered page is now "activated"
+        payload.target = 'prerendered';
+        sampleRUM('navigate', payload); // prerendered navigation
+      }, {
+        once: true,
+      });
+      if (type === 'navigate') {
+        sampleRUM('prerender', payload); // prerendering page
+      }
+    } else if (type === 'reload' || source === window.location.href) {
       sampleRUM('reload', payload);
     } else if (type && type !== 'navigate') {
       sampleRUM(type, payload); // back, forward, prerender, etc.
@@ -119,41 +160,41 @@ function addEnterLeaveTracking() {
     } else {
       sampleRUM('enter', payload); // enter site
     }
+    fflags.enabled('redirect', () => {
+      const from = new URLSearchParams(window.location.search).get('redirect_from');
+      if (redirectCount || from) {
+        sampleRUM('redirect', { source: from, target: redirectCount || 1 });
+      }
+    });
   };
 
+  const processed = new Set(); // avoid processing duplicate types
   new PerformanceObserver((list) => list
-    .getEntries().map((entry) => navigate(document.referrer, entry.type)))
-    .observe({ type: 'navigation', buffered: true });
-
-  const leave = ((event) => {
-    try {
-      if (leave.left || (event.type === 'visibilitychange' && document.visibilityState !== 'hidden')) {
-        return;
-      }
-      leave.left = true;
-      sampleRUM('leave');
-    } catch (error) {
-      // something went wrong
-    }
-  });
-  window.addEventListener('visibilitychange', ((event) => leave(event)));
-  window.addEventListener('pagehide', ((event) => leave(event)));
+    .getEntries()
+    .filter(({ type }) => !processed.has(type))
+    .map((e) => [e, processed.add(e.type)])
+    .map(([e]) => navigate(
+      window.hlx.referrer || document.referrer,
+      e.type,
+      e.redirectCount,
+    ))).observe({ type: 'navigation', buffered: true });
 }
 
 function addLoadResourceTracking() {
   const observer = new PerformanceObserver((list) => {
     try {
       list.getEntries()
-        .filter((entry) => !entry.responseStatus || entry.responseStatus < 400)
-        .filter((entry) => window.location.hostname === new URL(entry.name).hostname)
-        .filter((entry) => new URL(entry.name).pathname.match('.*(\\.plain\\.html|\\.json)$'))
-        .forEach((entry) => {
-          sampleRUM('loadresource', { source: entry.name, target: Math.round(entry.duration) });
+        .filter((e) => !e.responseStatus || e.responseStatus < 400)
+        .filter((e) => window.location.hostname === new URL(e.name).hostname || fflags.has('allresources'))
+        .filter((e) => new URL(e.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)'))
+        .forEach((e) => {
+          sampleRUM('loadresource', { source: e.name, target: Math.round(e.duration) });
         });
       list.getEntries()
-        .filter((entry) => entry.responseStatus === 404)
-        .forEach((entry) => {
-          sampleRUM('missingresource', { source: entry.name, target: entry.hostname });
+        .filter((e) => e.responseStatus >= 400)
+        .filter((e) => !(new URL(e.name).pathname.match('.*(/\\.rum/1[0-9]{0,3})')))
+        .forEach((e) => {
+          sampleRUM('missingresource', { source: e.name, target: e.responseStatus });
         });
       /* c8 ignore next 3 */
     } catch (error) {
@@ -163,40 +204,32 @@ function addLoadResourceTracking() {
   observer.observe({ type: 'resource', buffered: true });
 }
 
-function activateBlocksMutationObserver() {
-  if (!mutationObserver || mutationObserver.active) {
+// activate blocks mutation observer
+function activateBlocksMO() {
+  if (!blocksMO || blocksMO.active) {
     return;
   }
-  mutationObserver.active = true;
-  mutationObserver.observe(
+  blocksMO.active = true;
+  blocksMO.observe(
     document.body,
     // eslint-disable-next-line object-curly-newline
     { subtree: true, attributes: true, attributeFilter: ['data-block-status'] },
   );
 }
 
-function getIntersectionObsever(checkpoint) {
-  if (!window.IntersectionObserver) {
-    return null;
+// activate media mutation observer
+function activateMediaMO() {
+  if (!mediaMO || mediaMO.active) {
+    return;
   }
-  activateBlocksMutationObserver();
-  const observer = new IntersectionObserver((entries) => {
-    try {
-      entries
-        .filter((entry) => entry.isIntersecting)
-        .forEach((entry) => {
-          observer.unobserve(entry.target); // observe only once
-          const target = targetSelector(entry.target);
-          const source = sourceSelector(entry.target);
-          sampleRUM(checkpoint, { target, source });
-        });
-      /* c8 ignore next 3 */
-    } catch (error) {
-      // something went wrong
-    }
-  }, { threshold: 0.25 });
-  return observer;
+  mediaMO.active = true;
+  mediaMO.observe(
+    document.body,
+    // eslint-disable-next-line object-curly-newline
+    { subtree: true, attributes: false, childList: true },
+  );
 }
+
 function addViewBlockTracking(element) {
   const blockobserver = getIntersectionObsever('viewblock');
   if (blockobserver) {
@@ -205,131 +238,66 @@ function addViewBlockTracking(element) {
   }
 }
 
+const observedMedia = new Set();
 function addViewMediaTracking(parent) {
   const mediaobserver = getIntersectionObsever('viewmedia');
   if (mediaobserver) {
     parent.querySelectorAll('img, video, audio, iframe').forEach((m) => {
-      if (!m.closest('div .block') || m.closest('div[data-block-status="loaded"]')) {
+      if (!observedMedia.has(m)) {
+        observedMedia.add(m);
         mediaobserver.observe(m);
       }
     });
   }
 }
 
-function addUTMParametersTracking() {
-  const usp = new URLSearchParams(window.location.search);
-  [...usp.entries()]
-    .filter(([key]) => key.startsWith('utm_'))
-    // exclude keys that may leak PII
-    .filter(([key]) => key !== 'utm_id')
-    .filter(([key]) => key !== 'utm_term')
-    .forEach(([source, target]) => sampleRUM('utm', { source, target }));
+function addObserver(ck, fn, block) {
+  return DEFAULT_TRACKING_EVENTS.includes(ck) && fn(block);
 }
 
-function addAdsParametersTracking() {
-  const networks = {
-    google: /gclid|gclsrc|wbraid|gbraid/,
-    doubleclick: /dclid/,
-    microsoft: /msclkid/,
-    facebook: /fb(cl|ad_|pxl_)id/,
-    twitter: /tw(clid|src|term)/,
-    linkedin: /li_fat_id/,
-    pinterest: /epik/,
-    tiktok: /ttclid/,
-  };
-  const params = Array.from(new URLSearchParams(window.location.search).keys());
-  Object.entries(networks).forEach(([network, regex]) => {
-    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('paid', { source: network, target: param }));
-  });
-}
-
-function addEmailParameterTracking() {
-  const networks = {
-    mailchimp: /mc_(c|e)id/,
-    marketo: /mkt_tok/,
-
-  };
-  const params = Array.from(new URLSearchParams(window.location.search).keys());
-  Object.entries(networks).forEach(([network, regex]) => {
-    params.filter((param) => regex.test(param)).forEach((param) => sampleRUM('email', { source: network, target: param }));
-  });
-}
-
-function addFormTracking(parent) {
-  activateBlocksMutationObserver();
-  parent.querySelectorAll('form').forEach((form) => {
-    form.removeEventListener('submit', formSubmitListener); // listen only once
-    form.addEventListener('submit', formSubmitListener);
-  });
-}
-
-function addCookieConsentTracking() {
-  const cmpCookie = document.cookie.split(';')
-    .map((c) => c.trim())
-    .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
-
-  if (cmpCookie) {
-    sampleRUM('consent', { source: 'onetrust', target: 'hidden' });
-    return;
-  }
-
-  let consentMutationObserver;
-  const trackShowConsent = () => {
-    if (document.querySelector('body > div#onetrust-consent-sdk')) {
-      sampleRUM('consent', { source: 'onetrust', target: 'show' });
-      if (consentMutationObserver) {
-        consentMutationObserver.disconnect();
-      }
-      return true;
-    }
-    return false;
-  };
-
-  if (!trackShowConsent()) {
-    // eslint-disable-next-line max-len
-    consentMutationObserver = window.MutationObserver ? new MutationObserver(trackShowConsent) : null;
-    if (consentMutationObserver) {
-      consentMutationObserver.observe(
-        document.body,
-        // eslint-disable-next-line object-curly-newline
-        { attributes: false, childList: true, subtree: false },
-      );
-    }
-  }
-}
-
-const addObserver = (ck, fn, block) => getCollectionConfig().includes(ck) && fn(block);
-function mutationsCallback(mutations) {
-  mutations.filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
+// blocks mutation observer callback
+function blocksMCB(mutations) {
+  // block specific mutations
+  mutations
+    .filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
     .filter((m) => m.target.dataset.blockStatus === 'loaded')
     .forEach((m) => {
-      addObserver('form', addFormTracking, m.target);
+      addObserver('form', (el) => loadPlugins((p) => p.isBlockDependent, { ...PLUGIN_PARAMETERS, context: el }), m.target);
       addObserver('viewblock', addViewBlockTracking, m.target);
+    });
+}
+
+// media mutation observer callback
+function mediaMCB(mutations) {
+  // media mutations
+  mutations
+    .forEach((m) => {
       addObserver('viewmedia', addViewMediaTracking, m.target);
     });
 }
 
 function addTrackingFromConfig() {
-  const trackingFunctions = {
-    click: () => {
-      document.addEventListener('click', (event) => {
-        sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
-      });
-    },
-    cwv: () => addCWVTracking(),
-    form: () => addFormTracking(window.document.body),
-    enterleave: () => addEnterLeaveTracking(),
-    loadresource: () => addLoadResourceTracking(),
-    utm: () => addUTMParametersTracking(),
-    viewblock: () => addViewBlockTracking(window.document.body),
-    viewmedia: () => addViewMediaTracking(window.document.body),
-    consent: () => addCookieConsentTracking(),
-    paid: () => addAdsParametersTracking(),
-    email: () => addEmailParameterTracking(),
-  };
+  activateBlocksMO();
+  activateMediaMO();
 
-  getCollectionConfig().filter((ck) => trackingFunctions[ck])
-    .forEach((ck) => trackingFunctions[ck]());
+  document.addEventListener('click', (event) => {
+    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
+  });
+
+  // Core tracking
+  addNavigationTracking();
+  addLoadResourceTracking();
+  addViewBlockTracking(document.body);
+  addViewMediaTracking(document.body);
+
+  // Tracking extensions
+  loadPlugins();
+
+  fflags.enabled('language', () => {
+    const target = navigator.language;
+    const source = document.documentElement.lang;
+    sampleRUM('language', { source, target });
+  });
 }
 
 function initEnhancer() {
@@ -339,6 +307,7 @@ function initEnhancer() {
       window.hlx.rum.collector = trackCheckpoint;
       processQueue();
     }
+  /* c8 ignore next 3 */
   } catch (error) {
     // something went wrong
   }

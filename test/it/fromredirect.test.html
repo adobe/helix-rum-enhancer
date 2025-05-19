@@ -25,7 +25,7 @@
         });
       }
     };
-</script>
+  </script>
 </head>
 
 <body>
@@ -38,7 +38,7 @@
     runTests(async () => {
       beforeEach(() => {
         const usp = new URLSearchParams(window.location.search);
-        usp.append('utm_medium', 'test');
+        usp.append('redirect_from', 'https://www.example.com');
         window.history.replaceState({}, '', `${window.location.pathname}?${usp.toString()}`);
         const script = document.createElement('script');
         script.type = 'text/javascript';
@@ -48,7 +48,7 @@
 
       describe('HTML Integration Tests', () => {
 
-        it('Can load rum enhancer through a (prepared) helix-rum-js', async () => {
+        it('Can load rum enhancer through a (prepared) helix-rum-js, while pretending to be redirected', async () => {
 
           await sendMouse({ type: 'click', position: [100, 100] });
 
@@ -59,7 +59,7 @@
           await sendMouse({ type: 'click', position: [10, 10] });
 
           assert(window.called.some((call) => call.checkpoint === 'top'), 'top checkpoint missing');
-          assert(window.called.some((call) => call.checkpoint === 'utm'), 'utm checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'redirect'), 'redirect checkpoint missing');
           assert(window.called.some((call) => call.checkpoint === 'enter'), 'enter checkpoint missing');
           assert(window.called.some((call) => call.checkpoint === 'viewmedia'), 'viewmedia checkpoint missing');
           assert(window.called.some((call) => call.checkpoint === 'cwv'), 'cwv checkpoint missing');

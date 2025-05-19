@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Adobe. All rights reserved.
+ * Copyright 2025 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -9,15 +9,9 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-const h = (s, a) => [...s].reduce((p, c) => p + c.charCodeAt(0), a) % 1371;
 
-export const fflags = {
-  has: (f) => fflags[f].includes(h(window.origin, 1)) || /localhost/.test(window.origin),
-  enabled: (f, c) => fflags.has(f) && c(),
-  disabled: (f, c) => !fflags.has(f) && c(),
-  eagercwv: [683],
-  redirect: [620, 1139],
-  example: [543, 770, 1136],
-  language: [543, 959, 1139, 620],
-  allresources: [1139, 457],
-};
+export default function addVideoTracking({ context }) {
+  context.querySelectorAll('video').forEach(() => {
+    // TODO: Add video tracking
+  });
+}

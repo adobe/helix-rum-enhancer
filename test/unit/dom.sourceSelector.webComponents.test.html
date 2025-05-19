@@ -63,7 +63,7 @@
           const element = document.querySelector('web-component-no-shadow');
           const button = element.querySelector('button');
           const selector = await testElementClick(button);
-          expect(selector).to.equal('#no-shadow-button'); // finds the button
+          expect(selector).to.equal('button#no-shadow-button'); // finds the button
         });
 
         it('webcomponent - shadow root', async () => {

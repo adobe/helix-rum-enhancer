@@ -1,0 +1,106 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+  <style>
+    .section {
+      height: 500px;
+      overflow: auto;
+    }
+
+    .block {
+      height: 1000px;
+    }
+
+    .block[data-block-name="block2"] {
+      height: 4000px;
+    }
+  </style>
+</head>
+<body>
+  <div class="section">
+    <div class="block" data-block-name="block1" data-block-status="loaded">
+      <p>Block 1</p>
+    </div>
+    <div class="block" data-block-name="block2" data-block-status="loaded">
+      <p>Block 2</p>
+    </div>
+    <div class="block" data-block-name="block3" data-block-status="loaded">
+      <p>Block 3</p>
+    </div>
+  </div>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('HTML viewblock Tests', () => {
+
+        it('rum enhancer reports blocks viewed', async () => {
+          let called = false;
+          const blocksViewed = [];
+          window.hlx = {
+            rum: {
+              sampleRUM: (checkpoint, data) => {
+                called = true;
+                if (checkpoint === 'viewblock') {
+                  blocksViewed.push(data.source);
+                }
+              }
+            }
+          };
+
+          const script = document.createElement('script');
+          script.src = new URL('/modules/index.js', window.location).href;
+          script.type = 'module';
+          document.head.appendChild(script);
+
+          await new Promise((resolve) => {
+            script.onload = resolve;
+          });
+
+          const section = document.querySelector('.section');
+          section.scrollTo(0, 0);
+
+          // wait one second for the script to run
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          expect(called, 'viewblock has been triggerd').to.be.true;
+          expect(blocksViewed.length, 'only one block is viewed').to.equal(1);
+          expect(blocksViewed[0], 'only first block is viewed').to.equal('.block1');
+
+          const b2 = document.querySelector('[data-block-name="block2"]');
+
+          section.scrollTo(0, b2.offsetTop);
+
+          // wait one second for the scrolling to happen
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          expect(blocksViewed.length, '2 blocks are viewed').to.equal(2);
+          expect(blocksViewed[1], 'second block has been viewed').to.equal('.block2');
+
+          const b3 = document.querySelector('[data-block-name="block3"]');
+
+
+          section.scrollTo(0, b3.offsetTop);
+
+          // wait one second for the scrolling to happen
+          await new Promise((resolve) => {
+            setTimeout(resolve, 1000);
+          });
+
+          expect(blocksViewed.length, '3 blocks are viewed').to.equal(3);
+          expect(blocksViewed[2], 'thrid block has been viewed').to.equal('.block3');
+          
+        });
+
+      });
+    });
+  </script>
+</body>
+
+</html>

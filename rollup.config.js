@@ -10,8 +10,11 @@
  * governing permissions and limitations under the License.
  */
 
-import cleanup from 'rollup-plugin-cleanup';
-import eslint from 'rollup-plugin-eslint-bundle';
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { babel } from '@rollup/plugin-babel';
+import pkg from 'rollup-plugin-checksum';
+
+const checksum = pkg.default;
 
 const banner = `/*
  * Copyright 2024 Adobe. All rights reserved.
@@ -23,45 +26,48 @@ const banner = `/*
  * the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
- */
-
-/* eslint-disable max-classes-per-file, wrap-iife */
-// eslint-disable-next-line func-names`;
+ */`;
 
 const bundles = [
+  // Core library
   {
     source: 'modules/index.js',
     outputFile: 'src/index',
   },
+  // Library plugins
+  ...['cwv', 'form', 'martech', 'onetrust', 'video'].map((plugin) => ({
+    source: `plugins/${plugin}.js`,
+    outputFile: `src/plugins/${plugin}`,
+    format: 'es',
+  })),
 ];
 
-export default [...bundles.map(({ outputFile, source }) => ({
+export default [...bundles.map(({ outputFile, source, format }) => ({
   input: source,
   output: [
     {
-      file: `${outputFile}.js`,
-      format: 'iife',
-      sourcemap: false,
+      file: `${outputFile}.map.js`,
+      format: format || 'iife',
+      sourcemap: 'inline',
       exports: 'auto',
       banner,
     },
     {
-      file: `${outputFile}.map.js`,
-      format: 'iife',
-      sourcemap: 'inline',
+      file: `${outputFile}.js`,
+      format: format || 'iife',
+      sourcemap: false,
       exports: 'auto',
       banner,
     },
   ],
   plugins: [
-    cleanup({
-      comments: ['eslint', 'jsdoc', /^\//, /^\*(?!\sc8\s)(?!\n \* Copyright)/],
-      maxEmptyLines: -1,
+    babel({
+      babelHelpers: 'bundled',
+      comments: false,
     }),
-    eslint({
-      eslintOptions: {
-        fix: true,
-      },
+    checksum({
+      filename: `${outputFile.split('/').pop()}.md5`,
+      includeAssets: false,
     }),
   ],
 }))];

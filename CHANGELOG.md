@@ -1,3 +1,276 @@
+## [2.34.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.2...v2.34.3) (2025-05-12)
+
+
+### Reverts
+
+* Revert "chore: ignore psi check not needed ([#383](https://github.com/adobe/helix-rum-enhancer/issues/383))" ([c9d577f](https://github.com/adobe/helix-rum-enhancer/commit/c9d577f535a937f515319431ec56d972188840b4))
+
+## [2.34.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.1...v2.34.2) (2025-04-17)
+
+
+### Bug Fixes
+
+* **release:** ignore hooks, force add ([4fda7f0](https://github.com/adobe/helix-rum-enhancer/commit/4fda7f074cf790bda3ea7c5c129a90884d64aa74))
+
+## [2.34.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.0...v2.34.1) (2025-04-17)
+
+
+### Bug Fixes
+
+* trigger release ([fd3b7c1](https://github.com/adobe/helix-rum-enhancer/commit/fd3b7c135f376d60e5f7444f05692354258ac73e))
+
+# [2.34.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.33.0...v2.34.0) (2025-04-16)
+
+
+### Features
+
+* add class in source  selector ([#398](https://github.com/adobe/helix-rum-enhancer/issues/398)) ([c72aa0d](https://github.com/adobe/helix-rum-enhancer/commit/c72aa0d66074a66b2ebeed4a625989c040112eee))
+
+# [2.33.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.32.0...v2.33.0) (2025-03-24)
+
+
+### Features
+
+* track all resources loaded on ups.com ([285a495](https://github.com/adobe/helix-rum-enhancer/commit/285a49565b0b96d182cb19923b8e6b93b53c9b00))
+
+# [2.32.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.1...v2.32.0) (2025-03-11)
+
+
+### Features
+
+* bringing back some more checkpoints: search, login and signup ([#372](https://github.com/adobe/helix-rum-enhancer/issues/372)) ([0a3ef75](https://github.com/adobe/helix-rum-enhancer/commit/0a3ef754666355adadf063f7230e9436f5f128ce))
+
+## [2.31.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0...v2.31.1) (2025-03-11)
+
+
+### Bug Fixes
+
+* **onetrust:** prevent duplicate consent tracking events ([41ff1c3](https://github.com/adobe/helix-rum-enhancer/commit/41ff1c383d063f05ec5edd00084cd959436de31b))
+
+# [2.31.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.4...v2.31.0) (2025-03-04)
+
+
+### Bug Fixes
+
+* bugs and failing tests ([5c9adbc](https://github.com/adobe/helix-rum-enhancer/commit/5c9adbc2502203495a05d4fd2be6e05cc11102df))
+* cross-browser compatibility ([1c21afd](https://github.com/adobe/helix-rum-enhancer/commit/1c21afd8cd982d4c33feba863d2251311f36e153))
+* just forcing a release ([0a643d5](https://github.com/adobe/helix-rum-enhancer/commit/0a643d55440216adc5ca8b66e5cf70b31997b800))
+* plugin path resolution ([f77d736](https://github.com/adobe/helix-rum-enhancer/commit/f77d736a5e52b6e01fb83defe74b5e0f9622c127))
+* plugins are not executing because they are exported as iife ([dfc1eea](https://github.com/adobe/helix-rum-enhancer/commit/dfc1eea7bf230d95456ee2f7ee200e6a37c2f8c3))
+* set proper url base for plugins ([9726dc8](https://github.com/adobe/helix-rum-enhancer/commit/9726dc8f98bd71936c8a8f430cae73b6a8f5d63f))
+* use proper fully qualified URLs for plugin path to avoid CORS ([c73eb31](https://github.com/adobe/helix-rum-enhancer/commit/c73eb31461115529922b82c3a8b678f21052b918))
+
+
+### Features
+
+* allow external extension via window.RUM_PLUGINS ([4613b00](https://github.com/adobe/helix-rum-enhancer/commit/4613b004c617f4d503355b5c43008149df9101ef))
+* handle pre-rendering ([3181698](https://github.com/adobe/helix-rum-enhancer/commit/3181698ea202ebb389dd82ab35a8d206a82b2006))
+* inline web-vitals.js ([7d89e9f](https://github.com/adobe/helix-rum-enhancer/commit/7d89e9f664686d3a475ce829d7fb4f68f29ed71b))
+* introduce minimal plugin system to offset non-essenial logic ([8642557](https://github.com/adobe/helix-rum-enhancer/commit/8642557beaef5161d1d4d51d2b04ce06bf7dbeb7))
+* introduce minimal plugin system to offset non-essenial logic ([6066f0b](https://github.com/adobe/helix-rum-enhancer/commit/6066f0bd56393a10391e190b9a338f9a65b772b0))
+* introduce plugin system to offset non-essenial logic ([38a3a65](https://github.com/adobe/helix-rum-enhancer/commit/38a3a65b43b7b8fff1447a6cf742dc228d47300b))
+* **loadresource:** add `allresources` feature flag that enables tracking all resources, not just same host ([a8fa936](https://github.com/adobe/helix-rum-enhancer/commit/a8fa936035f56b13ff8db66f32db17c828318972))
+* **missingresource:** report all resource error with http status code ([e3ad482](https://github.com/adobe/helix-rum-enhancer/commit/e3ad482454e5fe874e5cef5842a08915c53dbad4))
+
+
+### Reverts
+
+* Revert "feat: handle pre-rendering" ([9603927](https://github.com/adobe/helix-rum-enhancer/commit/9603927774966fcfadb3ba3f8f7b42a0c003fd2e))
+
+## [2.30.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.3...v2.30.4) (2025-02-24)
+
+
+### Bug Fixes
+
+* **missingresource:** exclude specific RUM tracking resources from missing resource reports ([be1f077](https://github.com/adobe/helix-rum-enhancer/commit/be1f077e6aff202071ea3e5974b4092d6610d66e))
+
+## [2.30.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.2...v2.30.3) (2025-02-03)
+
+
+### Bug Fixes
+
+* collect repeating clicks upto max configuration ([6daba19](https://github.com/adobe/helix-rum-enhancer/commit/6daba19b6dcf3717e8330a923a0d87e61e3080ee))
+* comment for max events tracking ([b4b1c6d](https://github.com/adobe/helix-rum-enhancer/commit/b4b1c6da79a31485bb2165382f9fb9ece611a716))
+* implement flood control with 1024 max events ([e06e1e5](https://github.com/adobe/helix-rum-enhancer/commit/e06e1e51b6dd3db0a015f4dcccb3ab8dcfb11b9f))
+* Implement flood control with 1024 max events ([ddfdb1e](https://github.com/adobe/helix-rum-enhancer/commit/ddfdb1e9dd58ff41cbd761774af9ad616290aae0))
+* review feedback ([f4e6dd1](https://github.com/adobe/helix-rum-enhancer/commit/f4e6dd1b3fae8e37024045156c85923e776f40c3))
+
+## [2.30.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.1...v2.30.2) (2025-01-17)
+
+
+### Bug Fixes
+
+* do not trigger fill checkpoint for hidden fields ([f6f4c51](https://github.com/adobe/helix-rum-enhancer/commit/f6f4c519d38c48740ace4ba64f47cafc6cea2f47))
+
+## [2.30.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.30.0...v2.30.1) (2025-01-17)
+
+
+### Bug Fixes
+
+* form elements having name/id as id breaks the sourceSelector logic. ([37bd0ab](https://github.com/adobe/helix-rum-enhancer/commit/37bd0ab4c6bb1aac1326bc9be0097a7ccf038870))
+
+# [2.30.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.29.0...v2.30.0) (2025-01-15)
+
+
+### Features
+
+* **missingresource:** report all resource error with http status code ([e238136](https://github.com/adobe/helix-rum-enhancer/commit/e238136c46a9801be1e3ce7887c7b4b292cbcf5b))
+
+# [2.29.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.28.0...v2.29.0) (2025-01-15)
+
+
+### Features
+
+* **loadresource:** add `allresources` feature flag that enables tracking all resources, not just same host ([7c536d7](https://github.com/adobe/helix-rum-enhancer/commit/7c536d7b8ec77c40c4b9868dd3dff53c39529699))
+
+# [2.28.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.27.0...v2.28.0) (2025-01-02)
+
+
+### Features
+
+* remove (deprecated) FID ex-CWV ([58e39ae](https://github.com/adobe/helix-rum-enhancer/commit/58e39ae3eae6315562ab9c7aec479e9da2737e7d))
+
+# [2.27.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.4...v2.27.0) (2024-12-20)
+
+
+### Features
+
+* adding new checkpoint fill ([#336](https://github.com/adobe/helix-rum-enhancer/issues/336)) ([d3887f3](https://github.com/adobe/helix-rum-enhancer/commit/d3887f3b7eb073aa9f9e18f4d4a106bf7fa5b676))
+
+## [2.26.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.3...v2.26.4) (2024-12-20)
+
+
+### Bug Fixes
+
+* release process ([bdce5c3](https://github.com/adobe/helix-rum-enhancer/commit/bdce5c328037630347f6bc96b64f097c983418e0))
+
+## [2.26.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.2...v2.26.3) (2024-12-16)
+
+
+### Bug Fixes
+
+* do not track repeating clicks ([#339](https://github.com/adobe/helix-rum-enhancer/issues/339)) ([f511a03](https://github.com/adobe/helix-rum-enhancer/commit/f511a03679188361326fbd3a8d68e650c39bea50))
+
+## [2.26.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.1...v2.26.2) (2024-12-11)
+
+
+### Bug Fixes
+
+* do not process duplicate navigation checkpoints ([#331](https://github.com/adobe/helix-rum-enhancer/issues/331)) ([4b6843f](https://github.com/adobe/helix-rum-enhancer/commit/4b6843f4cbe7b685ffc0c017a46274e505b26b56))
+
+## [2.26.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.26.0...v2.26.1) (2024-12-10)
+
+
+### Bug Fixes
+
+* **redirects:** use underscore in param ([bada92e](https://github.com/adobe/helix-rum-enhancer/commit/bada92e69aaa8f560d61d6264f578eb2958934ec))
+
+# [2.26.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.25.0...v2.26.0) (2024-10-16)
+
+
+### Features
+
+* handle pre-speculation rules and rendering ([#301](https://github.com/adobe/helix-rum-enhancer/issues/301)) ([196d404](https://github.com/adobe/helix-rum-enhancer/commit/196d404f3f90a247a223e8ddc7c667592a87319f))
+
+# [2.25.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.24.0...v2.25.0) (2024-10-03)
+
+
+### Features
+
+* capturing id of form and button type inside a form ([#293](https://github.com/adobe/helix-rum-enhancer/issues/293)) ([530572f](https://github.com/adobe/helix-rum-enhancer/commit/530572f7c441c72f8d5f7683bef7490d37186a9f))
+
+# [2.24.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.23.0...v2.24.0) (2024-09-20)
+
+
+### Features
+
+* **navigation:** add support for `redirect` checkpoint ([87b2c05](https://github.com/adobe/helix-rum-enhancer/commit/87b2c057a5e0afbe21cd6224bd995f48ebafa30e))
+* **redirect:** support soft-redirects ([00392c1](https://github.com/adobe/helix-rum-enhancer/commit/00392c18ad8a0677437f5846b9e63ea32df163cb))
+
+# [2.23.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.22.0...v2.23.0) (2024-09-19)
+
+
+### Features
+
+* **index:** support  to attach custom URL parameters to collection URL ([02f4d0b](https://github.com/adobe/helix-rum-enhancer/commit/02f4d0b366505fc17bc251e29364efa2e497c299))
+
+# [2.22.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.21.1...v2.22.0) (2024-09-18)
+
+
+### Bug Fixes
+
+* **consent:** spelling ([1279aca](https://github.com/adobe/helix-rum-enhancer/commit/1279aca5ab997b33428766a9c552cbde7007804a))
+
+
+### Features
+
+* **onetrust:** detect supressed consent banner ([440473e](https://github.com/adobe/helix-rum-enhancer/commit/440473ea92fcd281eacad5a14478d3d4751a3c1a))
+
+## [2.21.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.21.0...v2.21.1) (2024-09-18)
+
+
+### Bug Fixes
+
+* **release:** do not attempt to create hash from source map ([0ba7631](https://github.com/adobe/helix-rum-enhancer/commit/0ba763158ee7760ec405a0a0e2d6c32e8911d6c2))
+
+# [2.21.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.20.0...v2.21.0) (2024-09-18)
+
+
+### Bug Fixes
+
+* **dom:** apply change ([67803e6](https://github.com/adobe/helix-rum-enhancer/commit/67803e60f57ef29b9ea1c51eea26d99c778b5f97))
+* **dom:** better handling of empty type form inputs ([d53deb5](https://github.com/adobe/helix-rum-enhancer/commit/d53deb5c6e94ff18df2a01996c39b5cff7636fe4))
+* **dom:** better handling of fake blocks ([66a9049](https://github.com/adobe/helix-rum-enhancer/commit/66a90497a45d754ed0fa4e8f8bc0917be64b3245))
+
+
+### Features
+
+* **checkpoints:** add support for the `language` checkpoint ([f99755a](https://github.com/adobe/helix-rum-enhancer/commit/f99755a5cc8eef83b655a6beff5e7e371196c90d))
+* **dom:** more fine-grained sourceselector implementation ([ada279d](https://github.com/adobe/helix-rum-enhancer/commit/ada279d423590fb3feeb304b3a57d6da4ee3c9bf))
+
+# [2.20.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.2...v2.20.0) (2024-08-19)
+
+
+### Features
+
+* observe all mutations to capture late added medias ([#261](https://github.com/adobe/helix-rum-enhancer/issues/261)) ([56844b2](https://github.com/adobe/helix-rum-enhancer/commit/56844b2aa61fe5cc837cd5a887f0c8669a335e0f))
+
+## [2.19.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.1...v2.19.2) (2024-08-15)
+
+
+### Bug Fixes
+
+* remove intersection threshold ([#258](https://github.com/adobe/helix-rum-enhancer/issues/258)) ([8805b49](https://github.com/adobe/helix-rum-enhancer/commit/8805b49a052bbc9a659ee2485ada8a9db5a13e40))
+
+## [2.19.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.19.0...v2.19.1) (2024-08-15)
+
+
+### Bug Fixes
+
+* **navigation:** remove `leave` checkpoint ([95503de](https://github.com/adobe/helix-rum-enhancer/commit/95503de3dfd83534a8692d6fa3a1af96734e65aa)), closes [/github.com/adobe/helix-rum-enhancer/pull/257#discussion_r1718152824](https://github.com//github.com/adobe/helix-rum-enhancer/pull/257/issues/discussion_r1718152824)
+
+# [2.19.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.18.0...v2.19.0) (2024-08-13)
+
+
+### Features
+
+* **onetrust:** enable on all domains ([6039f11](https://github.com/adobe/helix-rum-enhancer/commit/6039f1198f6484d623a3e42ffdd24807b6ed7c54))
+
+# [2.18.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.17.1...v2.18.0) (2024-08-08)
+
+
+### Features
+
+* **loadresource:** include API calls in `loadresouce` requests for content request counting ([45449c2](https://github.com/adobe/helix-rum-enhancer/commit/45449c2e6a1602d80321f4ffa8698cbd116f1383))
+
+## [2.17.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.17.0...v2.17.1) (2024-08-02)
+
+
+### Bug Fixes
+
+* **loadresource:** fix closing bracket ([0978b71](https://github.com/adobe/helix-rum-enhancer/commit/0978b7138f16421b5eb22c49b3c757116cb7053b))
+* **loadresource:** include all JSON resources, and GraphQL resources ([8ebaa97](https://github.com/adobe/helix-rum-enhancer/commit/8ebaa97e844ff605ec2e6a458fc43adc3c5a37dd))
+
 # [2.17.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.16.0...v2.17.0) (2024-07-03)
 
 
