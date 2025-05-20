@@ -12,6 +12,15 @@
         <button class="button no-shadow" id="no-shadow-button">Button</button>
       </div>
     </web-component-no-shadow>
+    <div id="nested-webcomponent">
+      <web-component-no-shadow>
+        <web-component-shadow></web-component-shadow>
+      </web-component-no-shadow>
+    </div>
+    <div id="nested-webcomponent-reversed">
+      <web-component-shadow></web-component-shadow> <!-- add no-shadow at runtime in test -->
+    </div>
+    <div id="late-web-component"></div>
   </div>
 
   <script>
@@ -96,6 +105,45 @@
           const button = element.shadowRoot.querySelector('button');
           const { selector, calls } = await testElementClick(button);
           expect(selector).to.equal('button#shadow-button'); // also finds the button
+          // only 1 click event
+          expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
+        });
+
+        it('webcomponent - nested', async () => {
+          const element = document.querySelector('#nested-webcomponent');
+          const button = element.firstElementChild.firstElementChild.shadowRoot.querySelector('button');
+          const { selector, calls } = await testElementClick(button);
+          expect(selector).to.equal('button#shadow-button'); // shadow is inside
+          // only 1 click event
+          expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
+        });
+
+        it('webcomponent - nested reverse', async () => {
+          const element = document.querySelector('#nested-webcomponent-reversed');
+          const root = element.firstElementChild.shadowRoot;
+          const wcNoShadow = document.createElement('web-component-no-shadow');
+          const button = document.createElement('button');
+          button.id = 'no-shadow-button';
+          wcNoShadow.append(button);
+          root.append(wcNoShadow);
+          const { selector, calls } = await testElementClick(button);
+          expect(selector).to.equal('button#no-shadow-button'); // no-shadow is inside
+          // only 1 click event
+          expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
+        });
+
+        it('webcomponent - late added', async () => {
+          const container = document.querySelector('#late-web-component');
+
+          const wcNoShadow = document.createElement('web-component-no-shadow');
+          container.append(wcNoShadow);
+
+          const button = document.createElement('button');
+          button.id = 'late-button';
+          wcNoShadow.append(button);
+
+          const { selector, calls } = await testElementClick(button);
+          expect(selector).to.equal('#late-web-component button#late-button'); // late-button is inside
           // only 1 click event
           expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
         });

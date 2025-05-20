@@ -25,6 +25,7 @@ export default function addWebComponentTracking({
 }) {
   // eslint-disable-next-line no-underscore-dangle
   function _addWebComponentTracking(obj) {
+    /* c8 ignore next 3 */
     if (!obj) {
       return;
     }
