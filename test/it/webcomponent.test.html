@@ -14,10 +14,24 @@
     </web-component-no-shadow>
   </div>
 
+  <script>
+    window.hlx = {
+      rum: {
+        calls: [],
+        reset() {
+          window.hlx.rum.calls = [];
+        },
+        sampleRUM(...args) {
+          window.hlx.rum.calls.push(args);
+        }
+      }
+    }
+  </script>
+
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
-    import { sourceSelector } from '../../modules/dom.js';
+    import '../../modules/index.js';
     import { sendMouse } from '@web/test-runner-commands';
 
     class WebComponentShadow extends HTMLElement {
@@ -40,12 +54,21 @@
     class WebComponentNoShadow extends HTMLElement { }
     customElements.define('web-component-no-shadow', WebComponentNoShadow);
 
+    // wait for plugins to load
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     function testElementClick(element) {
-      // find bounding box, click it, return promise that resolves when the click bubbles to document
+      // find bounding box, click it, return promise that resolves when the click is sampled
       return new Promise((resolve) => {
-        document.addEventListener('click', (event) => {
-          resolve(sourceSelector(event.target));
-        }, { once: true });
+        const before = window.hlx.rum.calls.length;
+        let interval;
+        interval = setInterval(() => {
+          if (window.hlx.rum.calls.length > before) {
+            clearInterval(interval);
+            const selector = window.hlx.rum.calls[window.hlx.rum.calls.length - 1][1].source;
+            resolve({ selector, calls: window.hlx.rum.calls });
+          }
+        }, 10);
 
         const pos = element.getBoundingClientRect();
         sendMouse({
@@ -62,16 +85,28 @@
         it('webcomponent - no shadow root', async () => {
           const element = document.querySelector('web-component-no-shadow');
           const button = element.querySelector('button');
-          const selector = await testElementClick(button);
+          const { selector, calls } = await testElementClick(button);
           expect(selector).to.equal('button#no-shadow-button'); // finds the button
+          // only 1 click event
+          expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
         });
 
         it('webcomponent - shadow root', async () => {
           const element = document.querySelector('web-component-shadow');
           const button = element.shadowRoot.querySelector('button');
-          const selector = await testElementClick(button);
-          expect(selector).to.equal('web-component-shadow'); // only finds the web component tagname
+          const { selector, calls } = await testElementClick(button);
+          expect(selector).to.equal('button#shadow-button'); // also finds the button
+          // only 1 click event
+          expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
         });
+      });
+
+      afterEach(() => {
+        window.hlx.rum.reset();
+      });
+
+      after(() => {
+        window.hlx = undefined;
       });
     });
   </script>

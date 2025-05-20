@@ -24,11 +24,11 @@ export const getSubmitType = (el) => {
 };
 
 export default function addFormTracking({
-  sampleRUM, sourceSelector, targetSelector, context, getIntersectionObsever,
+  sampleRUM, sourceSelector, targetSelector, context, getIntersectionObserver,
 }) {
   context.querySelectorAll('form').forEach((form) => {
     form.addEventListener('submit', (e) => sampleRUM(getSubmitType(e.target), { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
-    getIntersectionObsever('viewblock').observe(form);
+    getIntersectionObserver('viewblock').observe(form);
     let lastSource;
     form.addEventListener('change', (e) => {
       if (e.target.checkVisibility()) {

@@ -81,9 +81,6 @@ function getSourceElement(el) {
           ? `[type='${el.getAttribute('type') || ''}']`
           : ''));
   }
-  if (typeof el.shadowRoot === 'object' && !!el.shadowRoot) {
-    return el.tagName.toLowerCase();
-  }
   if (walk(el, isButton)) return 'button';
   return el.tagName.toLowerCase().match(/^(a|img|video|form)$/) && el.tagName.toLowerCase();
 }
@@ -93,6 +90,7 @@ function getSourceIdentifier(el) {
   if (el.getAttribute('data-block-name')) return `.${el.getAttribute('data-block-name')}`;
   return (el.classList.length > 0 && `.${el.classList[0]}`);
 }
+
 export const sourceSelector = (el) => {
   try {
     if (!el || el === document.body || el === document.documentElement) {

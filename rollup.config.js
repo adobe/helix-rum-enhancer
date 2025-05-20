@@ -35,7 +35,7 @@ const bundles = [
     outputFile: 'src/index',
   },
   // Library plugins
-  ...['cwv', 'form', 'martech', 'onetrust', 'video'].map((plugin) => ({
+  ...['cwv', 'form', 'martech', 'onetrust', 'video', 'webcomponent'].map((plugin) => ({
     source: `plugins/${plugin}.js`,
     outputFile: `src/plugins/${plugin}`,
     format: 'es',

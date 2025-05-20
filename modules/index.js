@@ -22,7 +22,7 @@ const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window
 const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
 /* c8 ignore next */ : {});
 
-// blocks & media mutation observer
+// blocks & media mutation observers
 // eslint-disable-next-line no-use-before-define
 const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 
@@ -37,13 +37,18 @@ const PLUGINS = {
   // Interactive elements
   form: { url: `${pluginBasePath}/form.js`, when: () => document.querySelector('form'), isBlockDependent: true },
   video: { url: `${pluginBasePath}/video.js`, when: () => document.querySelector('video'), isBlockDependent: true },
+  webcomponent: {
+    url: `${pluginBasePath}/webcomponent.js`,
+    when: () => [...document.querySelectorAll('*')].some((el) => el.tagName && el.tagName.includes('-')),
+    isBlockDependent: true,
+  },
   // Martech
   martech: { url: `${pluginBasePath}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
   onetrust: { url: `${pluginBasePath}/onetrust.js`, when: () => (document.querySelector('#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
   // test: broken-plugin
 };
 
-function getIntersectionObsever(checkpoint) {
+function getIntersectionObserver(checkpoint) {
   /* c8 ignore next 3 */
   if (!window.IntersectionObserver) {
     return null;
@@ -72,7 +77,8 @@ const PLUGIN_PARAMETERS = {
   sampleRUM,
   sourceSelector,
   targetSelector,
-  getIntersectionObsever,
+  getIntersectionObserver,
+  createMO,
 };
 
 const pluginCache = new Map();
@@ -83,9 +89,11 @@ function loadPlugin(key, params) {
   if (!pluginCache.has(key) && plugin.when && !plugin.when({ urlParameters: usp })) {
     return null;
   }
+
   if (!pluginCache.has(key)) {
     pluginCache.set(key, import(`${plugin.url || plugin}`));
   }
+
   const pluginLoadPromise = pluginCache.get(key);
   return pluginLoadPromise
     .then((p) => (p.default && p.default(params)) || (typeof p === 'function' && p(params)))
@@ -231,7 +239,7 @@ function activateMediaMO() {
 }
 
 function addViewBlockTracking(element) {
-  const blockobserver = getIntersectionObsever('viewblock');
+  const blockobserver = getIntersectionObserver('viewblock');
   if (blockobserver) {
     const blocks = element.getAttribute('data-block-status') ? [element] : element.querySelectorAll('div[data-block-status="loaded"]');
     blocks.forEach((b) => blockobserver.observe(b));
@@ -240,7 +248,7 @@ function addViewBlockTracking(element) {
 
 const observedMedia = new Set();
 function addViewMediaTracking(parent) {
-  const mediaobserver = getIntersectionObsever('viewmedia');
+  const mediaobserver = getIntersectionObserver('viewmedia');
   if (mediaobserver) {
     parent.querySelectorAll('img, video, audio, iframe').forEach((m) => {
       if (!observedMedia.has(m)) {
@@ -281,6 +289,9 @@ function addTrackingFromConfig() {
   activateMediaMO();
 
   document.addEventListener('click', (event) => {
+    if (event.optelHandled) {
+      return;
+    }
     sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
   });
 
