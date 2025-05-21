@@ -1,3 +1,10 @@
+# [2.35.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.3...v2.35.0) (2025-05-21)
+
+
+### Features
+
+* update to @trieloff/rollup-plugin-checksum v1.1.0 with SHA-384 SRI hash support ([fad9251](https://github.com/adobe/helix-rum-enhancer/commit/fad9251b268951da05391381a4046e5e184ec43d))
+
 ## [2.34.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.2...v2.34.3) (2025-05-12)
 
 
