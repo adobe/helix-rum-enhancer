@@ -1,3 +1,45 @@
+## [2.34.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.2...v2.34.3) (2025-05-12)
+
+
+### Reverts
+
+* Revert "chore: ignore psi check not needed ([#383](https://github.com/adobe/helix-rum-enhancer/issues/383))" ([c9d577f](https://github.com/adobe/helix-rum-enhancer/commit/c9d577f535a937f515319431ec56d972188840b4))
+
+## [2.34.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.1...v2.34.2) (2025-04-17)
+
+
+### Bug Fixes
+
+* **release:** ignore hooks, force add ([4fda7f0](https://github.com/adobe/helix-rum-enhancer/commit/4fda7f074cf790bda3ea7c5c129a90884d64aa74))
+
+## [2.34.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.0...v2.34.1) (2025-04-17)
+
+
+### Bug Fixes
+
+* trigger release ([fd3b7c1](https://github.com/adobe/helix-rum-enhancer/commit/fd3b7c135f376d60e5f7444f05692354258ac73e))
+
+# [2.34.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.33.0...v2.34.0) (2025-04-16)
+
+
+### Features
+
+* add class in source  selector ([#398](https://github.com/adobe/helix-rum-enhancer/issues/398)) ([c72aa0d](https://github.com/adobe/helix-rum-enhancer/commit/c72aa0d66074a66b2ebeed4a625989c040112eee))
+
+# [2.33.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.32.0...v2.33.0) (2025-03-24)
+
+
+### Features
+
+* track all resources loaded on ups.com ([285a495](https://github.com/adobe/helix-rum-enhancer/commit/285a49565b0b96d182cb19923b8e6b93b53c9b00))
+
+# [2.32.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.1...v2.32.0) (2025-03-11)
+
+
+### Features
+
+* bringing back some more checkpoints: search, login and signup ([#372](https://github.com/adobe/helix-rum-enhancer/issues/372)) ([0a3ef75](https://github.com/adobe/helix-rum-enhancer/commit/0a3ef754666355adadf063f7230e9436f5f128ce))
+
 ## [2.31.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.31.0...v2.31.1) (2025-03-11)
 
 

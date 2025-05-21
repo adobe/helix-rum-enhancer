@@ -12,7 +12,7 @@
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { babel } from '@rollup/plugin-babel';
-import pkg from '@trieloff/rollup-plugin-checksum';
+import pkg from '@adobe/rollup-plugin-checksum';
 import fs from 'fs';
 import path from 'path';
 
