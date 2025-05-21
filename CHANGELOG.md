@@ -1,3 +1,10 @@
+## [2.35.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.0...v2.35.1) (2025-05-21)
+
+
+### Bug Fixes
+
+* **releaserc:** update path for RUM Enhancer SRI Hash configuration ([2da2aa7](https://github.com/adobe/helix-rum-enhancer/commit/2da2aa7ddcd801d01a99ff16f0ed596320516073))
+
 # [2.35.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.3...v2.35.0) (2025-05-21)
 
 
