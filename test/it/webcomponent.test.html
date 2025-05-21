@@ -20,6 +20,9 @@
     <div id="nested-webcomponent-reversed">
       <web-component-shadow></web-component-shadow> <!-- add no-shadow at runtime in test -->
     </div>
+    <div id="nested-webcomponent-shadows">
+      <web-component-shadow></web-component-shadow> <!-- add another shadow wc at runtime in test -->
+    </div>
     <div id="late-web-component"></div>
   </div>
 
@@ -68,16 +71,21 @@
 
     function testElementClick(element) {
       // find bounding box, click it, return promise that resolves when the click is sampled
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         const before = window.hlx.rum.calls.length;
+        let count = 0;
         let interval;
         interval = setInterval(() => {
-          if (window.hlx.rum.calls.length > before) {
+          if (window.hlx?.rum?.calls?.length > before) {
             clearInterval(interval);
             const selector = window.hlx.rum.calls[window.hlx.rum.calls.length - 1][1].source;
             resolve({ selector, calls: window.hlx.rum.calls });
+          } else if (count > 2000) {
+            clearInterval(interval);
+            reject(Error('Timeout waiting for click event'));
           }
-        }, 10);
+          count += 1;
+        }, 1);
 
         const pos = element.getBoundingClientRect();
         sendMouse({
@@ -90,8 +98,8 @@
     }
 
     runTests(async () => {
-      describe('dom#sourceSelector', () => {
-        it('webcomponent - no shadow root', async () => {
+      describe('webcomponent', () => {
+        it('no shadow root', async () => {
           const element = document.querySelector('web-component-no-shadow');
           const button = element.querySelector('button');
           const { selector, calls } = await testElementClick(button);
@@ -100,7 +108,7 @@
           expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
         });
 
-        it('webcomponent - shadow root', async () => {
+        it('shadow root', async () => {
           const element = document.querySelector('web-component-shadow');
           const button = element.shadowRoot.querySelector('button');
           const { selector, calls } = await testElementClick(button);
@@ -109,7 +117,7 @@
           expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
         });
 
-        it('webcomponent - nested', async () => {
+        it('nested - shadow inner', async () => {
           const element = document.querySelector('#nested-webcomponent');
           const button = element.firstElementChild.firstElementChild.shadowRoot.querySelector('button');
           const { selector, calls } = await testElementClick(button);
@@ -118,7 +126,7 @@
           expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
         });
 
-        it('webcomponent - nested reverse', async () => {
+        it('nested - shadow outer', async () => {
           const element = document.querySelector('#nested-webcomponent-reversed');
           const root = element.firstElementChild.shadowRoot;
           const wcNoShadow = document.createElement('web-component-no-shadow');
@@ -132,7 +140,27 @@
           expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
         });
 
-        it('webcomponent - late added', async () => {
+        it('nested - shadow DOM within shadow DOM', async () => {
+          const element = document.querySelector('#nested-webcomponent-shadows');
+          const wcOuter = element.firstElementChild;
+          wcOuter.shadowRoot.innerHTML = ''; // clear the shadow DOM
+          const wcInner = document.createElement('web-component-shadow');
+          wcOuter.shadowRoot.append(wcInner);
+
+          const button = wcInner.shadowRoot.querySelector('button');
+          button.id = 'shadow-button-inner';
+          button.innerText = 'Shadow Button Inner';
+
+          // wait for mutation observer to pick up the new element
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
+          const { selector, calls } = await testElementClick(button);
+          expect(selector).to.equal('button#shadow-button-inner'); // no-shadow is inside
+          // only 1 click event
+          expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
+        });
+
+        it('added to DOM at runtime, should be picked up by the mutation observer', async () => {
           const container = document.querySelector('#late-web-component');
 
           const wcNoShadow = document.createElement('web-component-no-shadow');

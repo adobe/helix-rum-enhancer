@@ -13,8 +13,8 @@
 /** @type {WeakMap<HTMLElement, boolean>} */
 const observedWC = new WeakMap();
 
-/** @type {MutationObserver|undefined} */
-let webcomponentMO;
+/** @type {MutationObserver&{active?:boolean}|undefined} */
+let rootMO;
 
 export default function addWebComponentTracking({
   context,
@@ -23,6 +23,37 @@ export default function addWebComponentTracking({
   targetSelector,
   createMO,
 }) {
+  /**
+   * activate mutation observer
+   * @param {MutationObserver&{active?:boolean}} mo
+   * @param {HTMLElement} [root=document.body]
+   * @returns {void}
+   */
+  function activateMutationObserver(mo, root = document.body) {
+    if (!mo || mo.active) {
+      return;
+    }
+    // eslint-disable-next-line no-param-reassign
+    mo.active = true;
+    mo.observe(
+      root,
+      { subtree: true, attributes: false, childList: true },
+    );
+  }
+
+  /**
+   * @callback MutationCallback
+   * @param {MutationRecord[]} mutations
+   * @param {MutationObserver} observer
+   */
+  function mutationCB(mutations) {
+    mutations
+      .forEach((m) => {
+        // eslint-disable-next-line no-use-before-define
+        _addWebComponentTracking(m.target);
+      });
+  }
+
   // eslint-disable-next-line no-underscore-dangle
   function _addWebComponentTracking(obj) {
     /* c8 ignore next 3 */
@@ -34,14 +65,18 @@ export default function addWebComponentTracking({
     if (tagName && tagName.includes('-')) {
       window.customElements.whenDefined(tagName.toLowerCase())
         .then(() => {
-          if (obj.shadowRoot && !observedWC.get(obj)) {
+          if (obj.shadowRoot && !observedWC.has(obj)) {
             observedWC.set(obj, true);
+            const mo = createMO(mutationCB);
+            activateMutationObserver(mo, obj.shadowRoot);
+            // eslint-disable-next-line no-underscore-dangle, no-param-reassign
+            obj.__optelMO = mo;
             _addWebComponentTracking(obj.shadowRoot);
           }
         });
     } else {
       if (Object.getPrototypeOf(obj).toString().includes('ShadowRoot')) {
-      // parent is a shadowRoot, add click tracking here
+        // obj is a shadowRoot, add click tracking
         obj.addEventListener('click', (event) => {
           if (event.optelHandled) {
             return;
@@ -51,35 +86,18 @@ export default function addWebComponentTracking({
           sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
         });
       }
+      // look for web components below this element
       [...obj.querySelectorAll('*')]
-        .filter((el) => el.tagName && el.tagName.includes('-') && !observedWC.get(el))
+        .filter((el) => el.tagName && el.tagName.includes('-') && !observedWC.has(el))
         .forEach((el) => {
           _addWebComponentTracking(el);
         });
     }
   }
 
-  // wc observer callback
-  function webcomponentMCB(mutations) {
-    mutations
-      .forEach((m) => {
-        _addWebComponentTracking(m.target);
-      });
-  }
-
-  // activate webcomponent mutation observer
-  function activateWebComponentMO() {
-    webcomponentMO.active = true;
-    webcomponentMO.observe(
-      document.body,
-      // eslint-disable-next-line object-curly-newline
-      { subtree: true, attributes: false, childList: true },
-    );
-  }
-
-  if (!webcomponentMO) {
-    webcomponentMO = createMO(webcomponentMCB);
-    activateWebComponentMO();
+  if (!rootMO) {
+    rootMO = createMO(mutationCB);
+    activateMutationObserver(rootMO);
   }
   _addWebComponentTracking(context);
 }
