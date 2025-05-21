@@ -21,7 +21,7 @@ module.exports = {
           "label": "RUM Enhancer Hash"
         },
         {
-          "path": "src/index.sha384",
+          "path": "src/index.sri",
           "label": "RUM Enhancer SRI Hash"
         }
       ]
