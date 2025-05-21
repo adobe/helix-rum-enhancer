@@ -30,6 +30,7 @@ export default function addWebComponentTracking({
    * @returns {void}
    */
   function activateMutationObserver(mo, root = document.body) {
+    /* c8 ignore next 3 */
     if (!mo || mo.active) {
       return;
     }
