@@ -35,7 +35,7 @@ function walk(el, checkFn) {
     return undefined;
   }
 
-  return checkFn(el) || walk(el.parentElement ?? el.parentNode?.host, checkFn);
+  return checkFn(el) || walk(el.parentElement || (el.parentNode && el.parentNode.host), checkFn);
 }
 
 function isDialog(el) {
