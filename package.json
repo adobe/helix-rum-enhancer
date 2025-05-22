@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/adobe/helix-rum-enhancer#readme",
   "mocha": {
-    "recursive": "true",
+    "recursive": true,
     "reporter": "mocha-multi-reporters",
     "reporter-options": "configFile=.mocha-multi.json"
   },

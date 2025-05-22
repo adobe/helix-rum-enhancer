@@ -34,7 +34,8 @@ function walk(el, checkFn) {
   if (!el || el === document.body || el === document.documentElement) {
     return undefined;
   }
-  return checkFn(el) || walk(el.parentElement, checkFn);
+
+  return checkFn(el) || walk(el.parentElement || (el.parentNode && el.parentNode.host), checkFn);
 }
 
 function isDialog(el) {
@@ -69,6 +70,7 @@ function getSourceContext(el) {
   const block = el.closest('.block[data-block-name]');
   return ((block && `.${block.getAttribute('data-block-name')}`)
     || (walk(el, isDialog) && 'dialog')
+    || (walk(el, (e) => e.tagName && e.tagName.includes('-') && e.tagName.toLowerCase()))
     || ['nav', 'header', 'footer', 'aside'].find((t) => el.closest(t))
     || walk(el, (e) => e.id && `#${e.id}`));
 }
@@ -90,6 +92,7 @@ function getSourceIdentifier(el) {
   if (el.getAttribute('data-block-name')) return `.${el.getAttribute('data-block-name')}`;
   return (el.classList.length > 0 && `.${el.classList[0]}`);
 }
+
 export const sourceSelector = (el) => {
   try {
     if (!el || el === document.body || el === document.documentElement) {
