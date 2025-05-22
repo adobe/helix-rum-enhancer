@@ -1,3 +1,13 @@
+## [2.35.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.1...v2.35.2) (2025-05-22)
+
+
+### Bug Fixes
+
+* get selector within shadowdom ([b3562cb](https://github.com/adobe/helix-rum-enhancer/commit/b3562cbd6180ccd1d10c81267b3518088359fe00))
+* handle webcomponent sources ([0d3fbf2](https://github.com/adobe/helix-rum-enhancer/commit/0d3fbf247db02b9b296958f2859c9a04e36ace2d))
+* include webcomponent tagname in source selector ([5794f5c](https://github.com/adobe/helix-rum-enhancer/commit/5794f5c3156f2572c63f5ea2560383bf924ead5b))
+* observe nested webcomponent mutations ([9c05d0b](https://github.com/adobe/helix-rum-enhancer/commit/9c05d0b9158af10712004642ba1daa182eb7ac53))
+
 ## [2.35.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.0...v2.35.1) (2025-05-21)
 
 
