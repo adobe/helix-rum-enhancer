@@ -6,9 +6,6 @@ module.exports = {
       "changelogFile": "CHANGELOG.md",
     }],
     "@semantic-release/npm",
-    ["@semantic-release/exec", {
-      "publishCmd": "./tagger.sh ${nextRelease.version} src/index.js src/plugins/cwv.js src/plugins/form.js src/plugins/martech.js src/plugins/onetrust.js src/plugins/video.js --push"
-    }],
     ["@semantic-release/git", {
       "assets": ["package.json", "package-lock.json", "CHANGELOG.md"],
       "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
@@ -22,8 +19,15 @@ module.exports = {
         {
           "path": "src/index.md5",
           "label": "RUM Enhancer Hash"
+        },
+        {
+          "path": "src/index.sri",
+          "label": "RUM Enhancer SRI Hash"
         }
       ]
+    }],
+    ["@semantic-release/exec", {
+      "publishCmd": "./tagger.sh ${nextRelease.version} src/index.js src/plugins/cwv.js src/plugins/form.js src/plugins/martech.js src/plugins/onetrust.js src/plugins/video.js --push"
     }],
     ["semantic-release-slack-bot", {
       notifyOnSuccess: true,

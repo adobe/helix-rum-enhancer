@@ -1,3 +1,17 @@
+## [2.35.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.0...v2.35.1) (2025-05-21)
+
+
+### Bug Fixes
+
+* **releaserc:** update path for RUM Enhancer SRI Hash configuration ([2da2aa7](https://github.com/adobe/helix-rum-enhancer/commit/2da2aa7ddcd801d01a99ff16f0ed596320516073))
+
+# [2.35.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.3...v2.35.0) (2025-05-21)
+
+
+### Features
+
+* update to @trieloff/rollup-plugin-checksum v1.1.0 with SHA-384 SRI hash support ([fad9251](https://github.com/adobe/helix-rum-enhancer/commit/fad9251b268951da05391381a4046e5e184ec43d))
+
 ## [2.34.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.2...v2.34.3) (2025-05-12)
 
 

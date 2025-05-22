@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-rum-enhancer",
-  "version": "2.34.3",
+  "version": "2.35.1",
   "description": "Helix RUM Enhancer",
   "main": "src/index.js",
   "type": "module",
@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "2.0.9",
-    "@adobe/helix-rum-js": "2.10.5",
+    "@adobe/helix-rum-js": "2.11.4",
     "@esm-bundle/chai": "4.3.4-fix.0",
     "@rollup/plugin-babel": "6.0.4",
     "@semantic-release/changelog": "6.0.3",
@@ -55,14 +55,14 @@
     "jsdoc-to-markdown": "9.1.1",
     "junit-report-builder": "5.1.1",
     "lint-staged": "16.0.0",
-    "mocha": "11.2.2",
+    "mocha": "11.4.0",
     "mocha-multi-reporters": "1.5.1",
-    "rollup": "4.40.2",
-    "rollup-plugin-checksum": "1.0.1",
+    "rollup": "4.41.0",
+    "@adobe/rollup-plugin-checksum": "1.2.0",
     "rollup-plugin-eslint-bundle": "9.0.0",
-    "semantic-release": "24.2.3",
+    "semantic-release": "24.2.4",
     "semantic-release-slack-bot": "^4.0.2",
-    "web-vitals": "5.0.0"
+    "web-vitals": "5.0.1"
   },
   "lint-staged": {
     "*.js": "eslint",
