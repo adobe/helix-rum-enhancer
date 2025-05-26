@@ -76,7 +76,13 @@ export default function addWebComponentTracking({
           }
         });
     } else {
-      if (Object.getPrototypeOf(obj).toString().includes('ShadowRoot')) {
+      let includesShadowRoot = false;
+      try {
+        includesShadowRoot = Object.getPrototypeOf(obj).toString().includes('ShadowRoot');
+      } catch (e) {
+        includesShadowRoot = false;
+      }
+      if (includesShadowRoot) {
         // obj is a shadowRoot, add click tracking
         obj.addEventListener('click', (event) => {
           if (event.optelHandled) {
