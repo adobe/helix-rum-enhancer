@@ -187,7 +187,6 @@
             uncaughtErrors.push({ message, source, lineno, colno, error });
           };
           container.append(span);
-          // await new Promise((resolve) => setTimeout(resolve, 1000));
           expect(uncaughtErrors).to.be.empty;
           window.onerror = originalOnError;
         });
