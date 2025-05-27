@@ -1,3 +1,10 @@
+## [2.35.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.2...v2.35.3) (2025-05-27)
+
+
+### Bug Fixes
+
+* fixing illegal invocation in webcomponent.js ([#419](https://github.com/adobe/helix-rum-enhancer/issues/419)) ([4153899](https://github.com/adobe/helix-rum-enhancer/commit/415389954e3a7b0d4973a9f176909da60ae8b812))
+
 ## [2.35.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.1...v2.35.2) (2025-05-22)
 
 
