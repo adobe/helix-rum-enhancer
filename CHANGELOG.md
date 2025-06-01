@@ -1,3 +1,10 @@
+# [2.36.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.3...v2.36.0) (2025-06-01)
+
+
+### Features
+
+* remove ups from all resources flag ([6997dce](https://github.com/adobe/helix-rum-enhancer/commit/6997dce92d828f2b9a0a2196d0550c742615152e))
+
 ## [2.35.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.2...v2.35.3) (2025-05-27)
 
 
