@@ -1,3 +1,11 @@
+## [2.36.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.0...v2.36.1) (2025-06-05)
+
+
+### Bug Fixes
+
+* only watch valid customelement tagnames ([034e85f](https://github.com/adobe/helix-rum-enhancer/commit/034e85f5970891dc86ea64cb7f480826e481e2db))
+* tweak regex ([6b65996](https://github.com/adobe/helix-rum-enhancer/commit/6b65996b157b84fdcb200229acfc0bef9c7315ad))
+
 # [2.36.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.3...v2.36.0) (2025-06-01)
 
 
