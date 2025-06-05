@@ -16,6 +16,8 @@ const observedWC = new WeakMap();
 /** @type {MutationObserver&{active?:boolean}|undefined} */
 let rootMO;
 
+const isValidTagName = (tagName) => /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(tagName);
+
 export default function addWebComponentTracking({
   context,
   sampleRUM,
@@ -63,7 +65,7 @@ export default function addWebComponentTracking({
     }
 
     const { tagName } = obj;
-    if (tagName && tagName.includes('-')) {
+    if (tagName && tagName.includes('-') && isValidTagName(tagName)) {
       window.customElements.whenDefined(tagName.toLowerCase())
         .then(() => {
           if (obj.shadowRoot && !observedWC.has(obj)) {
