@@ -16,7 +16,7 @@ const observedWC = new WeakMap();
 /** @type {MutationObserver&{active?:boolean}|undefined} */
 let rootMO;
 
-const isValidTagName = (tagName) => /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(tagName);
+const isValidTagName = (tagName) => /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(tagName.toLowerCase());
 
 export default function addWebComponentTracking({
   context,
