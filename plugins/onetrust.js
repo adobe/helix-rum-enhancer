@@ -28,9 +28,12 @@ export default function addCookieConsentTracking({ sampleRUM }) {
 
   let consentMO; // consent mutation observer
   const trackShowConsent = () => {
-    const otsdk = document.querySelector('body > div#onetrust-consent-sdk');
+    const otsdk = document.querySelector('body > div#onetrust-consent-sdk > div#onetrust-banner-sdk');
     if (otsdk) {
-      if (otsdk.checkVisibility && !otsdk.checkVisibility()) {
+      const { height, width } = otsdk.getBoundingClientRect();
+      const hasZeroHeightOrWidth = height === 0 || width === 0;
+
+      if ((otsdk.checkVisibility && !otsdk.checkVisibility()) || hasZeroHeightOrWidth) {
         sampleRUMOnce('consent', { source: 'onetrust', target: 'suppressed' });
       } else {
         sampleRUMOnce('consent', { source: 'onetrust', target: 'show' });
