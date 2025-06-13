@@ -19,7 +19,7 @@ export default function addCookieConsentTracking({ sampleRUM }) {
     return;
   }
 
-  const otsdk = document.querySelector('body > div#onetrust-consent-sdk > div#onetrust_banner_sdk');
+  const otsdk = document.querySelector('#onetrust-banner-sdk');
 
   if (otsdk && otsdk.checkVisibility && otsdk.checkVisibility()) {
     sampleRUM('consent', { source: 'onetrust', target: 'show' });
