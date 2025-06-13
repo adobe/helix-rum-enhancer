@@ -44,7 +44,15 @@ const PLUGINS = {
   },
   // Martech
   martech: { url: `${pluginBasePath}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
-  onetrust: { url: `${pluginBasePath}/onetrust.js`, when: () => (document.querySelector('#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
+  onetrust: {
+    url: `${pluginBasePath}/onetrust.js`,
+    when: () => (hasCookieKey('OptanonAlertBoxClosed')) || document.querySelector('#onetrust-consent-sdk'),
+    isBlockDependent: true,
+    mutationObserverParams: {
+      target: document.body,
+      options: { attributes: false, childList: true, subtree: false },
+    },
+  },
   // test: broken-plugin
 };
 
@@ -87,6 +95,17 @@ function loadPlugin(key, params) {
   const plugin = PLUGINS[key];
   const usp = new URLSearchParams(window.location.search);
   if (!pluginCache.has(key) && plugin.when && !plugin.when({ urlParameters: usp })) {
+    if (plugin.mutationObserverParams && !plugin.isBeingObserved) {
+      plugin.isBeingObserved = true;
+      const observer = new MutationObserver(() => {
+        if (plugin.when({ urlParameters: usp })) {
+          plugin.isBeingObserved = false;
+          observer.disconnect();
+          loadPlugin(key, params);
+        }
+      });
+      observer.observe(plugin.mutationObserverParams.target, plugin.mutationObserverParams.options);
+    }
     return null;
   }
 

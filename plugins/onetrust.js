@@ -9,54 +9,22 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-let hasSentData = false;
 export default function addCookieConsentTracking({ sampleRUM }) {
-  const sampleRUMOnce = (...args) => {
-    if (!hasSentData) {
-      sampleRUM(...args);
-      hasSentData = true;
-    }
-  };
   const cmpCookie = document.cookie.split(';')
     .map((c) => c.trim())
     .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
 
   if (cmpCookie) {
-    sampleRUMOnce('consent', { source: 'onetrust', target: 'hidden' });
+    sampleRUM('consent', { source: 'onetrust', target: 'hidden' });
     return;
   }
 
-  let consentMO; // consent mutation observer
-  const trackShowConsent = () => {
-    const otsdk = document.querySelector('body > div#onetrust-consent-sdk > div#onetrust-banner-sdk');
-    if (otsdk) {
-      const { height, width } = otsdk.getBoundingClientRect();
-      const hasZeroHeightOrWidth = height === 0 || width === 0;
+  const otsdk = document.querySelector('body > div#onetrust-consent-sdk > div#onetrust_banner_sdk');
 
-      if ((otsdk.checkVisibility && !otsdk.checkVisibility()) || hasZeroHeightOrWidth) {
-        sampleRUMOnce('consent', { source: 'onetrust', target: 'suppressed' });
-      } else {
-        sampleRUMOnce('consent', { source: 'onetrust', target: 'show' });
-      }
-      if (consentMO) {
-        consentMO.disconnect();
-      }
-      return true;
-    }
-    return false;
-  };
-
-  if (!trackShowConsent()) {
-    // eslint-disable-next-line max-len
-    consentMO = window.MutationObserver
-      ? new MutationObserver(trackShowConsent)
-      : /* c8 ignore next */ null;
-    if (consentMO) {
-      consentMO.observe(
-        document.body,
-        // eslint-disable-next-line object-curly-newline
-        { attributes: false, childList: true, subtree: false },
-      );
-    }
+  if (otsdk && otsdk.checkVisibility && otsdk.checkVisibility()) {
+    sampleRUM('consent', { source: 'onetrust', target: 'show' });
+    return;
   }
+
+  sampleRUM('consent', { source: 'onetrust', target: 'suppressed' });
 }
