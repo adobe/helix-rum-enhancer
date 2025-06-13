@@ -27,7 +27,7 @@ const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
 const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 
 // Check for the presence of a given cookie
-const hasCookieKey = (key) => () => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
+const hasCookieKey = (key) => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
 
 // Set the base path for the plugins
 const pluginBasePath = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
