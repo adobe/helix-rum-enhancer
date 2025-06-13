@@ -97,7 +97,7 @@ function loadPlugin(key, params) {
   if (!pluginCache.has(key) && plugin.when && !plugin.when({ urlParameters: usp })) {
     if (plugin.mutationObserverParams && !plugin.isBeingObserved) {
       plugin.isBeingObserved = true;
-      const observer = new MutationObserver(() => {
+      const observer = createMO(() => {
         if (plugin.when({ urlParameters: usp })) {
           plugin.isBeingObserved = false;
           observer.disconnect();
@@ -337,7 +337,7 @@ function initEnhancer() {
       window.hlx.rum.collector = trackCheckpoint;
       processQueue();
     }
-  /* c8 ignore next 3 */
+    /* c8 ignore next 3 */
   } catch (error) {
     // something went wrong
   }
