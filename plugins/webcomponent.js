@@ -16,6 +16,8 @@ const observedWC = new WeakMap();
 /** @type {MutationObserver&{active?:boolean}|undefined} */
 let rootMO;
 
+const isValidTagName = (tagName) => /^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$/.test(tagName.toLowerCase());
+
 export default function addWebComponentTracking({
   context,
   sampleRUM,
@@ -63,7 +65,7 @@ export default function addWebComponentTracking({
     }
 
     const { tagName } = obj;
-    if (tagName && tagName.includes('-')) {
+    if (tagName && tagName.includes('-') && isValidTagName(tagName)) {
       window.customElements.whenDefined(tagName.toLowerCase())
         .then(() => {
           if (obj.shadowRoot && !observedWC.has(obj)) {
@@ -76,7 +78,11 @@ export default function addWebComponentTracking({
           }
         });
     } else {
-      if (Object.getPrototypeOf(obj).toString().includes('ShadowRoot')) {
+      let hasShadowRoot = false;
+      try {
+        hasShadowRoot = Object.getPrototypeOf(obj).toString().includes('ShadowRoot');
+      } catch (e) { /* do nothing */ }
+      if (hasShadowRoot) {
         // obj is a shadowRoot, add click tracking
         obj.addEventListener('click', (event) => {
           if (event.optelHandled) {

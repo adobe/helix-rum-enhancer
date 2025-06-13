@@ -1,3 +1,25 @@
+## [2.36.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.0...v2.36.1) (2025-06-05)
+
+
+### Bug Fixes
+
+* only watch valid customelement tagnames ([034e85f](https://github.com/adobe/helix-rum-enhancer/commit/034e85f5970891dc86ea64cb7f480826e481e2db))
+* tweak regex ([6b65996](https://github.com/adobe/helix-rum-enhancer/commit/6b65996b157b84fdcb200229acfc0bef9c7315ad))
+
+# [2.36.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.3...v2.36.0) (2025-06-01)
+
+
+### Features
+
+* remove ups from all resources flag ([6997dce](https://github.com/adobe/helix-rum-enhancer/commit/6997dce92d828f2b9a0a2196d0550c742615152e))
+
+## [2.35.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.2...v2.35.3) (2025-05-27)
+
+
+### Bug Fixes
+
+* fixing illegal invocation in webcomponent.js ([#419](https://github.com/adobe/helix-rum-enhancer/issues/419)) ([4153899](https://github.com/adobe/helix-rum-enhancer/commit/415389954e3a7b0d4973a9f176909da60ae8b812))
+
 ## [2.35.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.1...v2.35.2) (2025-05-22)
 
 

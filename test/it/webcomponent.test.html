@@ -24,6 +24,7 @@
       <web-component-shadow></web-component-shadow> <!-- add another shadow wc at runtime in test -->
     </div>
     <div id="late-web-component"></div>
+    <a id="no-web-component"></a>
   </div>
 
   <script>
@@ -174,6 +175,20 @@
           expect(selector).to.equal('web-component-no-shadow button#late-button'); // late-button is inside
           // only 1 click event
           expect(calls.filter((call) => call[0] === 'click').length).to.equal(1);
+        });
+
+        it("adding an anchor element at runtime", async () => {
+          const container = document.querySelector('#no-web-component');
+          const span = document.createElement('span');
+          span.innerText = 'no-web-component-span';
+          const uncaughtErrors = [];
+          const originalOnError = window.onerror;
+          window.onerror = function(message, source, lineno, colno, error) {
+            uncaughtErrors.push({ message, source, lineno, colno, error });
+          };
+          container.append(span);
+          expect(uncaughtErrors).to.be.empty;
+          window.onerror = originalOnError;
         });
       });
 
