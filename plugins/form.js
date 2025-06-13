@@ -31,7 +31,7 @@ export default function addFormTracking({
     getIntersectionObserver('viewblock').observe(form);
     let lastSource;
     form.addEventListener('change', (e) => {
-      if (e.target.checkVisibility()) {
+      if (e.target.checkVisibility && e.target.checkVisibility()) {
         const source = sourceSelector(e.target);
         if (source !== lastSource) {
           sampleRUM('fill', { source });
