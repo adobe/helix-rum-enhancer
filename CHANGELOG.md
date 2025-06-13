@@ -1,3 +1,10 @@
+## [2.36.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.1...v2.36.2) (2025-06-13)
+
+
+### Bug Fixes
+
+* added a check for checkVisibility as it is not available on many browsers yet ([#432](https://github.com/adobe/helix-rum-enhancer/issues/432)) ([2963dd9](https://github.com/adobe/helix-rum-enhancer/commit/2963dd9cabb4f4215b9f9b837bd28545dccaa9b2))
+
 ## [2.36.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.0...v2.36.1) (2025-06-05)
 
 
