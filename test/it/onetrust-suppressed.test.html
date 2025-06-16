@@ -57,7 +57,7 @@
           const onetrustWrapper = document.createElement('div');
           onetrustWrapper.innerHTML = fixtureContent;
           document.body.appendChild(onetrustWrapper.firstElementChild);
-          document.body.querySelector('#onetrust-consent-sdk').style = 'display: none !important';
+          document.body.querySelector('#onetrust-consent-sdk').style.cssText = 'display: none !important';
 
           await new Promise((resolve) => {
             setTimeout(resolve, 3000);

@@ -104,7 +104,13 @@ function loadPlugin(key, params) {
           loadPlugin(key, params);
         }
       });
-      observer.observe(plugin.mutationObserverParams.target, plugin.mutationObserverParams.options);
+
+      if (observer) {
+        observer.observe(
+          plugin.mutationObserverParams.target,
+          plugin.mutationObserverParams.options,
+        );
+      }
     }
     return null;
   }
@@ -337,7 +343,7 @@ function initEnhancer() {
       window.hlx.rum.collector = trackCheckpoint;
       processQueue();
     }
-    /* c8 ignore next 3 */
+  /* c8 ignore next 3 */
   } catch (error) {
     // something went wrong
   }
