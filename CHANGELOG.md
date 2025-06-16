@@ -1,3 +1,10 @@
+## [2.36.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.2...v2.36.3) (2025-06-16)
+
+
+### Bug Fixes
+
+* **consent:** check OneTrust banner div instead of consent div ([#434](https://github.com/adobe/helix-rum-enhancer/issues/434)) ([b71a242](https://github.com/adobe/helix-rum-enhancer/commit/b71a242bfe8e9eea2599be42689a4cfdebdb4a41))
+
 ## [2.36.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.1...v2.36.2) (2025-06-13)
 
 
