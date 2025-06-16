@@ -128,7 +128,7 @@ function createPluginMO(key, params, usp) {
     }
   });
 
-  if (observer) {
+  if (observer instanceof MutationObserver) {
     plugin.isBeingObserved = true;
     observer.observe(
       plugin.mutationObserverParams.target,
