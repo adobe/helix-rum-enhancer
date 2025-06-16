@@ -46,7 +46,7 @@ const PLUGINS = {
   martech: { url: `${pluginBasePath}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
   onetrust: {
     url: `${pluginBasePath}/onetrust.js`,
-    when: () => (hasCookieKey('OptanonAlertBoxClosed')) || document.querySelector('#onetrust-consent-sdk'),
+    when: () => (hasCookieKey('OptanonAlertBoxClosed') || document.querySelector('#onetrust-consent-sdk')),
     isBlockDependent: true,
     mutationObserverParams: {
       target: document.body,
@@ -96,21 +96,8 @@ function loadPlugin(key, params) {
   const usp = new URLSearchParams(window.location.search);
   if (!pluginCache.has(key) && plugin.when && !plugin.when({ urlParameters: usp })) {
     if (plugin.mutationObserverParams && !plugin.isBeingObserved) {
-      plugin.isBeingObserved = true;
-      const observer = createMO(() => {
-        if (plugin.when({ urlParameters: usp })) {
-          plugin.isBeingObserved = false;
-          observer.disconnect();
-          loadPlugin(key, params);
-        }
-      });
-
-      if (observer) {
-        observer.observe(
-          plugin.mutationObserverParams.target,
-          plugin.mutationObserverParams.options,
-        );
-      }
+      // eslint-disable-next-line no-use-before-define
+      createPluginMO(key, params, usp);
     }
     return null;
   }
@@ -130,6 +117,26 @@ function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
     .filter(([, plugin]) => filter(plugin))
     .map(([key]) => loadPlugin(key, params));
 }
+
+function createPluginMO(key, params, usp) {
+  const plugin = PLUGINS[key];
+  const observer = createMO(() => {
+    if (plugin.when({ urlParameters: usp })) {
+      plugin.isBeingObserved = false;
+      observer.disconnect();
+      loadPlugin(key, params);
+    }
+  });
+
+  if (observer) {
+    plugin.isBeingObserved = true;
+    observer.observe(
+      plugin.mutationObserverParams.target,
+      plugin.mutationObserverParams.options,
+    );
+  }
+}
+
 /**
  * Maximum number of events. The first call will be made by rum-js,
  * leaving 1023 events for the enhancer to track
