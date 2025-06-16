@@ -27,7 +27,7 @@ const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
 const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 
 // Check for the presence of a given cookie
-const hasCookieKey = (key) => () => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
+const hasCookieKey = (key) => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
 
 // Set the base path for the plugins
 const pluginBasePath = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
@@ -44,7 +44,15 @@ const PLUGINS = {
   },
   // Martech
   martech: { url: `${pluginBasePath}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
-  onetrust: { url: `${pluginBasePath}/onetrust.js`, when: () => (document.querySelector('#onetrust-consent-sdk') || hasCookieKey('OptanonAlertBoxClosed')), isBlockDependent: true },
+  onetrust: {
+    url: `${pluginBasePath}/onetrust.js`,
+    when: () => (hasCookieKey('OptanonAlertBoxClosed') || document.querySelector('#onetrust-consent-sdk')),
+    isBlockDependent: true,
+    mutationObserverParams: {
+      target: document.body,
+      options: { attributes: false, childList: true, subtree: false },
+    },
+  },
   // test: broken-plugin
 };
 
@@ -87,6 +95,10 @@ function loadPlugin(key, params) {
   const plugin = PLUGINS[key];
   const usp = new URLSearchParams(window.location.search);
   if (!pluginCache.has(key) && plugin.when && !plugin.when({ urlParameters: usp })) {
+    if (plugin.mutationObserverParams && !plugin.isBeingObserved) {
+      // eslint-disable-next-line no-use-before-define
+      createPluginMO(key, params, usp);
+    }
     return null;
   }
 
@@ -105,6 +117,26 @@ function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
     .filter(([, plugin]) => filter(plugin))
     .map(([key]) => loadPlugin(key, params));
 }
+
+function createPluginMO(key, params, usp) {
+  const plugin = PLUGINS[key];
+  const observer = createMO(() => {
+    if (plugin.when({ urlParameters: usp })) {
+      plugin.isBeingObserved = false;
+      observer.disconnect();
+      loadPlugin(key, params);
+    }
+  });
+
+  if (observer instanceof MutationObserver) {
+    plugin.isBeingObserved = true;
+    observer.observe(
+      plugin.mutationObserverParams.target,
+      plugin.mutationObserverParams.options,
+    );
+  }
+}
+
 /**
  * Maximum number of events. The first call will be made by rum-js,
  * leaving 1023 events for the enhancer to track

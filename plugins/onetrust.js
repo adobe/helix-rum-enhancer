@@ -26,34 +26,12 @@ export default function addCookieConsentTracking({ sampleRUM }) {
     return;
   }
 
-  let consentMO; // consent mutation observer
-  const trackShowConsent = () => {
-    const otsdk = document.querySelector('body > div#onetrust-consent-sdk');
-    if (otsdk) {
-      if (otsdk.checkVisibility && !otsdk.checkVisibility()) {
-        sampleRUMOnce('consent', { source: 'onetrust', target: 'suppressed' });
-      } else {
-        sampleRUMOnce('consent', { source: 'onetrust', target: 'show' });
-      }
-      if (consentMO) {
-        consentMO.disconnect();
-      }
-      return true;
-    }
-    return false;
-  };
+  const otsdk = document.querySelector('#onetrust-banner-sdk');
 
-  if (!trackShowConsent()) {
-    // eslint-disable-next-line max-len
-    consentMO = window.MutationObserver
-      ? new MutationObserver(trackShowConsent)
-      : /* c8 ignore next */ null;
-    if (consentMO) {
-      consentMO.observe(
-        document.body,
-        // eslint-disable-next-line object-curly-newline
-        { attributes: false, childList: true, subtree: false },
-      );
-    }
+  if (otsdk && otsdk.checkVisibility && otsdk.checkVisibility()) {
+    sampleRUMOnce('consent', { source: 'onetrust', target: 'show' });
+    return;
   }
+
+  sampleRUMOnce('consent', { source: 'onetrust', target: 'suppressed' });
 }
