@@ -26,9 +26,16 @@ export default function addCookieConsentTracking({ sampleRUM }) {
     return;
   }
 
-  const otsdk = document.querySelector('#onetrust-banner-sdk');
+  const bannersdk = document.querySelector('#onetrust-banner-sdk');
 
-  if (otsdk && otsdk.checkVisibility && otsdk.checkVisibility()) {
+  if (bannersdk && bannersdk.offsetHeight > 0) {
+    sampleRUMOnce('consent', { source: 'onetrust', target: 'show' });
+    return;
+  }
+
+  const pcsdk = document.querySelector('#onetrust-pc-sdk');
+
+  if (pcsdk && pcsdk.offsetHeight > 0) {
     sampleRUMOnce('consent', { source: 'onetrust', target: 'show' });
     return;
   }
