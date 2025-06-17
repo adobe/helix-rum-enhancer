@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 export const getTargetValue = (el) => el.getAttribute('data-rum-target') || el.getAttribute('href')
-    || el.currentSrc || el.getAttribute('src') || el.dataset.action || el.action;
+  || el.currentSrc || el.getAttribute('src') || el.dataset.action || el.action;
 
 export const targetSelector = (el) => {
   try {
@@ -20,7 +20,7 @@ export const targetSelector = (el) => {
       v = getTargetValue(el.closest('a'));
     }
     if (v && !v.startsWith('https://')) {
-    // resolve relative links
+      // resolve relative links
       v = new URL(v, window.location).href;
     }
     return v;
@@ -79,9 +79,9 @@ function getSourceElement(el) {
   const f = el.closest('form');
   if (f && Array.from(f.elements).includes(el)) {
     return (el.tagName.toLowerCase()
-        + (['INPUT', 'BUTTON'].includes(el.tagName)
-          ? `[type='${el.getAttribute('type') || ''}']`
-          : ''));
+      + (['INPUT', 'BUTTON'].includes(el.tagName)
+        ? `[type='${el.getAttribute('type') || ''}']`
+        : ''));
   }
   if (walk(el, isButton)) return 'button';
   return el.tagName.toLowerCase().match(/^(a|img|video|form)$/) && el.tagName.toLowerCase();
@@ -94,6 +94,32 @@ function getSourceIdentifier(el) {
 }
 
 export const sourceSelector = (el) => {
+  const escape = (selector) => (
+    selector
+      .split(' ')
+      .map((part) => (
+        part.replace(/([#.])([^\s#.]+)/g, (_, prefix, name) => {
+          const escaped = name
+            .split('')
+            .map((char, index) => {
+              if (index === 0 && /\d/.test(char)) {
+                return `\\3${char} `;
+              }
+
+              if (!/[a-zA-Z0-9_-]/.test(char)) {
+                return `\\${char}`;
+              }
+
+              return char;
+            })
+            .join('');
+
+          return prefix + escaped;
+        })
+      ))
+      .join(' ')
+  );
+
   try {
     if (!el || el === document.body || el === document.documentElement) {
       return undefined;
@@ -104,7 +130,8 @@ export const sourceSelector = (el) => {
     const ctx = getSourceContext(el.parentElement) || '';
     const name = getSourceElement(el) || '';
     const id = getSourceIdentifier(el) || '';
-    return `${ctx} ${name}${id}`.trim() || `"${el.textContent.substring(0, 10)}"`;
+    const selector = `${ctx} ${name}${id}`.trim() || `"${el.textContent.substring(0, 10)}"`;
+    return escape(selector);
     /* c8 ignore next 3 */
   } catch (error) {
     return null;
