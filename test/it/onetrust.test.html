@@ -64,6 +64,27 @@
             && call.source === 'onetrust'), 'onetrust not detected');
         });
 
+        it('Raises "show" when "#onetrust-pc-sdk" is visible and "#onetrust-banner-sdk" does not exist', async () => {
+
+          await sendMouse({ type: 'click', position: [100, 100] });
+
+          const fixtureWithoutBanner = await fetch('/test/fixtures/otsdk-without-banner.html');
+          const fixtureContent = await fixtureWithoutBanner.text();
+          const onetrustWrapper = document.createElement('div');
+          onetrustWrapper.innerHTML = fixtureContent;
+          document.body.appendChild(onetrustWrapper.firstElementChild);
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 3000);
+          });
+
+          await sendMouse({ type: 'click', position: [10, 10] });
+
+          assert(window.called.some((call) => call.checkpoint === 'consent'), 'consent checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'consent'
+            && call.target === 'show'
+            && call.source === 'onetrust'), 'onetrust not detected');
+        });
       });
     });
   </script>

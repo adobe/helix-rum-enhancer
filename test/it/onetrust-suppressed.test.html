@@ -71,7 +71,7 @@
             && call.source === 'onetrust'), 'suppressed onetrust not detected');
         });
 
-        it('Raises "suppressed" if "#onetrust-consent-sdk" exists but "#onetrust-banner-sdk" does not', async () => {
+        it('Raises "suppressed" if "#onetrust-banner-sdk" does not exist and "#onetrust-pc-sdk" is not displayed', async () => {
 
           await sendMouse({ type: 'click', position: [100, 100] });
 
@@ -84,6 +84,7 @@
           const onetrustWrapper = document.createElement('div');
           onetrustWrapper.innerHTML = fixtureContent;
           document.body.appendChild(onetrustWrapper.firstElementChild);
+          document.body.querySelector('#onetrust-pc-sdk').style.cssText = 'display: none !important';
 
           await new Promise((resolve) => {
             setTimeout(resolve, 3000);
