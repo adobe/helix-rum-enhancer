@@ -26,11 +26,21 @@ const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
 // eslint-disable-next-line no-use-before-define
 const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 
-// Check for the presence of a given cookie
-const hasCookieKey = (key) => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
-
 // Set the base path for the plugins
 const pluginBasePath = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
+
+const hasCookieKey = (key) => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
+const oneTrustIsPresent = () => document.querySelector('#onetrust-banner-sdk') || document.querySelector('#onetrust-pc-sdk') || hasCookieKey('OptanonAlertBoxClosed');
+const trustArcsIsPresent = () => document.querySelector('#truste-consent-track') || document.querySelector('#consent_blackbar');
+const userCentricsIsPresent = () => document.querySelector('#usercentrics-root');
+
+const CONSENT_PROVIDERS = [
+  { url: `${pluginBasePath}/onetrust.js`, isPresent: oneTrustIsPresent },
+  { url: `${pluginBasePath}/trustarcs.js`, isPresent: trustArcsIsPresent },
+  { url: `${pluginBasePath}/usercentrics.js`, isPresent: userCentricsIsPresent },
+];
+
+const getConsentProvider = () => CONSENT_PROVIDERS.find((p) => p.isPresent());
 
 const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
@@ -45,9 +55,9 @@ const PLUGINS = {
   },
   // Martech
   martech: { url: `${pluginBasePath}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
-  onetrust: {
-    url: `${pluginBasePath}/onetrust.js`,
-    when: () => (hasCookieKey('OptanonAlertBoxClosed') || document.querySelector('#onetrust-consent-sdk')),
+  consent: {
+    url: undefined,
+    when: () => getConsentProvider(),
     isBlockDependent: true,
     mutationObserverParams: {
       target: document.body,
@@ -101,6 +111,11 @@ function loadPlugin(key, params) {
       createPluginMO(key, params, usp);
     }
     return null;
+  }
+
+  if (key === 'consent') {
+    const { url } = getConsentProvider();
+    plugin.url = url;
   }
 
   if (!pluginCache.has(key)) {
@@ -348,7 +363,7 @@ function init() {
       window.hlx.rum.collector = trackCheckpoint;
       processQueue();
     }
-  /* c8 ignore next 3 */
+    /* c8 ignore next 3 */
   } catch (error) {
     // something went wrong
   }
