@@ -1,3 +1,10 @@
+## [2.36.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.3...v2.36.4) (2025-06-18)
+
+
+### Bug Fixes
+
+* check for OneTrust PC sdk if banner is not present ([#437](https://github.com/adobe/helix-rum-enhancer/issues/437)) ([6a63f79](https://github.com/adobe/helix-rum-enhancer/commit/6a63f79b10f2a983a8748bd9ffb14cafee16d3d7))
+
 ## [2.36.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.2...v2.36.3) (2025-06-16)
 
 
