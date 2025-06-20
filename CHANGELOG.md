@@ -1,3 +1,10 @@
+## [2.36.5](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.4...v2.36.5) (2025-06-20)
+
+
+### Bug Fixes
+
+* **release:** Add webcomponent.js to release tagging ([0953552](https://github.com/adobe/helix-rum-enhancer/commit/0953552f424fba66f1e26b2bd32bebeff86015fe))
+
 ## [2.36.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.3...v2.36.4) (2025-06-18)
 
 
