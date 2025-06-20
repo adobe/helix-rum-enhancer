@@ -27,7 +27,7 @@ module.exports = {
       ]
     }],
     ["@semantic-release/exec", {
-      "publishCmd": "./tagger.sh ${nextRelease.version} src/index.js src/plugins/cwv.js src/plugins/form.js src/plugins/martech.js src/plugins/onetrust.js src/plugins/video.js --push"
+      "publishCmd": "./tagger.sh ${nextRelease.version} src/index.js src/plugins/cwv.js src/plugins/form.js src/plugins/martech.js src/plugins/onetrust.js src/plugins/video.js src/plugins/webcomponent.js --push"
     }],
     ["semantic-release-slack-bot", {
       notifyOnSuccess: true,
