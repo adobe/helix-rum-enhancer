@@ -94,31 +94,11 @@ function getSourceIdentifier(el) {
 }
 
 export const sourceSelector = (el) => {
-  const escape = (selector) => (
-    selector
-      .split(' ')
-      .map((part) => (
-        part.replace(/([#.])([^\s#.]+)/g, (_, prefix, name) => {
-          const escaped = name
-            .split('')
-            .map((char, index) => {
-              if (index === 0 && /\d/.test(char)) {
-                return `\\3${char} `;
-              }
-
-              if (!/[a-zA-Z0-9_-]/.test(char)) {
-                return `\\${char}`;
-              }
-
-              return char;
-            })
-            .join('');
-
-          return prefix + escaped;
-        })
-      ))
-      .join(' ')
-  );
+  const escape = (selector) => selector
+    .split(' ')
+    .map((part) => part
+      .replace(/([#.])([^\s#.]+)/g, (_, prefix, name) => prefix + CSS.escape(name)))
+    .join(' ');
 
   try {
     if (!el || el === document.body || el === document.documentElement) {
