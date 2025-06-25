@@ -9,20 +9,30 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-function sampleTrustArcs() {
+function sampleTrustArc() {
+  const cookies = document.cookie.split(';')
+    .map((c) => c.trim());
+
+  const cookieGdprPrefs = cookies.find((cookie) => cookie.startsWith('notice_gdpr_prefs='));
+  const cookiePreferences = cookies.find((cookie) => cookie.startsWith('notice_preferences='));
+
+  if (cookieGdprPrefs && cookiePreferences) {
+    return { source: 'trustarc', target: 'hidden' };
+  }
+
   const taConsentTrack = document.querySelector('#truste-consent-track');
 
   if (taConsentTrack && taConsentTrack.offsetHeight > 0) {
-    return { source: 'trustarcs', target: 'show' };
+    return { source: 'trustarc', target: 'show' };
   }
 
   const taConsentContent = document.querySelector('#truste-consent-content');
 
   if (taConsentContent && taConsentContent.offsetHeight > 0) {
-    return { source: 'trustarcs', target: 'show' };
+    return { source: 'trustarc', target: 'show' };
   }
 
-  return { source: 'trustarcs', target: 'suppressed' };
+  return { source: 'trustarc', target: 'suppressed' };
 }
 
 let hasSentData = false;
@@ -31,6 +41,6 @@ export default function addCookieConsentTracking({ sampleRUM }) {
     return;
   }
 
-  sampleRUM('consent', sampleTrustArcs());
+  sampleRUM('consent', sampleTrustArc());
   hasSentData = true;
 }

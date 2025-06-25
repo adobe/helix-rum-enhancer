@@ -30,14 +30,40 @@ const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 const pluginBasePath = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
 
 const hasCookieKey = (key) => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
-const oneTrustIsPresent = () => document.querySelector('#onetrust-banner-sdk') || document.querySelector('#onetrust-pc-sdk') || hasCookieKey('OptanonAlertBoxClosed');
-const trustArcsIsPresent = () => document.querySelector('#truste-consent-track') || document.querySelector('#consent_blackbar');
-const userCentricsIsPresent = () => document.querySelector('#usercentrics-root');
+
+function isOneTrustPresent() {
+  return (document.querySelector('#onetrust-banner-sdk') || document.querySelector('#onetrust-pc-sdk') || hasCookieKey('OptanonAlertBoxClosed'));
+}
+
+function isTrustArcPresent() {
+  const hasCookies = hasCookieKey('notice_gdpr_prefs') && hasCookieKey('notice_preferences');
+  const consentTrack = document.querySelector('#truste-consent-track');
+  const consentBlackbar = document.querySelector('#consent_blackbar');
+  return (hasCookies || consentTrack || consentBlackbar);
+}
+
+function isUserCentricsPresent() {
+  const ucgcm = localStorage.getItem('uc_gcm');
+
+  if (ucgcm) {
+    return true;
+  }
+
+  const root = document.querySelector('#usercentrics-root');
+
+  if (!root || !root.shadowRoot) {
+    return false;
+  }
+
+  const container = root.shadowRoot.querySelector('#uc-center-container');
+  const wrapper = root.shadowRoot.querySelector('#uc-fading-wrapper');
+  return (container || wrapper);
+}
 
 const CONSENT_PROVIDERS = [
-  { url: `${pluginBasePath}/onetrust.js`, isPresent: oneTrustIsPresent },
-  { url: `${pluginBasePath}/trustarcs.js`, isPresent: trustArcsIsPresent },
-  { url: `${pluginBasePath}/usercentrics.js`, isPresent: userCentricsIsPresent },
+  { url: `${pluginBasePath}/onetrust.js`, isPresent: isOneTrustPresent },
+  { url: `${pluginBasePath}/trustarc.js`, isPresent: isTrustArcPresent },
+  { url: `${pluginBasePath}/usercentrics.js`, isPresent: isUserCentricsPresent },
 ];
 
 const getConsentProvider = () => CONSENT_PROVIDERS.find((p) => p.isPresent());

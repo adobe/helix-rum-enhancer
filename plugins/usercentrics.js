@@ -11,23 +11,22 @@
  */
 
 function sampleUserCentrics() {
-  const ucroot = document.querySelector('#usercentrics-root');
+  const ucgcm = localStorage.getItem('uc_gcm');
 
-  if (ucroot && ucroot.offsetHeight > 0) {
+  if (ucgcm) {
+    return { source: 'usercentrics', target: 'hidden' };
+  }
+
+  const { shadowRoot } = document.querySelector('#usercentrics-root');
+  const container = shadowRoot.querySelector('#uc-center-container');
+
+  if (container && container.offsetHeight > 0) {
     return { source: 'usercentrics', target: 'show' };
   }
 
-  if (ucroot && ucroot.shadowRoot) {
-    const shadowcontainer = ucroot.shadowRoot.querySelector('#uc-center-container');
+  const wrapper = shadowRoot.querySelector('#uc-fading-wrapper');
 
-    if (shadowcontainer && shadowcontainer.offsetHeight > 0) {
-      return { source: 'usercentrics', target: 'show' };
-    }
-  }
-
-  const uccontainer = document.querySelector('#uc-center-container');
-
-  if (uccontainer && uccontainer.offsetHeight > 0) {
+  if (wrapper && wrapper.offsetHeight > 0) {
     return { source: 'usercentrics', target: 'show' };
   }
 
