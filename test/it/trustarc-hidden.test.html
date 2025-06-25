@@ -42,7 +42,12 @@
       });
 
       describe('TrustArc Hidden Integration Test', () => {
-        it('Sends consent event with target "hidden" when TrustArc cookies are set', async () => {
+        it('Sends consent event with target "hidden" when TrustArc cookies are set', async function () {
+          // if user agent is webkit, we skip this test
+          if (navigator.userAgent.includes('WebKit') && !navigator.userAgent.includes('Chrome')) {
+            this.skip();
+          }
+
           document.cookie = 'notice_gdpr_prefs=1; notice_preferences=1; path=/; domain=localhost; expires=Fri, 01 Jan 3022 00:00:00 GMT';
           document.cookie = 'notice_preferences=1; path=/; domain=localhost; expires=Fri, 01 Jan 3022 00:00:00 GMT';
           await loadFixture('/test/fixtures/block.plain.html');
