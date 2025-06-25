@@ -32,40 +32,29 @@ const hasCookieKey = (key) => document.cookie.split(';').some((c) => c.trim().st
 // Set the base path for the plugins
 const pluginBasePath = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
 
-function isOneTrustPresent() {
-  return (document.querySelector('#onetrust-banner-sdk')
-    || document.querySelector('#onetrust-pc-sdk')
-    || hasCookieKey('OptanonAlertBoxClosed'));
-}
-
-function isTrustArcPresent() {
-  return (hasCookieKey('notice_gdpr_prefs') && hasCookieKey('notice_preferences'))
-    || document.querySelector('#truste-consent-track')
-    || document.querySelector('#consent_blackbar');
-}
-
-function isUserCentricsPresent() {
-  if (localStorage.getItem('uc_gcm')) {
-    return true;
-  }
-
-  const shadowRoot = document.querySelector('#usercentrics-root')?.shadowRoot;
-
-  if (!shadowRoot) {
-    return false;
-  }
-
-  return (shadowRoot.querySelector('#uc-center-container')
-    || shadowRoot.querySelector('#uc-fading-wrapper'));
-}
-
 const CONSENT_PROVIDERS = [
-  { url: `${pluginBasePath}/onetrust.js`, isPresent: isOneTrustPresent },
-  { url: `${pluginBasePath}/trustarc.js`, isPresent: isTrustArcPresent },
-  { url: `${pluginBasePath}/usercentrics.js`, isPresent: isUserCentricsPresent },
+  {
+    url: `${pluginBasePath}/onetrust.js`,
+    selectors: ['#onetrust-banner-sdk', '#onetrust-pc-sdk'],
+    cookies: ['OptanonAlertBoxClosed'],
+  },
+  {
+    url: `${pluginBasePath}/trustarc.js`,
+    selectors: ['#truste-consent-track', '#consent_blackbar'],
+    cookies: ['notice_gdpr_prefs', 'notice_preferences'],
+  },
+  {
+    url: `${pluginBasePath}/usercentrics.js`,
+    selectors: ['#usercentrics-root'],
+    localStorage: ['uc_gcm'],
+  },
 ];
 
-const getConsentProvider = () => CONSENT_PROVIDERS.find((p) => p.isPresent());
+const getConsentProvider = () => CONSENT_PROVIDERS.find(({ cookies, localStorage, selectors }) => ((
+  cookies && cookies.every((c) => hasCookieKey(c)))
+  || (localStorage && localStorage.every((l) => window.localStorage.getItem(l)))
+  || (selectors && selectors.some((s) => document.querySelector(s)))
+));
 
 const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
