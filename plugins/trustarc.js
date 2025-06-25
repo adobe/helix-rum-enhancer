@@ -9,30 +9,22 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-function sampleTrustArc() {
+function trackConsent() {
   const cookies = document.cookie.split(';')
-    .map((c) => c.trim());
+    .map((c) => c.trim())
+    .filter((cookie) => (cookie.startsWith('notice_gdpr_prefs=') || cookie.startsWith('notice_preferences=')));
 
-  const cookieGdprPrefs = cookies.find((cookie) => cookie.startsWith('notice_gdpr_prefs='));
-  const cookiePreferences = cookies.find((cookie) => cookie.startsWith('notice_preferences='));
-
-  if (cookieGdprPrefs && cookiePreferences) {
-    return { source: 'trustarc', target: 'hidden' };
+  if (cookies.length === 2) {
+    return 'hidden';
   }
 
-  const taConsentTrack = document.querySelector('#truste-consent-track');
+  const banner = document.querySelector('#truste-consent-track') || document.querySelector('#truste-consent-content');
 
-  if (taConsentTrack && taConsentTrack.offsetHeight > 0) {
-    return { source: 'trustarc', target: 'show' };
+  if (banner && banner.offsetHeight > 0) {
+    return 'show';
   }
 
-  const taConsentContent = document.querySelector('#truste-consent-content');
-
-  if (taConsentContent && taConsentContent.offsetHeight > 0) {
-    return { source: 'trustarc', target: 'show' };
-  }
-
-  return { source: 'trustarc', target: 'suppressed' };
+  return 'suppressed';
 }
 
 let hasSentData = false;
@@ -41,6 +33,6 @@ export default function addCookieConsentTracking({ sampleRUM }) {
     return;
   }
 
-  sampleRUM('consent', sampleTrustArc());
+  sampleRUM('consent', { source: 'trustarc', target: trackConsent() });
   hasSentData = true;
 }

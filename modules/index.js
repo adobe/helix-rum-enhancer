@@ -26,38 +26,37 @@ const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
 // eslint-disable-next-line no-use-before-define
 const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 
+// Check for the presence of a given cookie
+const hasCookieKey = (key) => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
+
 // Set the base path for the plugins
 const pluginBasePath = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
 
-const hasCookieKey = (key) => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
-
 function isOneTrustPresent() {
-  return (document.querySelector('#onetrust-banner-sdk') || document.querySelector('#onetrust-pc-sdk') || hasCookieKey('OptanonAlertBoxClosed'));
+  return (document.querySelector('#onetrust-banner-sdk')
+    || document.querySelector('#onetrust-pc-sdk')
+    || hasCookieKey('OptanonAlertBoxClosed'));
 }
 
 function isTrustArcPresent() {
-  const hasCookies = hasCookieKey('notice_gdpr_prefs') && hasCookieKey('notice_preferences');
-  const consentTrack = document.querySelector('#truste-consent-track');
-  const consentBlackbar = document.querySelector('#consent_blackbar');
-  return (hasCookies || consentTrack || consentBlackbar);
+  return (hasCookieKey('notice_gdpr_prefs') && hasCookieKey('notice_preferences'))
+    || document.querySelector('#truste-consent-track')
+    || document.querySelector('#consent_blackbar');
 }
 
 function isUserCentricsPresent() {
-  const ucgcm = localStorage.getItem('uc_gcm');
-
-  if (ucgcm) {
+  if (localStorage.getItem('uc_gcm')) {
     return true;
   }
 
-  const root = document.querySelector('#usercentrics-root');
+  const shadowRoot = document.querySelector('#usercentrics-root')?.shadowRoot;
 
-  if (!root || !root.shadowRoot) {
+  if (!shadowRoot) {
     return false;
   }
 
-  const container = root.shadowRoot.querySelector('#uc-center-container');
-  const wrapper = root.shadowRoot.querySelector('#uc-fading-wrapper');
-  return (container || wrapper);
+  return (shadowRoot.querySelector('#uc-center-container')
+    || shadowRoot.querySelector('#uc-fading-wrapper'));
 }
 
 const CONSENT_PROVIDERS = [
@@ -82,7 +81,6 @@ const PLUGINS = {
   // Martech
   martech: { url: `${pluginBasePath}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
   consent: {
-    url: undefined,
     when: () => getConsentProvider(),
     isBlockDependent: true,
     mutationObserverParams: {
@@ -140,8 +138,7 @@ function loadPlugin(key, params) {
   }
 
   if (key === 'consent') {
-    const { url } = getConsentProvider();
-    plugin.url = url;
+    plugin.url = getConsentProvider().url;
   }
 
   if (!pluginCache.has(key)) {
@@ -389,7 +386,7 @@ function init() {
       window.hlx.rum.collector = trackCheckpoint;
       processQueue();
     }
-    /* c8 ignore next 3 */
+  /* c8 ignore next 3 */
   } catch (error) {
     // something went wrong
   }
