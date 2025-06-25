@@ -1,0 +1,71 @@
+<html>
+
+<head>
+  <title>Usercentrics Integration Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.called = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.called.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.called.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <img src="/test/it/img.test.html">
+  <script type="module">
+    import {runTests} from '@web/test-runner-mocha';
+    import {sendMouse} from '@web/test-runner-commands';
+    import {assert} from '@esm-bundle/chai';
+
+    async function loadFixture(pathToShadowFixture) {
+      const fixture = await fetch('/test/fixtures/usercentrics.html');
+      const fixtureContent = await fixture.text();
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = fixtureContent;
+
+      const shadowFixture = await fetch(pathToShadowFixture);
+      const shadowContent = await shadowFixture.text();
+      wrapper.firstElementChild.attachShadow({mode: "open"});
+      wrapper.firstElementChild.shadowRoot.innerHTML = shadowContent;
+
+      document.body.appendChild(wrapper.firstElementChild);
+    }
+
+    runTests(async () => {
+      beforeEach(async () => {
+        const usp = new URLSearchParams(window.location.search);
+        usp.append('utm_medium', 'test');
+        window.history.replaceState({}, '', `${window.location.pathname}?${usp.toString()}`);
+        document.body.innerHTML = '';
+      });
+
+      describe('Usercentrics Integration Tests', () => {
+        it('Reports "show" when Usercentrics banner is visible', async () => {
+          await loadFixture('/test/fixtures/usercentrics-shadow-root.html');
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          await sendMouse({type: 'click', position: [10, 10]});
+          assert(window.called.some((call) => call.checkpoint === 'consent'), 'consent checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'consent' && call.target === 'show' && call.source === 'usercentrics'), 'usercentrics banner not detected as shown');
+        });
+
+        it('Reports "show" when Usercentrics banner with shadow wrapper is visible', async () => {
+          await loadFixture('/test/fixtures/usercentrics-shadow-wrapper.html');
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          await sendMouse({type: 'click', position: [10, 10]});
+          assert(window.called.some((call) => call.checkpoint === 'consent'), 'consent checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'consent' && call.target === 'show' && call.source === 'usercentrics'), 'usercentrics banner not detected as shown');
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

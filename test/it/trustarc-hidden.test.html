@@ -1,0 +1,59 @@
+<html>
+
+<head>
+  <title>TrustArc Hidden Integration Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.called = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.called.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.called.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <img src="/test/it/img.test.html">
+  <script type="module">
+    import {runTests} from '@web/test-runner-mocha';
+    import {sendMouse} from '@web/test-runner-commands';
+    import {assert} from '@esm-bundle/chai';
+
+    async function loadFixture(path) {
+      const fixture = await fetch(path);
+      const fixtureContent = await fixture.text();
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = fixtureContent;
+      document.body.appendChild(wrapper.firstElementChild);
+    }
+
+    runTests(async () => {
+      beforeEach(() => {
+        const usp = new URLSearchParams(window.location.search);
+        usp.append('utm_medium', 'test');
+        window.history.replaceState({}, '', `${window.location.pathname}?${usp.toString()}`);
+        document.body.innerHTML = '';
+      });
+
+      describe('TrustArc Hidden Integration Test', () => {
+        it('Sends consent event with target "hidden" when TrustArc cookies are set', async () => {
+          document.cookie = 'notice_gdpr_prefs=1; notice_preferences=1; path=/; domain=localhost; expires=Fri, 01 Jan 3022 00:00:00 GMT';
+          document.cookie = 'notice_preferences=1; path=/; domain=localhost; expires=Fri, 01 Jan 3022 00:00:00 GMT';
+          await loadFixture('/test/fixtures/block.plain.html');
+
+          await new Promise((resolve) => setTimeout(resolve, 3000));
+          assert(window.called.some((call) => call.checkpoint === 'consent'), 'consent checkpoint missing');
+          assert(window.called.some((call) => call.checkpoint === 'consent' && call.target === 'hidden' && call.source === 'trustarc'), 'trustarc did not report hidden when cookies set');
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

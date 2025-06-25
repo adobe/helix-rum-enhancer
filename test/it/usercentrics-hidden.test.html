@@ -1,0 +1,54 @@
+<html>
+
+<head>
+  <title>Usercentrics Hidden State Integration Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.called = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.called.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.called.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <img src="/test/it/img.test.html">
+  <script type="module">
+    import {runTests} from '@web/test-runner-mocha';
+    import {sendMouse} from '@web/test-runner-commands';
+    import {assert} from '@esm-bundle/chai';
+
+    async function loadFixture() {
+      const fixture = await fetch('/test/fixtures/usercentrics.html');
+      const fixtureContent = await fixture.text();
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = fixtureContent;
+      document.body.appendChild(wrapper.firstElementChild);
+    }
+
+    runTests(async () => {
+      describe('Usercentrics Suppressed State Integration Test', () => {
+        it('Reports "suppressed" when Usercentrics container & wrapper are hidden', async () => {
+          localStorage.setItem('uc_gcm', '1');
+          await loadFixture();
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 3000);
+          });
+
+          assert(window.called.some((call) => call.checkpoint === 'consent'), 'consent checkpoint missing');
+          assert(window.called.some((call) => call.target === 'hidden'), 'usercentrics not detected as suppressed');
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>
