@@ -1,0 +1,60 @@
+<html>
+
+<head>
+  <title>Usercentrics Suppressed State Integration Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.called = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.called.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.called.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <img src="/test/it/img.test.html">
+  <script type="module">
+    import {runTests} from '@web/test-runner-mocha';
+    import {sendMouse} from '@web/test-runner-commands';
+    import {assert} from '@esm-bundle/chai';
+
+    async function loadFixture(pathToShadowFixture) {
+      const fixture = await fetch('/test/fixtures/usercentrics.html');
+      const fixtureContent = await fixture.text();
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = fixtureContent;
+
+      const shadowFixture = await fetch(pathToShadowFixture);
+      const shadowContent = await shadowFixture.text();
+      wrapper.firstElementChild.attachShadow({mode: "open"});
+      wrapper.firstElementChild.shadowRoot.innerHTML = shadowContent;
+      wrapper.firstElementChild.style.display = 'none';
+
+      document.body.appendChild(wrapper.firstElementChild);
+    }
+
+    runTests(async () => {
+      describe('Usercentrics Suppressed State Integration Test', () => {
+        it('Reports "suppressed" when Usercentrics container & wrapper are hidden', async () => {
+          await loadFixture('/test/fixtures/usercentrics-shadow-root.html');
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 3000);
+          });
+
+          assert(window.called.some((call) => call.checkpoint === 'consent'), 'consent checkpoint missing');
+          assert(window.called.some((call) => call.target === 'suppressed'), 'usercentrics not detected as suppressed');
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>
