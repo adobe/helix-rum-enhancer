@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Adobe. All rights reserved.
+ * Copyright 2025 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -10,15 +10,12 @@
  * governing permissions and limitations under the License.
  */
 function trackConsent() {
-  const cmpCookie = document.cookie.split(';')
-    .map((c) => c.trim())
-    .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
-
-  if (cmpCookie) {
+  if (localStorage.getItem('uc_gcm')) {
     return 'hidden';
   }
 
-  const banner = document.querySelector('#onetrust-banner-sdk') || document.querySelector('#onetrust-pc-sdk');
+  const { shadowRoot } = document.querySelector('#usercentrics-root');
+  const banner = shadowRoot.querySelector('#uc-center-container') || shadowRoot.querySelector('#uc-fading-wrapper');
 
   if (banner && banner.offsetHeight > 0) {
     return 'show';
@@ -33,6 +30,6 @@ export default function addCookieConsentTracking({ sampleRUM }) {
     return;
   }
 
-  sampleRUM('consent', { source: 'onetrust', target: trackConsent() });
+  sampleRUM('consent', { source: 'usercentrics', target: trackConsent() });
   hasSentData = true;
 }
