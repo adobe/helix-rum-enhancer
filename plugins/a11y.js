@@ -74,7 +74,7 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
     } else if (score >= 1) {
       audience = 'a11y-low';
     }
-    sampleRUM('audience', { target: audience });
+    sampleRUM('audience', { source: audience, target: 'a11y-standard:a11y-low:a11y-medium:a11y-high' });
   };
 
   const reportFocusTrap = (trapType, elements) => {
