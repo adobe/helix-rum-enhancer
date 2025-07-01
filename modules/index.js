@@ -107,8 +107,7 @@ function loadPlugin(key, params) {
     pluginCache.set(key, import(`${plugin.url || plugin}`));
   }
 
-  const pluginLoadPromise = pluginCache.get(key);
-  return pluginLoadPromise
+  return pluginCache.get(key)
     .then((p) => (p.default && p.default(params)) || (typeof p === 'function' && p(params)))
     .catch(() => { /* silent plugin error catching */ });
 }
@@ -148,22 +147,19 @@ function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
   if (isSelected && maxEvents) {
     maxEvents -= 1;
-    const sendPing = (pdata = data) => {
-      // eslint-disable-next-line object-curly-newline, max-len
-      const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
-      const urlParams = window.RUM_PARAMS ? `?${new URLSearchParams(window.RUM_PARAMS).toString()}` : '';
-      const { href: url, origin } = new URL(`.rum/${weight}${urlParams}`, sampleRUM.collectBaseURL);
-      if (window.location.origin === origin) {
-        const headers = { type: 'application/json' };
-        navigator.sendBeacon(url, new Blob([body], headers));
-        /* c8 ignore next 3 */
-      } else {
-        navigator.sendBeacon(url, body);
-      }
-      // eslint-disable-next-line no-console
-      console.debug(`ping:${checkpoint}`, pdata);
-    };
-    sendPing(data);
+    // eslint-disable-next-line object-curly-newline, max-len
+    const body = JSON.stringify({ weight, id, referer: urlSanitizers[window.hlx.RUM_MASK_URL || 'path'](), checkpoint, t, ...data }, KNOWN_PROPERTIES);
+    const urlParams = window.RUM_PARAMS ? `?${new URLSearchParams(window.RUM_PARAMS).toString()}` : '';
+    const { href: url, origin } = new URL(`.rum/${weight}${urlParams}`, sampleRUM.collectBaseURL);
+    if (window.location.origin === origin) {
+      const headers = { type: 'application/json' };
+      navigator.sendBeacon(url, new Blob([body], headers));
+      /* c8 ignore next 3 */
+    } else {
+      navigator.sendBeacon(url, body);
+    }
+    // eslint-disable-next-line no-console
+    console.debug(`ping:${checkpoint}`, data);
   }
 }
 
@@ -224,14 +220,15 @@ function addNavigationTracking() {
 function addLoadResourceTracking() {
   const observer = new PerformanceObserver((list) => {
     try {
-      list.getEntries()
+      const entries = list.getEntries();
+      entries
         .filter((e) => !e.responseStatus || e.responseStatus < 400)
         .filter((e) => window.location.hostname === new URL(e.name).hostname || fflags.has('allresources'))
         .filter((e) => new URL(e.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)'))
         .forEach((e) => {
           sampleRUM('loadresource', { source: e.name, target: Math.round(e.duration) });
         });
-      list.getEntries()
+      entries
         .filter((e) => e.responseStatus >= 400)
         .filter((e) => !(new URL(e.name).pathname.match('.*(/\\.rum/1[0-9]{0,3})')))
         .forEach((e) => {
@@ -344,7 +341,7 @@ function addTrackingFromConfig() {
   });
 }
 
-function initEnhancer() {
+function init() {
   try {
     if (sampleRUM) {
       addTrackingFromConfig();
@@ -357,4 +354,4 @@ function initEnhancer() {
   }
 }
 
-initEnhancer();
+init();
