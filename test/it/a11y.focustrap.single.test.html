@@ -1,0 +1,61 @@
+<html>
+<head>
+  <title>A11y - Single Element Focus Trap Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin'
+    };
+    window.events = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.events.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.events.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+<body>
+  <button id="btn-0"></button>
+  <button id="btn-1"></button>
+
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendKeys } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+    import { pollForError } from './a11y.test.utils.js';
+
+    runTests(async () => {
+      describe('Focus Trap Detection', () => {
+        const targetElement = document.getElementById('btn-0');
+
+        // Create a programmatic focus trap for the test
+        targetElement.addEventListener('keydown', (e) => {
+          if (e.key === 'Tab') {
+            e.preventDefault();
+            targetElement.focus();
+          }
+        });
+
+        const dispatchTab = async () => {
+          await sendKeys({ press: 'Tab' });
+          await new Promise(resolve => setTimeout(resolve, 50));
+        };
+
+        it('should detect a single-element trap', async () => {
+          targetElement.focus();
+          for (let i = 0; i < 4; i += 1) {
+            await dispatchTab();
+          }
+          const error = await pollForError('focus-trap:single');
+          expect(error).to.exist;
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

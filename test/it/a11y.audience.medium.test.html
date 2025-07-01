@@ -28,18 +28,24 @@
     import { pollForAudience, mockMaxTouchPoints, restoreMaxTouchPoints, mockVisualViewport, restoreVisualViewport } from './a11y.test.utils.js';
 
     runTests(async () => {
+      let originalMaxTouchPoints;
+      let originalVisualViewport;
+
+      before(async () => {
+        originalMaxTouchPoints = await mockMaxTouchPoints(1);
+        originalVisualViewport = await mockVisualViewport(200);
+      });
+
+      after(async () => {
+        restoreVisualViewport(originalVisualViewport);
+        restoreMaxTouchPoints(originalMaxTouchPoints);
+      });
+
       describe('Accessibility Audience Scoring', () => {
         it('should report a medium audience for high zoom', async () => {
-          const originalMaxTouchPoints = mockMaxTouchPoints();
-          navigator.maxTouchPoints = 1;
-          const originalVisualViewport = mockVisualViewport();
-
           const audience = await pollForAudience();
           expect(audience).to.exist;
           expect(audience.source).to.equal('a11y-medium');
-
-          restoreVisualViewport(originalVisualViewport);
-          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });

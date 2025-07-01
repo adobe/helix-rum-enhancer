@@ -28,26 +28,30 @@
     import { pollForAudience, mockMaxTouchPoints, restoreMaxTouchPoints, mockVisualViewport, restoreVisualViewport } from './a11y.test.utils.js';
 
     runTests(async () => {
+      let originalVisualViewport;
+      let originalMaxTouchPoints;
+      let originalMatchMedia;
+
+      before(async () => {
+        originalVisualViewport = await mockVisualViewport(200);
+        originalMaxTouchPoints = await mockMaxTouchPoints(0);
+        originalMatchMedia = window.matchMedia;
+        window.matchMedia = (query) => ({ matches: query === '(prefers-contrast: high)' });
+      });
+
+      after(async () => {
+        restoreVisualViewport(originalVisualViewport);
+        restoreMaxTouchPoints(originalMaxTouchPoints);
+        window.matchMedia = originalMatchMedia;
+      });
+
       describe('Accessibility Audience Scoring', () => {
         it('should report a high audience for multiple signals', async () => {
-          const originalMatchMedia = window.matchMedia;
-          const originalVisualViewport = mockVisualViewport();
-          const originalMaxTouchPoints = mockMaxTouchPoints();
-
-          navigator.maxTouchPoints = 0;
-          window.matchMedia = (query) => ({ matches: query === '(prefers-contrast: high)' });
-          Object.defineProperty(window, 'visualViewport', {
-            value: { width: window.innerWidth / 2 },
-            configurable: true,
-          });
+          await new Promise(resolve => setTimeout(resolve, 1000));
 
           const audience = await pollForAudience();
           expect(audience).to.exist;
           expect(audience.source).to.equal('a11y-high');
-
-          window.matchMedia = originalMatchMedia;
-          restoreVisualViewport(originalVisualViewport);
-          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });

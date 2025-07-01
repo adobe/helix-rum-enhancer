@@ -66,14 +66,14 @@ export async function pollForError(errorSource, timeout = 5000) {
  * Mocks the 'navigator.maxTouchPoints' property to be writable for tests.
  * @returns {PropertyDescriptor|undefined} The original property descriptor to restore later.
  */
-export function mockMaxTouchPoints() {
+export function mockMaxTouchPoints(points = 1) {
   const originalDescriptor = Object.getOwnPropertyDescriptor(
     Navigator.prototype,
     'maxTouchPoints',
   );
 
   Object.defineProperty(Navigator.prototype, 'maxTouchPoints', {
-    value: 1,
+    value: points,
     writable: true,
     configurable: true,
   });
@@ -95,14 +95,14 @@ export function restoreMaxTouchPoints(originalDescriptor) {
  * Mocks the 'window.visualViewport' property to be writable for tests.
  * @returns {PropertyDescriptor|undefined} The original property descriptor to restore later.
  */
-export function mockVisualViewport() {
+export function mockVisualViewport(percentage) {
   const originalDescriptor = Object.getOwnPropertyDescriptor(
     window,
     'visualViewport',
   );
 
   Object.defineProperty(window, 'visualViewport', {
-    value: { width: window.innerWidth / 2 },
+    value: { width: window.innerWidth / (percentage / 100) },
     configurable: true,
   });
 

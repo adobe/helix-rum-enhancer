@@ -29,15 +29,20 @@
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
+        let originalMaxTouchPoints;
+
+        before(async () => {
+          originalMaxTouchPoints = await mockMaxTouchPoints(1);
+        });
+
+        after(async () => {
+          restoreMaxTouchPoints(originalMaxTouchPoints);
+        });
+
         it('should report a11y-standard for a default user', async () => {
-          const originalMaxTouchPoints = mockMaxTouchPoints();
-          navigator.maxTouchPoints = 1;
-          
           const audience = await pollForAudience();
           expect(audience).to.exist;
           expect(audience.source).to.equal('a11y-standard');
-
-          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });

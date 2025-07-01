@@ -1,0 +1,77 @@
+<html>
+<head>
+  <title>A11y - Sequence Focus Trap Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin'
+    };
+    window.events = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.events.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.events.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+<body>
+  <button id="btn-0" tabindex="0"></button>
+  <button id="btn-1" tabindex="0"></button>
+  <button id="btn-2" tabindex="0"></button>
+
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendKeys } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+    import { pollForError } from './a11y.test.utils.js';
+
+    runTests(async () => {
+      describe('Focus Trap Detection', () => {
+        const el0 = document.getElementById('btn-0');
+        const el2 = document.getElementById('btn-2');
+
+        // Create a programmatic focus trap for the test
+        el2.addEventListener('keydown', (e) => {
+          if (e.key === 'Tab' && !e.shiftKey) {
+            e.preventDefault();
+            el0.focus();
+          }
+        });
+
+        el0.addEventListener('keydown', (e) => {
+          if (e.key === 'Tab' && e.shiftKey) {
+            e.preventDefault();
+            el2.focus();
+          }
+        });
+
+        const dispatchTab = async () => {
+          await sendKeys({ press: 'Tab' });
+          // Allow time for focus to settle and for the tracker to run.
+          // The tracker runs in a setTimeout(0), so 50ms is a safe wait.
+          await new Promise(resolve => setTimeout(resolve, 50));
+        };
+
+        it('should detect a repeating sequence of 3 elements', async () => {
+          el0.focus();
+          
+          // Tab multiple times to create a focus history with a repeating sequence.
+          // The focus trap will cycle through btn-0, btn-1, btn-2.
+          // The detector needs at least 3 repeats of the sequence.
+          for (let i = 0; i < 9; i += 1) {
+            await dispatchTab();
+          }
+
+          const error = await pollForError('focus-trap:sequence');
+          expect(error).to.exist;
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

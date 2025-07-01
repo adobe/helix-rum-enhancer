@@ -29,19 +29,26 @@
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
-        it('should report a low audience for a single preference', async () => {
-          const originalMaxTouchPoints = mockMaxTouchPoints();
-          navigator.maxTouchPoints = 1;
+        let originalMaxTouchPoints;
+        let originalMatchMedia;
 
-          const originalMatchMedia = window.matchMedia;
+        before(async () => {
+          originalMaxTouchPoints = await mockMaxTouchPoints(1);
+          originalMatchMedia = window.matchMedia;
           window.matchMedia = (query) => ({ matches: query === '(prefers-reduced-motion: reduce)' });
-          
+        });
+
+        after(async () => {
+          restoreMaxTouchPoints(originalMaxTouchPoints);
+          window.matchMedia = originalMatchMedia;
+        });
+
+        it('should report a low audience for a single preference', async () => {
           const audience = await pollForAudience();
           expect(audience).to.exist;
           expect(audience.source).to.equal('a11y-low');
 
           window.matchMedia = originalMatchMedia;
-          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });
