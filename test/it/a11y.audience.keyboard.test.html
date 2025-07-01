@@ -12,7 +12,6 @@
         window.events.push(JSON.parse(payload));
       } else {
         payload.text().then((text) => {
-          console.error('### data', text);
           window.events.push(JSON.parse(text));
         });
       }

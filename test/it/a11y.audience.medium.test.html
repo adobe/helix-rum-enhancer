@@ -43,6 +43,8 @@
 
       describe('Accessibility Audience Scoring', () => {
         it('should report a medium audience for high zoom', async () => {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
           const audience = await pollForAudience();
           expect(audience).to.exist;
           expect(audience.source).to.equal('a11y-medium');

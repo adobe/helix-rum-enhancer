@@ -54,6 +54,8 @@
         };
 
         it('should detect a ping-pong trap', async () => {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
           el0.focus();
 
           // Tab multiple times to create a ping-pong history

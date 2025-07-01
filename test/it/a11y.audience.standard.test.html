@@ -40,6 +40,8 @@
         });
 
         it('should report a11y-standard for a default user', async () => {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
           const audience = await pollForAudience();
           expect(audience).to.exist;
           expect(audience.source).to.equal('a11y-standard');

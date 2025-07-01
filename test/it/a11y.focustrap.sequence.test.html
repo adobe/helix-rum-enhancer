@@ -58,6 +58,8 @@
         };
 
         it('should detect a repeating sequence of 3 elements', async () => {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
           el0.focus();
           
           // Tab multiple times to create a focus history with a repeating sequence.

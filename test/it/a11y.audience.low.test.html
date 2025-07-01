@@ -44,6 +44,8 @@
         });
 
         it('should report a low audience for a single preference', async () => {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+
           const audience = await pollForAudience();
           expect(audience).to.exist;
           expect(audience.source).to.equal('a11y-low');
