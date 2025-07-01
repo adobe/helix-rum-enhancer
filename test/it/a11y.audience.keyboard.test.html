@@ -1,0 +1,45 @@
+<html>
+<head>
+  <title>A11y Audience - Keyboard Usage Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin'
+    };
+    window.events = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.events.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.events.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <p>Some content</p>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendKeys } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+    import { pollForAudience } from './a11y.test.utils.js';
+
+    runTests(async () => {
+      describe('Accessibility Audience Scoring', () => {
+        it('should score heavy keyboard usage', async () => {
+          for (let i = 0; i < 10; i += 1) {
+            await sendKeys({ press: 'ArrowDown' });
+          }
+          const audience = await pollForAudience();
+          expect(audience).to.exist;
+          expect(audience.source).to.equal('a11y-medium');
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

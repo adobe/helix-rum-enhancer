@@ -1,0 +1,48 @@
+<html>
+<head>
+  <title>A11y Audience - Medium Zoom Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin'
+    };
+    window.events = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.events.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.events.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <p>Some content</p>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+    import { pollForAudience, mockMaxTouchPoints, restoreMaxTouchPoints, mockVisualViewport, restoreVisualViewport } from './a11y.test.utils.js';
+
+    runTests(async () => {
+      describe('Accessibility Audience Scoring', () => {
+        it('should report a medium audience for high zoom', async () => {
+          const originalMaxTouchPoints = mockMaxTouchPoints();
+          navigator.maxTouchPoints = 1;
+          const originalVisualViewport = mockVisualViewport();
+
+          const audience = await pollForAudience();
+          expect(audience).to.exist;
+          expect(audience.source).to.equal('a11y-medium');
+
+          restoreVisualViewport(originalVisualViewport);
+          restoreMaxTouchPoints(originalMaxTouchPoints);
+        });
+      });
+    });
+  </script>
+</body>
+</html> 
