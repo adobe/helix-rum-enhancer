@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>A11y Audience - Low Preference Test</title>
+  <title>A11y Audience - High Zoom Test</title>
   <script>
     window.RUM_BASE = window.origin;
     window.hlx = {
@@ -19,38 +19,25 @@
   </script>
   <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
 </head>
-
 <body>
   <p>Some content</p>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
-    import { pollForAudience, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+    import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
-        let originalMaxTouchPoints;
-        let originalMatchMedia;
-
-        before(async () => {
-          originalMaxTouchPoints = await mockMaxTouchPoints(1);
-          originalMatchMedia = window.matchMedia;
-          window.matchMedia = (query) => ({ matches: query === '(prefers-reduced-motion: reduce)' });
-        });
-
-        after(async () => {
-          restoreMaxTouchPoints(originalMaxTouchPoints);
-          window.matchMedia = originalMatchMedia;
-        });
-
-        it('should report a low audience for a single preference', async () => {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        it('should report `a11y-on` for high zoom', async () => {
+          const originalVisualViewport = mockVisualViewport(200);
+          const originalMaxTouchPoints = mockMaxTouchPoints(1);
 
           const audience = await pollForAudience();
           expect(audience).to.exist;
-          expect(audience.source).to.equal('a11y-low');
+          expect(audience.source).to.equal('a11y-on');
 
-          window.matchMedia = originalMatchMedia;
+          restoreVisualViewport(originalVisualViewport);
+          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });

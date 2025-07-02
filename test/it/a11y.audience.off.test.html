@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>A11y Audience - Standard User Test</title>
+  <title>A11y Audience - Default User Test</title>
   <script>
     window.RUM_BASE = window.origin;
     window.hlx = {
@@ -19,32 +19,25 @@
   </script>
   <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
 </head>
-
 <body>
   <p>Some content</p>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
-    import { pollForAudience, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+    import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
-        let originalMaxTouchPoints;
-
-        before(async () => {
-          originalMaxTouchPoints = await mockMaxTouchPoints(1);
-        });
-
-        after(async () => {
-          restoreMaxTouchPoints(originalMaxTouchPoints);
-        });
-
-        it('should report a11y-standard for a default user', async () => {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        it('should report `a11y-off` for a standard user', async () => {
+          const originalVisualViewport = mockVisualViewport(100);
+          const originalMaxTouchPoints = mockMaxTouchPoints(1);
 
           const audience = await pollForAudience();
           expect(audience).to.exist;
-          expect(audience.source).to.equal('a11y-standard');
+          expect(audience.source).to.equal('a11y-off');
+
+          restoreVisualViewport(originalVisualViewport);
+          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });

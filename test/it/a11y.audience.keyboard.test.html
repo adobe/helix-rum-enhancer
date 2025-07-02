@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>A11y Audience - Keyboard Only Test</title>
+  <title>A11y Audience - Keyboard Usage Test</title>
   <script>
     window.RUM_BASE = window.origin;
     window.hlx = {
@@ -25,30 +25,25 @@
     import { runTests } from '@web/test-runner-mocha';
     import { sendKeys } from '@web/test-runner-commands';
     import { expect } from '@esm-bundle/chai';
-    import { pollForAudience, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+    import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
 
+    console.error('### Keyboard');
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
-        let originalMaxTouchPoints;
-
-        before(async () => {
-          originalMaxTouchPoints = await mockMaxTouchPoints(1);
-        });
-
-        after(async () => {
-          restoreMaxTouchPoints(originalMaxTouchPoints);
-        });
-
-        it('should score heavy keyboard usage correctly', async () => {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        it('should report `a11y-on` for heavy keyboard usage', async () => {
+          const originalVisualViewport = mockVisualViewport(100);
+          const originalMaxTouchPoints = mockMaxTouchPoints(1);
 
           for (let i = 0; i < 10; i += 1) {
             await sendKeys({ press: 'ArrowDown' });
           }
-          
+
           const audience = await pollForAudience();
           expect(audience).to.exist;
-          expect(audience.source).to.equal('a11y-low');
+          expect(audience.source).to.equal('a11y-on');
+
+          restoreVisualViewport(originalVisualViewport);
+          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });

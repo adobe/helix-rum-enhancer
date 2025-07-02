@@ -66,15 +66,8 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
       return;
     }
     reported = true;
-    let audience = 'a11y-standard';
-    if (score >= 5) {
-      audience = 'a11y-high';
-    } else if (score >= 3) {
-      audience = 'a11y-medium';
-    } else if (score >= 1) {
-      audience = 'a11y-low';
-    }
-    sampleRUM('audience', { source: audience, target: 'a11y-standard:a11y-low:a11y-medium:a11y-high' });
+    const audience = score >= 1 ? 'a11y-on' : 'a11y-off';
+    sampleRUM('audience', { source: audience, target: 'a11y-on:a11y-off' });
   };
 
   const reportFocusTrap = (trapType, elements) => {
@@ -220,7 +213,7 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
   focusLossObserver.observe(document, { childList: true, subtree: true });
 
   // --- Final Reporting ---
-  if (score >= 3) {
+  if (score >= 1) {
     reportAudience();
   } else {
     setTimeout(() => reportAudience(), 10_000);

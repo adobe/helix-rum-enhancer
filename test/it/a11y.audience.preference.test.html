@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>A11y Audience - Medium Zoom Test</title>
+  <title>A11y Audience - Single Preference Test</title>
   <script>
     window.RUM_BASE = window.origin;
     window.hlx = {
@@ -19,35 +19,29 @@
   </script>
   <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
 </head>
-
 <body>
   <p>Some content</p>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
-    import { pollForAudience, mockMaxTouchPoints, restoreMaxTouchPoints, mockVisualViewport, restoreVisualViewport } from './a11y.test.utils.js';
+    import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
 
     runTests(async () => {
-      let originalMaxTouchPoints;
-      let originalVisualViewport;
-
-      before(async () => {
-        originalMaxTouchPoints = await mockMaxTouchPoints(1);
-        originalVisualViewport = await mockVisualViewport(200);
-      });
-
-      after(async () => {
-        restoreVisualViewport(originalVisualViewport);
-        restoreMaxTouchPoints(originalMaxTouchPoints);
-      });
-
       describe('Accessibility Audience Scoring', () => {
-        it('should report a medium audience for high zoom', async () => {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+        it('should report `a11y-on` for a single preference', async () => {
+          const originalMatchMedia = window.matchMedia;
+          const originalVisualViewport = mockVisualViewport(100);
+          const originalMaxTouchPoints = mockMaxTouchPoints(1);
+
+          window.matchMedia = (query) => ({ matches: query === '(prefers-reduced-motion: reduce)' });
 
           const audience = await pollForAudience();
           expect(audience).to.exist;
-          expect(audience.source).to.equal('a11y-medium');
+          expect(audience.source).to.equal('a11y-on');
+
+          window.matchMedia = originalMatchMedia;
+          restoreVisualViewport(originalVisualViewport);
+          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });
