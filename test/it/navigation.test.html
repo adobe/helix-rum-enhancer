@@ -69,7 +69,7 @@
             setTimeout(resolve, 1000);
           });
 
-          expect(called).to.have.lengthOf(6, 'we expect six calls, got ' + called.map((c) => c[0]).join(', '));
+          expect(called).to.have.lengthOf(7, 'we expect six calls, got ' + called.map((c) => c[0]).join(', '));
           expect(called[0][0]).to.equal('navigate');
           expect(called[1][0]).to.equal('redirect');
           expect(called[1][1].target).to.equal(1);
@@ -77,6 +77,7 @@
           expect(called[3][0]).to.equal('back_forward');
           expect(called[4][0]).to.equal('prerender');
           expect(called[5][0]).to.equal('language');
+          expect(called[6][0]).to.equal('audience');
         });
 
       });
