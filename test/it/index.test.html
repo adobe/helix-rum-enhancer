@@ -45,7 +45,7 @@
           // sort called by the first argument
           called.sort((a, b) => a[0].localeCompare(b[0]));
 
-          expect(called).to.have.lengthOf(3);
+          expect(called).to.have.lengthOf(4);
           expect(called[0][0]).to.equal('click');
 
           expect(called[1][0]).to.equal('enter');
