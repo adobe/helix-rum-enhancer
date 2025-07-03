@@ -42,7 +42,7 @@
           await sendMouse({ type: 'click', position: [10, 10] });
 
           expect(called).to.have.lengthOf(4, 'three calls should have been made, got: ' + called.map((c) => c[0]).join(', '));
-          expect(called[2][0]).to.equal('click');
+          expect(called[3][0]).to.equal('click');
 
           let transferSize = 0;
           // check the size of loaded JS files

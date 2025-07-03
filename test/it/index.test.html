@@ -45,13 +45,15 @@
           // sort called by the first argument
           called.sort((a, b) => a[0].localeCompare(b[0]));
 
+          expect(called[0][0]).to.equal('audience');
+
           expect(called).to.have.lengthOf(4);
-          expect(called[0][0]).to.equal('click');
+          expect(called[1][0]).to.equal('click');
 
-          expect(called[1][0]).to.equal('enter');
+          expect(called[2][0]).to.equal('enter');
 
-          expect(called[2][0]).to.equal('language');
-          expect(called[2][1].source).to.equal('en-NZ');
+          expect(called[3][0]).to.equal('language');
+          expect(called[3][1].source).to.equal('en-NZ');
         });
 
       });
