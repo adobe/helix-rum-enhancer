@@ -17,8 +17,6 @@
         });
       }
     };
-    window.originalVisualViewport = mockVisualViewport(200);
-    window.originalMaxTouchPoints = mockMaxTouchPoints(1);
   </script>
   <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
 </head>
@@ -28,6 +26,8 @@
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
     import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+    window.originalVisualViewport = mockVisualViewport(200);
+    window.originalMaxTouchPoints = mockMaxTouchPoints(1);
     
     runTests(async () => {
       after(() => {
