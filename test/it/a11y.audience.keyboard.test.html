@@ -32,19 +32,20 @@
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
-        after(() => {
-          restoreVisualViewport(window.originalVisualViewport);
-          restoreMaxTouchPoints(window.originalMaxTouchPoints);
-        });
+        it('should report `on` for heavy keyboard usage', async () => {
+          const originalVisualViewport = mockVisualViewport(100);
+          const originalMaxTouchPoints = mockMaxTouchPoints(1);
 
-        it('should report `a11y-on` for heavy keyboard usage', async () => {
           for (let i = 0; i < 12; i += 1) {
             await sendKeys({ press: 'ArrowDown' });
           }
 
           const audience = await pollForAudience();
           expect(audience).to.exist;
-          expect(audience.source).to.equal('a11y-on');
+          expect(audience.source).to.equal('on');
+
+          restoreVisualViewport(originalVisualViewport);
+          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });

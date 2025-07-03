@@ -36,10 +36,16 @@
       });
 
       describe('Accessibility Audience Scoring', () => {
-        it('should report `a11y-on` for high zoom', async () => {
+        it('should report `on` for high zoom', async () => {
+          const originalVisualViewport = mockVisualViewport(200);
+          const originalMaxTouchPoints = mockMaxTouchPoints(1);
+
           const audience = await pollForAudience();
           expect(audience).to.exist;
-          expect(audience.source).to.equal('a11y-on');
+          expect(audience.source).to.equal('on');
+
+          restoreVisualViewport(originalVisualViewport);
+          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });

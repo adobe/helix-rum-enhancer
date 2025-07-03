@@ -33,16 +33,20 @@
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
-        after(() => {
-          window.matchMedia = window.originalMatchMedia;
-          restoreVisualViewport(window.originalVisualViewport);
-          restoreMaxTouchPoints(window.originalMaxTouchPoints);
-        });
+        it('should report `on` for a single preference', async () => {
+          const originalMatchMedia = window.matchMedia;
+          const originalVisualViewport = mockVisualViewport(100);
+          const originalMaxTouchPoints = mockMaxTouchPoints(1);
 
-        it('should report `a11y-on` for a single preference', async () => {
+          window.matchMedia = (query) => ({ matches: query === '(prefers-reduced-motion: reduce)' });
+
           const audience = await pollForAudience();
           expect(audience).to.exist;
-          expect(audience.source).to.equal('a11y-on');
+          expect(audience.source).to.equal('on');
+
+          window.matchMedia = originalMatchMedia;
+          restoreVisualViewport(originalVisualViewport);
+          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });

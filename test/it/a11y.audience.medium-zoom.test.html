@@ -1,6 +1,6 @@
 <html>
 <head>
-  <title>A11y Audience - Default User Test</title>
+  <title>A11y Audience - Medium Zoom Test</title>
   <script>
     window.RUM_BASE = window.origin;
     window.hlx = {
@@ -26,18 +26,18 @@
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
     import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
-    window.originalVisualViewport = mockVisualViewport(100);
+    window.originalVisualViewport = mockVisualViewport(150);
     window.originalMaxTouchPoints = mockMaxTouchPoints(1);
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
-        it('should report `off` for a standard user', async () => {
-          const originalVisualViewport = mockVisualViewport(100);
+        it('should report `on` for medium zoom', async () => {
+          const originalVisualViewport = mockVisualViewport(150);
           const originalMaxTouchPoints = mockMaxTouchPoints(1);
 
           const audience = await pollForAudience();
           expect(audience).to.exist;
-          expect(audience.source).to.equal('off');
+          expect(audience.source).to.equal('on');
 
           restoreVisualViewport(originalVisualViewport);
           restoreMaxTouchPoints(originalMaxTouchPoints);

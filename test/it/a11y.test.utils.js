@@ -11,55 +11,47 @@
  */
 
 /**
- * Polls for the 'audience' event to be captured in window.events.
- * This is necessary because the audience scoring is asynchronous and can be delayed.
- * @param {number} [timeout=18000] - The maximum time to wait in milliseconds.
- * @returns {Promise<Object|null>} A promise that resolves with the audience event or null if not
- *                                 found within the timeout.
+ * A generic polling function that waits for a specific condition to be met.
+ * @param {Function} predicate - A function that returns true when the condition is met.
+ * @param {number} [timeout=10000] - The maximum time to wait in milliseconds.
+ * @returns {Promise<Object|null>} A promise that resolves with the found event
+ *                                 or null if not found.
  */
-export async function pollForAudience(timeout = 18000) {
+async function pollFor(predicate, timeout = 10000) {
   const wait = (delay) => new Promise((resolve) => {
     setTimeout(resolve, delay);
   });
-  const find = () => window.events.find((e) => e.checkpoint === 'audience');
 
-  let found = find();
+  let found = window.events.find(predicate);
   let elapsed = 0;
   const interval = 100;
 
   while (!found && elapsed < timeout) {
     // eslint-disable-next-line no-await-in-loop
     await wait(interval);
-    found = find();
+    found = window.events.find(predicate);
     elapsed += interval;
   }
   return found;
 }
 
 /**
- * Polls for a specific error checkpoint in window.events.
- * @param {string} errorSource - The source of the error to look for (e.g., 'focus-trap:single').
- * @param {number} [timeout=5000] - The maximum time to wait in milliseconds.
- * @returns {Promise<Object|null>} A promise that resolves with the error event or
- *                                 null if not found.
+ * Polls for the accessibility audience event.
+ * @param {number} [timeout=10000] - The maximum time to wait.
+ * @returns {Promise<Object|null>} A promise that resolves with the audience event.
  */
-export async function pollForError(errorSource, timeout = 5000) {
-  const wait = (delay) => new Promise((resolve) => {
-    setTimeout(resolve, delay);
-  });
-  const find = () => window.events.find((e) => e.checkpoint === 'error' && e.source === errorSource);
+export function pollForAudience(timeout) {
+  return pollFor((e) => e.checkpoint === 'a11y', timeout);
+}
 
-  let found = find();
-  let elapsed = 0;
-  const interval = 100;
-
-  while (!found && elapsed < timeout) {
-    // eslint-disable-next-line no-await-in-loop
-    await wait(interval);
-    found = find();
-    elapsed += interval;
-  }
-  return found;
+/**
+ * Polls for a specific error checkpoint in window.events.
+ * @param {string} errorSource - The source of the error to look for.
+ * @param {number} [timeout=5000] - The maximum time to wait.
+ * @returns {Promise<Object|null>} A promise that resolves with the error event.
+ */
+export function pollForError(errorSource, timeout) {
+  return pollFor((e) => e.checkpoint === 'error' && e.source === errorSource, timeout);
 }
 
 /**
