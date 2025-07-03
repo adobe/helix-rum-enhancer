@@ -31,8 +31,8 @@
     
     runTests(async () => {
       after(() => {
-        restoreVisualViewport(widow.originalVisualViewport);
-        restoreMaxTouchPoints(widow.originalMaxTouchPoints);
+        restoreVisualViewport(window.originalVisualViewport);
+        restoreMaxTouchPoints(window.originalMaxTouchPoints);
       });
 
       describe('Accessibility Audience Scoring', () => {
