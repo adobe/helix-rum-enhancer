@@ -223,6 +223,10 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
   if (score >= 1) {
     reportAudience();
   } else {
-    setTimeout(() => reportAudience(), window.hlx.A11Y_REPORT_DELAY || 10_000);
+    setTimeout(
+      () => reportAudience(),
+      /* c8 ignore next 1 */
+      window.hlx.A11Y_REPORT_DELAY || 10_000,
+    );
   }
 }

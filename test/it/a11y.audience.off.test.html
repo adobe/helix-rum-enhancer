@@ -18,7 +18,6 @@
       }
     };
   </script>
-  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
 </head>
 <body>
   <p>Some content</p>
@@ -26,23 +25,36 @@
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
     import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
-    window.originalVisualViewport = mockVisualViewport(100);
-    window.originalMaxTouchPoints = mockMaxTouchPoints(1);
-    const originalMatchMedia = window.matchMedia;
-    window.matchMedia = () => ({ matches: false });
+
+    const loadRumScript = () => new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = '/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js';
+      script.onload = () => resolve(script);
+      document.head.appendChild(script);
+    });
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
-        after(() => {
-          restoreVisualViewport(window.originalVisualViewport);
-          restoreMaxTouchPoints(window.originalMaxTouchPoints);
-          window.matchMedia = originalMatchMedia;
-        });
-
         it('should report `off` for a standard user', async () => {
+          // 1. Set up mocks for a clean environment
+          const originalMatchMedia = window.matchMedia;
+          const originalVisualViewport = mockVisualViewport(100);
+          const originalMaxTouchPoints = mockMaxTouchPoints(1);
+          window.matchMedia = () => ({ matches: false });
+
+          // 2. Load and execute the RUM script with the mocked environment
+          const rumScript = await loadRumScript();
+
+          // 3. Poll for the result
           const audience = await pollForAudience();
           expect(audience).to.exist;
           expect(audience.source).to.equal('off');
+
+          // 4. Clean up
+          restoreVisualViewport(originalVisualViewport);
+          restoreMaxTouchPoints(originalMaxTouchPoints);
+          window.matchMedia = originalMatchMedia;
+          rumScript.remove();
         });
       });
     });
