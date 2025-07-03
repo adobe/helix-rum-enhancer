@@ -25,19 +25,20 @@
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
     import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+    window.originalVisualViewport = mockVisualViewport(100);
+    window.originalMaxTouchPoints = mockMaxTouchPoints(1);
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
-        it('should report `a11y-off` for a standard user', async () => {
-          const originalVisualViewport = mockVisualViewport(100);
-          const originalMaxTouchPoints = mockMaxTouchPoints(1);
+        after(() => {
+          restoreVisualViewport(window.originalVisualViewport);
+          restoreMaxTouchPoints(window.originalMaxTouchPoints);
+        });
 
+        it('should report `a11y-off` for a standard user', async () => {
           const audience = await pollForAudience();
           expect(audience).to.exist;
           expect(audience.source).to.equal('a11y-off');
-
-          restoreVisualViewport(originalVisualViewport);
-          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });

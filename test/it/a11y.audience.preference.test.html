@@ -16,6 +16,8 @@
         });
       }
     };
+    window.originalMatchMedia = window.matchMedia;
+    window.matchMedia = (query) => ({ matches: query === '(prefers-reduced-motion: reduce)' });
   </script>
   <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
 </head>
@@ -25,23 +27,21 @@
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
     import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+    window.originalVisualViewport = mockVisualViewport(100);
+    window.originalMaxTouchPoints = mockMaxTouchPoints(1);
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
+        after(() => {
+          window.matchMedia = window.originalMatchMedia;
+          restoreVisualViewport(window.originalVisualViewport);
+          restoreMaxTouchPoints(window.originalMaxTouchPoints);
+        });
+
         it('should report `a11y-on` for a single preference', async () => {
-          const originalMatchMedia = window.matchMedia;
-          const originalVisualViewport = mockVisualViewport(100);
-          const originalMaxTouchPoints = mockMaxTouchPoints(1);
-
-          window.matchMedia = (query) => ({ matches: query === '(prefers-reduced-motion: reduce)' });
-
           const audience = await pollForAudience();
           expect(audience).to.exist;
           expect(audience.source).to.equal('a11y-on');
-
-          window.matchMedia = originalMatchMedia;
-          restoreVisualViewport(originalVisualViewport);
-          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });
