@@ -31,16 +31,15 @@
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
-        it('should report `off` for a standard user', async () => {
-          const originalVisualViewport = mockVisualViewport(100);
-          const originalMaxTouchPoints = mockMaxTouchPoints(1);
+        after(() => {
+          restoreVisualViewport(window.originalVisualViewport);
+          restoreMaxTouchPoints(window.originalMaxTouchPoints);
+        });
 
+        it('should report `off` for a standard user', async () => {
           const audience = await pollForAudience();
           expect(audience).to.exist;
           expect(audience.source).to.equal('off');
-
-          restoreVisualViewport(originalVisualViewport);
-          restoreMaxTouchPoints(originalMaxTouchPoints);
         });
       });
     });
