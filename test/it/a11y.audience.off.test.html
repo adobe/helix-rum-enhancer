@@ -28,12 +28,15 @@
     import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
     window.originalVisualViewport = mockVisualViewport(100);
     window.originalMaxTouchPoints = mockMaxTouchPoints(1);
+    const originalMatchMedia = window.matchMedia;
+    window.matchMedia = () => ({ matches: false });
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
         after(() => {
           restoreVisualViewport(window.originalVisualViewport);
           restoreMaxTouchPoints(window.originalMaxTouchPoints);
+          window.matchMedia = originalMatchMedia;
         });
 
         it('should report `off` for a standard user', async () => {
