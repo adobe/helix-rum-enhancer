@@ -4,7 +4,8 @@
   <script>
     window.RUM_BASE = window.origin;
     window.hlx = {
-      RUM_MASK_URL: 'origin'
+      RUM_MASK_URL: 'origin',
+      A11Y_REPORT_DELAY: 1000,
     };
     window.events = [];
     window.fakeSendBeacon = function (url, payload) {
@@ -16,6 +17,8 @@
         });
       }
     };
+    window.originalVisualViewport = mockVisualViewport(200);
+    window.originalMaxTouchPoints = mockMaxTouchPoints(1);
   </script>
   <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
 </head>
@@ -25,9 +28,7 @@
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
     import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
-    widow.originalVisualViewport = mockVisualViewport(200);
-    widow.originalMaxTouchPoints = mockMaxTouchPoints(1);
-
+    
     runTests(async () => {
       after(() => {
         restoreVisualViewport(widow.originalVisualViewport);

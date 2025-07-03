@@ -4,7 +4,8 @@
   <script>
     window.RUM_BASE = window.origin;
     window.hlx = {
-      RUM_MASK_URL: 'origin'
+      RUM_MASK_URL: 'origin',
+      A11Y_REPORT_DELAY: 1000,
     };
     window.events = [];
     window.fakeSendBeacon = function (url, payload) {

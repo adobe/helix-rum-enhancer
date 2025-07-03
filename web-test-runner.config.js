@@ -25,7 +25,7 @@ export default {
   testFramework: {
     type: 'mocha',
     config: {
-      timeout: 11000,
+      timeout: 10000,
     },
   },
   coverageConfig: {

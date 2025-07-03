@@ -4,7 +4,8 @@
   <script>
     window.RUM_BASE = window.origin;
     window.hlx = {
-      RUM_MASK_URL: 'origin'
+      RUM_MASK_URL: 'origin',
+      A11Y_REPORT_DELAY: 1000,
     };
     window.events = [];
     window.fakeSendBeacon = function (url, payload) {
@@ -54,7 +55,7 @@
         };
 
         it('should detect a ping-pong trap', async () => {
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          await new Promise(resolve => setTimeout(resolve, 100));
 
           el0.focus();
 
