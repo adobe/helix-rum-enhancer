@@ -40,7 +40,7 @@ async function pollFor(predicate, timeout = 10000) {
  * @param {number} [timeout=10000] - The maximum time to wait.
  * @returns {Promise<Object|null>} A promise that resolves with the audience event.
  */
-export function pollForAudience(timeout) {
+export function pollForA11y(timeout) {
   return pollFor((e) => e.checkpoint === 'a11y', timeout);
 }
 

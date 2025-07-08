@@ -24,7 +24,7 @@
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
-    import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+    import { pollForA11y, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
 
     const loadRumScript = () => new Promise((resolve) => {
       const script = document.createElement('script');
@@ -46,7 +46,7 @@
           const rumScript = await loadRumScript();
 
           // 3. Poll for the result
-          const audience = await pollForAudience();
+          const audience = await pollForA11y();
           expect(audience).to.exist;
           expect(audience.source).to.equal('off');
 

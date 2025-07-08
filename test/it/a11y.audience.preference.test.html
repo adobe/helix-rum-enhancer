@@ -27,7 +27,7 @@
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { expect } from '@esm-bundle/chai';
-    import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+    import { pollForA11y, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
     window.originalVisualViewport = mockVisualViewport(100);
     window.originalMaxTouchPoints = mockMaxTouchPoints(1);
 
@@ -40,7 +40,7 @@
         });
 
         it('should report `on` for a single preference', async () => {
-          const audience = await pollForAudience();
+          const audience = await pollForA11y();
           expect(audience).to.exist;
           expect(audience.source).to.equal('on');
         });

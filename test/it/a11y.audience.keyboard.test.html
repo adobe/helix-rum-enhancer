@@ -26,7 +26,7 @@
     import { runTests } from '@web/test-runner-mocha';
     import { sendKeys } from '@web/test-runner-commands';
     import { expect } from '@esm-bundle/chai';
-    import { pollForAudience, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+    import { pollForA11y, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
     window.originalVisualViewport = mockVisualViewport(100);
     window.originalMaxTouchPoints = mockMaxTouchPoints(1);
 
@@ -42,7 +42,7 @@
             await sendKeys({ press: 'ArrowDown' });
           }
 
-          const audience = await pollForAudience();
+          const audience = await pollForA11y();
           expect(audience).to.exist;
           expect(audience.source).to.equal('on');
         });
