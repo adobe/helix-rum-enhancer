@@ -1,0 +1,51 @@
+<html>
+<head>
+  <title>A11y Audience - Single Preference Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin',
+      A11Y_REPORT_DELAY: 1000,
+    };
+    window.events = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.events.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.events.push(JSON.parse(text));
+        });
+      }
+    };
+    window.originalMatchMedia = window.matchMedia;
+    window.matchMedia = (query) => ({ matches: query === '(prefers-reduced-motion: reduce)' });
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+<body>
+  <p>Some content</p>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+    import { pollForA11y, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+    window.originalVisualViewport = mockVisualViewport(100);
+    window.originalMaxTouchPoints = mockMaxTouchPoints(1);
+
+    runTests(async () => {
+      describe('Accessibility Audience Scoring', () => {
+        after(() => {
+          window.matchMedia = window.originalMatchMedia;
+          restoreVisualViewport(window.originalVisualViewport);
+          restoreMaxTouchPoints(window.originalMaxTouchPoints);
+        });
+
+        it('should report `on` for a single preference', async () => {
+          const audience = await pollForA11y();
+          expect(audience).to.exist;
+          expect(audience.source).to.equal('on');
+        });
+      });
+    });
+  </script>
+</body>
+</html> 
