@@ -1,3 +1,16 @@
+# [2.37.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.5...v2.37.0) (2025-07-08)
+
+
+### Bug Fixes
+
+* audience reporting ([9f02657](https://github.com/adobe/helix-rum-enhancer/commit/9f0265703aba8ce01fa2850dadc36f993e9e2496))
+
+
+### Features
+
+* **a11y:** add a new accessibility plugin to categorize audience and detect common bugs ([033b425](https://github.com/adobe/helix-rum-enhancer/commit/033b4250ddfd3a3a8887b6fbebd18b92543c70a5))
+* **a11y:** add a new accessibility plugin to flag accessible audience and detect common bugs ([5a39aff](https://github.com/adobe/helix-rum-enhancer/commit/5a39aff315213187ce2b35928f72ad44fcd0e869))
+
 ## [2.36.5](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.4...v2.36.5) (2025-06-20)
 
 
