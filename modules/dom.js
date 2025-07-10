@@ -63,16 +63,16 @@ function getSourceContext(el) {
   if (formEl) {
     const id = formEl.getAttribute('id');
     if (id) {
-      return `form#${id}`;
+      return `form#${CSS.escape(id)}`;
     }
-    return `form${formEl.classList.length > 0 ? `.${formEl.classList[0]}` : ''}`;
+    return `form${formEl.classList.length > 0 ? `.${CSS.escape(formEl.classList[0])}` : ''}`;
   }
   const block = el.closest('.block[data-block-name]');
   return ((block && `.${block.getAttribute('data-block-name')}`)
     || (walk(el, isDialog) && 'dialog')
     || (walk(el, (e) => e.tagName && e.tagName.includes('-') && e.tagName.toLowerCase()))
     || ['nav', 'header', 'footer', 'aside'].find((t) => el.closest(t))
-    || walk(el, (e) => e.id && `#${e.id}`));
+    || walk(el, (e) => e.id && `#${CSS.escape(e.id)}`));
 }
 
 function getSourceElement(el) {
@@ -88,18 +88,12 @@ function getSourceElement(el) {
 }
 
 function getSourceIdentifier(el) {
-  if (el.id) return `#${el.id}`;
+  if (el.id) return `#${CSS.escape(el.id)}`;
   if (el.getAttribute('data-block-name')) return `.${el.getAttribute('data-block-name')}`;
-  return (el.classList.length > 0 && `.${el.classList[0]}`);
+  return (el.classList.length > 0 && `.${CSS.escape(el.classList[0])}`);
 }
 
 export const sourceSelector = (el) => {
-  const escape = (selector) => selector
-    .split(' ')
-    .map((part) => part
-      .replace(/([#.])([^\s#.]+)/g, (_, prefix, name) => prefix + CSS.escape(name)))
-    .join(' ');
-
   try {
     if (!el || el === document.body || el === document.documentElement) {
       return undefined;
@@ -111,7 +105,7 @@ export const sourceSelector = (el) => {
     const name = getSourceElement(el) || '';
     const id = getSourceIdentifier(el) || '';
     const selector = `${ctx} ${name}${id}`.trim() || `"${el.textContent.substring(0, 10)}"`;
-    return escape(selector);
+    return selector;
     /* c8 ignore next 3 */
   } catch (error) {
     return null;
