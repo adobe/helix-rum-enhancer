@@ -104,8 +104,7 @@ export const sourceSelector = (el) => {
     const ctx = getSourceContext(el.parentElement) || '';
     const name = getSourceElement(el) || '';
     const id = getSourceIdentifier(el) || '';
-    const selector = `${ctx} ${name}${id}`.trim() || `"${el.textContent.substring(0, 10)}"`;
-    return selector;
+    return `${ctx} ${name}${id}`.trim() || `"${el.textContent.substring(0, 10)}"`;
     /* c8 ignore next 3 */
   } catch (error) {
     return null;
