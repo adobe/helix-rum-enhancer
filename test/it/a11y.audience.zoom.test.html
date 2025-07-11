@@ -27,13 +27,10 @@
     import { pollForA11y, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
     window.originalVisualViewport = mockVisualViewport(200);
     window.originalMaxTouchPoints = mockMaxTouchPoints(1);
-    console.error('#1#', window.innerWidth, window.visualViewport.width);
+    // Making sure to load RUM after the viewport is properly mocked
     (function loadRumScript() {
       const script = document.createElement('script');
       script.src = '/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js';
-      script.onload = () => {
-        console.error('#2#', window.innerWidth, window.visualViewport.width);
-      }
       script.defer = true;
       document.head.appendChild(script);
     })();
