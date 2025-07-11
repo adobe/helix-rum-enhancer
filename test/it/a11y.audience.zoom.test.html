@@ -33,7 +33,6 @@
       script.src = '/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js';
       script.onload = () => {
         console.error('#2#', window.innerWidth, window.visualViewport.width);
-        resolve(script);
       }
       script.defer = true;
       document.head.appendChild(script);
