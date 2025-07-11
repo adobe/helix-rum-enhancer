@@ -15,7 +15,6 @@ const MEDIA_QUERY_PREFERENCES = [
   '(prefers-contrast: high)',
   '(prefers-contrast: more)',
   '(forced-colors: active)',
-  '(prefers-color-scheme: dark)',
   '(prefers-reduced-transparency: reduce)',
 ];
 
@@ -173,7 +172,7 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
     score += 2;
   }
 
-  if (navigator.maxTouchPoints === 0 && !window.matchMedia('(pointer: coarse)').matches) {
+  if (navigator.maxTouchPoints === 0 && window.matchMedia('(pointer: coarse)').matches) {
     score += 2;
   }
 
