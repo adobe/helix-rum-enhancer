@@ -166,7 +166,7 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
   score += MEDIA_QUERY_PREFERENCES.filter((q) => window.matchMedia(q).matches).length;
 
   const zoom = getZoom();
-  console.error('zoom', zoom);
+  console.error('#3#', zoom);
   if (zoom >= HIGH_ZOOM_LEVEL) {
     score += 3;
   } else if (zoom >= MEDIUM_ZOOM_LEVEL) {
