@@ -27,16 +27,13 @@
     import { pollForA11y, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
     window.originalVisualViewport = mockVisualViewport(200);
     window.originalMaxTouchPoints = mockMaxTouchPoints(1);
-    console.error('#1#', window.innerWidth, window.visualViewport.width);
-    (function loadRumScript() {
+
+    const loadRumScript = () => new Promise((resolve) => {
       const script = document.createElement('script');
       script.src = '/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js';
-      script.onload = () => {
-        console.error('#2#', window.innerWidth, window.visualViewport.width);
-      }
-      script.defer = true;
+      script.onload = () => resolve(script);
       document.head.appendChild(script);
-    })();
+    });
     
     runTests(async () => {
       after(() => {
@@ -46,6 +43,8 @@
 
       describe('Accessibility Audience Scoring', () => {
         it('should report `on` for high zoom', async () => {
+          const rumScript = await loadRumScript();
+
           const audience = await pollForA11y();
           expect(audience).to.exist;
           expect(audience.source).to.equal('on');
