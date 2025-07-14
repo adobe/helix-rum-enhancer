@@ -1,3 +1,11 @@
+## [2.37.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.37.0...v2.37.1) (2025-07-14)
+
+
+### Bug Fixes
+
+* **a11y:** audience is flagged as using accessibility too often ([4449970](https://github.com/adobe/helix-rum-enhancer/commit/444997021c49b45d9162a4a09035e6b75c0360fc))
+* **a11y:** audience is flagged as using accessibility too often ([03e9f1b](https://github.com/adobe/helix-rum-enhancer/commit/03e9f1b185574649741ca4e3a50ecce13165819d))
+
 # [2.37.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.5...v2.37.0) (2025-07-08)
 
 
