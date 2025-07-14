@@ -32,6 +32,23 @@ const hasCookieKey = (key) => document.cookie.split(';').some((c) => c.trim().st
 // Set the base path for the plugins
 const pluginBasePath = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
 
+const CONSENT_PROVIDERS = [
+  {
+    name: 'onetrust',
+    detect: () => hasCookieKey('OptanonAlertBoxClosed') || document.querySelector('#onetrust-banner-sdk, #onetrust-pc-sdk'),
+  },
+  {
+    name: 'trustarc',
+    detect: () => ['notice_gdpr_prefs', 'notice_preferences'].some(hasCookieKey) || document.querySelector('#truste-consent-track, #consent_blackbar'),
+  },
+  {
+    name: 'usercentrics',
+    detect: () => window.localStorage.getItem('uc_gcm') || document.querySelector('#usercentrics-root'),
+  },
+];
+
+const getConsentProvider = () => CONSENT_PROVIDERS.find(({ detect }) => detect());
+
 const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
   a11y: `${pluginBasePath}/a11y.js`,
@@ -45,9 +62,8 @@ const PLUGINS = {
   },
   // Martech
   martech: { url: `${pluginBasePath}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
-  onetrust: {
-    url: `${pluginBasePath}/onetrust.js`,
-    when: () => (hasCookieKey('OptanonAlertBoxClosed') || document.querySelector('#onetrust-consent-sdk')),
+  consent: {
+    when: () => getConsentProvider(),
     isBlockDependent: true,
     mutationObserverParams: {
       target: document.body,
@@ -101,6 +117,10 @@ function loadPlugin(key, params) {
       createPluginMO(key, params, usp);
     }
     return null;
+  }
+
+  if (key === 'consent') {
+    plugin.url = `${pluginBasePath}/${getConsentProvider().name}.js`;
   }
 
   if (!pluginCache.has(key)) {
