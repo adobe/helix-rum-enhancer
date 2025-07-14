@@ -34,27 +34,20 @@ const pluginBasePath = new URL(document.currentScript.src).href.replace(/index(\
 
 const CONSENT_PROVIDERS = [
   {
-    url: `${pluginBasePath}/onetrust.js`,
-    selectors: ['#onetrust-banner-sdk', '#onetrust-pc-sdk'],
-    cookies: ['OptanonAlertBoxClosed'],
+    name: 'onetrust',
+    detect: () => hasCookieKey('OptanonAlertBoxClosed') || document.querySelector('#onetrust-banner-sdk, #onetrust-pc-sdk'),
   },
   {
-    url: `${pluginBasePath}/trustarc.js`,
-    selectors: ['#truste-consent-track', '#consent_blackbar'],
-    cookies: ['notice_gdpr_prefs', 'notice_preferences'],
+    name: 'trustarc',
+    detect: () => ['notice_gdpr_prefs', 'notice_preferences'].some(hasCookieKey) || document.querySelector('#truste-consent-track, #consent_blackbar'),
   },
   {
-    url: `${pluginBasePath}/usercentrics.js`,
-    selectors: ['#usercentrics-root'],
-    localStorage: ['uc_gcm'],
+    name: 'usercentrics',
+    detect: () => window.localStorage.getItem('uc_gcm') || document.querySelector('#usercentrics-root'),
   },
 ];
 
-const getConsentProvider = () => CONSENT_PROVIDERS.find(({ cookies, localStorage, selectors }) => ((
-  cookies && cookies.every((c) => hasCookieKey(c)))
-  || (localStorage && localStorage.every((l) => window.localStorage.getItem(l)))
-  || (selectors && selectors.some((s) => document.querySelector(s)))
-));
+const getConsentProvider = () => CONSENT_PROVIDERS.find(({ detect }) => detect());
 
 const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
@@ -127,7 +120,7 @@ function loadPlugin(key, params) {
   }
 
   if (key === 'consent') {
-    plugin.url = getConsentProvider().url;
+    plugin.url = `${pluginBasePath}/${getConsentProvider().name}.js`;
   }
 
   if (!pluginCache.has(key)) {
