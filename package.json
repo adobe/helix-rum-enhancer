@@ -60,9 +60,9 @@
     "lint-staged": "16.1.2",
     "mocha": "11.7.1",
     "mocha-multi-reporters": "1.5.1",
-    "rollup": "4.44.2",
+    "rollup": "4.45.0",
     "rollup-plugin-eslint-bundle": "9.0.0",
-    "semantic-release": "24.2.6",
+    "semantic-release": "24.2.7",
     "semantic-release-slack-bot": "^4.0.2",
     "web-vitals": "5.0.3"
   },
