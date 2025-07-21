@@ -243,23 +243,8 @@ function addLoadResourceTracking() {
       const entries = list.getEntries();
       entries
         .filter((e) => !e.responseStatus || e.responseStatus < 400)
-        .filter((e) => {
-          const url = new URL(e.name);
-          const isFirstParty = window.location.hostname === url.hostname;
-          const isAllResourcesEnabled = fflags.has('allresources');
-
-          if (isFirstParty) {
-            // For first-party requests, include dropins patterns and existing patterns
-            return url.pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)')
-                   || url.pathname.includes('__dropins__/storefront-')
-                   || url.pathname.includes('scripts/dropins/storefront-');
-          } else if (isAllResourcesEnabled) {
-            // For third-party requests (when allresources is enabled), only existing patterns
-            return url.pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)');
-          }
-
-          return false;
-        })
+        .filter((e) => window.location.hostname === new URL(e.name).hostname || fflags.has('allresources'))
+        .filter((e) => new URL(e.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)') || (fflags.has('allresources') && (new URL(e.name).pathname.includes('__dropins__/storefront-') || new URL(e.name).pathname.includes('scripts/dropins/storefront-'))))
         .forEach((e) => {
           sampleRUM('loadresource', { source: e.name, target: Math.round(e.duration) });
         });
