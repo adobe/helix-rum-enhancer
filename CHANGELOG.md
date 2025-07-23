@@ -1,3 +1,10 @@
+# [2.38.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.37.1...v2.38.0) (2025-07-23)
+
+
+### Features
+
+* enable allresources flag for hash 543 and add dropins path patterns ([74a393c](https://github.com/adobe/helix-rum-enhancer/commit/74a393c075978f6e7107f003933eccbb228928a2))
+
 ## [2.37.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.37.0...v2.37.1) (2025-07-14)
 
 
