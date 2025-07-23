@@ -10,7 +10,7 @@
  * governing permissions and limitations under the License.
  */
 export const getTargetValue = (el) => el.getAttribute('data-rum-target') || el.getAttribute('href')
-    || el.currentSrc || el.getAttribute('src') || el.dataset.action || el.action;
+  || el.currentSrc || el.getAttribute('src') || el.dataset.action || el.action;
 
 export const targetSelector = (el) => {
   try {
@@ -20,7 +20,7 @@ export const targetSelector = (el) => {
       v = getTargetValue(el.closest('a'));
     }
     if (v && !v.startsWith('https://')) {
-    // resolve relative links
+      // resolve relative links
       v = new URL(v, window.location).href;
     }
     return v;
@@ -63,34 +63,34 @@ function getSourceContext(el) {
   if (formEl) {
     const id = formEl.getAttribute('id');
     if (id) {
-      return `form#${id}`;
+      return `form#${CSS.escape(id)}`;
     }
-    return `form${formEl.classList.length > 0 ? `.${formEl.classList[0]}` : ''}`;
+    return `form${formEl.classList.length > 0 ? `.${CSS.escape(formEl.classList[0])}` : ''}`;
   }
   const block = el.closest('.block[data-block-name]');
   return ((block && `.${block.getAttribute('data-block-name')}`)
     || (walk(el, isDialog) && 'dialog')
     || (walk(el, (e) => e.tagName && e.tagName.includes('-') && e.tagName.toLowerCase()))
     || ['nav', 'header', 'footer', 'aside'].find((t) => el.closest(t))
-    || walk(el, (e) => e.id && `#${e.id}`));
+    || walk(el, (e) => e.id && `#${CSS.escape(e.id)}`));
 }
 
 function getSourceElement(el) {
   const f = el.closest('form');
   if (f && Array.from(f.elements).includes(el)) {
     return (el.tagName.toLowerCase()
-        + (['INPUT', 'BUTTON'].includes(el.tagName)
-          ? `[type='${el.getAttribute('type') || ''}']`
-          : ''));
+      + (['INPUT', 'BUTTON'].includes(el.tagName)
+        ? `[type='${el.getAttribute('type') || ''}']`
+        : ''));
   }
   if (walk(el, isButton)) return 'button';
   return el.tagName.toLowerCase().match(/^(a|img|video|form)$/) && el.tagName.toLowerCase();
 }
 
 function getSourceIdentifier(el) {
-  if (el.id) return `#${el.id}`;
+  if (el.id) return `#${CSS.escape(el.id)}`;
   if (el.getAttribute('data-block-name')) return `.${el.getAttribute('data-block-name')}`;
-  return (el.classList.length > 0 && `.${el.classList[0]}`);
+  return (el.classList.length > 0 && `.${CSS.escape(el.classList[0])}`);
 }
 
 export const sourceSelector = (el) => {
