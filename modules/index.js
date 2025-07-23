@@ -244,7 +244,7 @@ function addLoadResourceTracking() {
       entries
         .filter((e) => !e.responseStatus || e.responseStatus < 400)
         .filter((e) => window.location.hostname === new URL(e.name).hostname || fflags.has('allresources'))
-        .filter((e) => new URL(e.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)'))
+        .filter((e) => new URL(e.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)') || (fflags.has('allresources') && (new URL(e.name).pathname.includes('__dropins__/storefront-') || new URL(e.name).pathname.includes('scripts/dropins/storefront-'))))
         .forEach((e) => {
           sampleRUM('loadresource', { source: e.name, target: Math.round(e.duration) });
         });
