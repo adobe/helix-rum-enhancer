@@ -17,6 +17,8 @@
         });
       }
     };
+    window.originalMatchMedia = window.matchMedia;
+    window.matchMedia = (query) => ({ matches: false });
   </script>
 </head>
 <body>
@@ -37,6 +39,7 @@
     
     runTests(async () => {
       after(() => {
+        window.matchMedia = window.originalMatchMedia;
         restoreVisualViewport(window.originalVisualViewport);
         restoreMaxTouchPoints(window.originalMaxTouchPoints);
       });
