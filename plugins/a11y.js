@@ -169,7 +169,6 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
     if (totalCount >= BEHAVIORAL_MIN_EVENTS && !reported) {
       if (keyboardCount / totalCount > 0.7) {
         score += AAA_WEIGHT;
-        console.log('keyboard', score);
       }
       reportAudience();
     }
@@ -179,27 +178,22 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
   Object.entries(PREFERENCE_WEIGHTS).forEach(([query, queryWeight]) => {
     if (window.matchMedia(query).matches) {
       score += queryWeight;
-      console.log('preference', query, score);
     }
   });
 
   const zoom = getZoom();
   if (zoom >= HIGH_ZOOM_LEVEL) {
     score += AA_WEIGHT;
-    console.log('high zoom', score);
   } else if (zoom >= MEDIUM_ZOOM_LEVEL) {
     score += A_WEIGHT;
-    console.log('medium zoom', score);
   }
 
   if (navigator.maxTouchPoints === 0 && window.matchMedia('(pointer: coarse)').matches) {
     score += AA_WEIGHT;
-    console.log('pointer', score);
   }
 
   if (window.matchMedia('(hover: none)').matches) {
     score += AA_WEIGHT;
-    console.log('hover', score);
   }
 
   // --- Event Listeners & Observers ---
