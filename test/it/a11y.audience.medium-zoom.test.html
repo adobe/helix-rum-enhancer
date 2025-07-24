@@ -17,6 +17,8 @@
         });
       }
     };
+    window.originalMatchMedia = window.matchMedia;
+    window.matchMedia = (query) => ({ matches: false });
   </script>
 </head>
 <body>
@@ -37,17 +39,18 @@
 
     runTests(async () => {
       describe('Accessibility Audience Scoring', () => {
-        after(() => {
+        after(() => { 
+          window.matchMedia = window.originalMatchMedia;
           restoreVisualViewport(window.originalVisualViewport);
           restoreMaxTouchPoints(window.originalMaxTouchPoints);
         });
 
-        it('should report `on` for medium zoom', async () => {
+        it('should report `low` for medium zoom', async () => {
           const rumScript = await loadRumScript();
 
           const audience = await pollForA11y();
           expect(audience).to.exist;
-          expect(audience.source).to.equal('on');
+          expect(audience.source).to.equal('low');
         });
       });
     });

@@ -39,10 +39,10 @@
           restoreMaxTouchPoints(window.originalMaxTouchPoints);
         });
 
-        it('should report `on` for a single preference', async () => {
+        it('should report `low` for a single preference', async () => {
           const audience = await pollForA11y();
           expect(audience).to.exist;
-          expect(audience.source).to.equal('on');
+          expect(audience.source).to.equal('low');
         });
       });
     });
