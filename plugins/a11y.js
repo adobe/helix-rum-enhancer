@@ -10,13 +10,18 @@
  * governing permissions and limitations under the License.
  */
 
-const MEDIA_QUERY_PREFERENCES = [
-  '(prefers-reduced-motion: reduce)',
-  '(prefers-contrast: high)',
-  '(prefers-contrast: more)',
-  '(forced-colors: active)',
-  '(prefers-reduced-transparency: reduce)',
-];
+const A_WEIGHT = 1;
+const AA_WEIGHT = 2;
+const AAA_WEIGHT = 4;
+
+const PREFERENCE_WEIGHTS = {
+  '(prefers-reduced-motion: reduce)': A_WEIGHT,
+  '(prefers-contrast: more)': AA_WEIGHT,
+  '(prefers-contrast: high)': AA_WEIGHT,
+  '(forced-colors: active)': AAA_WEIGHT,
+  '(-ms-high-contrast: active)': AAA_WEIGHT,
+  '(prefers-reduced-transparency: reduce)': A_WEIGHT,
+};
 
 const KEYBOARD_RELEVANT_KEYS = [
   'Tab', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Enter', ' ', 'Escape',
@@ -67,8 +72,15 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
       return;
     }
     reported = true;
-    const audience = score >= 1 ? 'on' : 'off';
-    sampleRUM('a11y', { source: audience, target: 'on:off' });
+    let audience = 'off';
+    if (score > 7) {
+      audience = 'high';
+    } else if (score >= 4) {
+      audience = 'medium';
+    } else if (score >= 1) {
+      audience = 'low';
+    }
+    sampleRUM('a11y', { source: audience, target: 'off:low:medium:high' });
   };
 
   const reportFocusTrap = (trapType, elements) => {
@@ -156,24 +168,32 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
   const checkBehavioralScore = () => {
     if (totalCount >= BEHAVIORAL_MIN_EVENTS && !reported) {
       if (keyboardCount / totalCount > 0.7) {
-        score += 2;
+        score += AAA_WEIGHT;
       }
       reportAudience();
     }
   };
 
   // --- Static Scoring ---
-  score += MEDIA_QUERY_PREFERENCES.filter((q) => window.matchMedia(q).matches).length;
+  Object.entries(PREFERENCE_WEIGHTS).forEach(([query, queryWeight]) => {
+    if (window.matchMedia(query).matches) {
+      score += queryWeight;
+    }
+  });
 
   const zoom = getZoom();
   if (zoom >= HIGH_ZOOM_LEVEL) {
-    score += 3;
+    score += AA_WEIGHT;
   } else if (zoom >= MEDIUM_ZOOM_LEVEL) {
-    score += 2;
+    score += A_WEIGHT;
   }
 
   if (navigator.maxTouchPoints === 0 && window.matchMedia('(pointer: coarse)').matches) {
-    score += 2;
+    score += AA_WEIGHT;
+  }
+
+  if (window.matchMedia('(hover: none)').matches) {
+    score += AA_WEIGHT;
   }
 
   // --- Event Listeners & Observers ---
