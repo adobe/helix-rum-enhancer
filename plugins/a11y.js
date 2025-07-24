@@ -239,7 +239,7 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
   focusLossObserver.observe(document, { childList: true, subtree: true });
 
   // --- Final Reporting ---
-  if (score >= 1) {
+  if (score >= 7) {
     reportAudience();
   } else {
     setTimeout(
