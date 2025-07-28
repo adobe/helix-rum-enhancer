@@ -1,3 +1,12 @@
+# [2.39.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.38.0...v2.39.0) (2025-07-28)
+
+
+### Features
+
+* **a11y:** introduce granular a11y level detection ([0f7a4ba](https://github.com/adobe/helix-rum-enhancer/commit/0f7a4bae5148fdb99c46ab122b630ca9ec06ce01))
+* **a11y:** introduce granular a11y level detection ([e8dfcca](https://github.com/adobe/helix-rum-enhancer/commit/e8dfcca547990eb985d1705db2f5752689858db1))
+* **a11y:** introduce granular a11y level detection ([39dc433](https://github.com/adobe/helix-rum-enhancer/commit/39dc433f74a3d9f6b1a241b6770e2759ce2313de))
+
 # [2.38.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.37.1...v2.38.0) (2025-07-23)
 
 
