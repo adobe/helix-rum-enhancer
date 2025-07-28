@@ -139,6 +139,7 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
     if (focusHistory.length >= minSeqLength) {
       for (let seqLength = 2; seqLength <= 4; seqLength += 1) {
         if (detectRepeatingSequence(elements, seqLength)) {
+          /* c8 ignore next 4 */
           return;
         }
       }
