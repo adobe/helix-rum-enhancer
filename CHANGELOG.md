@@ -1,3 +1,11 @@
+## [2.40.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.40.0...v2.40.1) (2025-07-29)
+
+
+### Bug Fixes
+
+* initialization logic ([a9df224](https://github.com/adobe/helix-rum-enhancer/commit/a9df2242fa0e970f8f730fbf39a985b2bad72937))
+* initialization logic ([2135ec5](https://github.com/adobe/helix-rum-enhancer/commit/2135ec5bde9e7a2ec244113e5731977a957b01cb))
+
 # [2.40.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.39.0...v2.40.0) (2025-07-29)
 
 
