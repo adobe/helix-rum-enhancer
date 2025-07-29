@@ -1,3 +1,10 @@
+# [2.40.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.39.0...v2.40.0) (2025-07-29)
+
+
+### Features
+
+* escape invalid/special characters from source selector ([#438](https://github.com/adobe/helix-rum-enhancer/issues/438)) ([#452](https://github.com/adobe/helix-rum-enhancer/issues/452)) ([6918ffa](https://github.com/adobe/helix-rum-enhancer/commit/6918ffaffd22d9c444a85815bc26bc8ebf655900))
+
 # [2.39.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.38.0...v2.39.0) (2025-07-28)
 
 
