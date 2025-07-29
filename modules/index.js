@@ -361,7 +361,7 @@ function addTrackingFromConfig() {
   });
 }
 
-function init() {
+function initEnhancer() {
   try {
     if (sampleRUM) {
       addTrackingFromConfig();
@@ -374,4 +374,4 @@ function init() {
   }
 }
 
-init();
+initEnhancer();
