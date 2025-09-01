@@ -11,3 +11,4 @@ test-results.xml
 .idea
 src
 test-results/test-results.json
+*.bak

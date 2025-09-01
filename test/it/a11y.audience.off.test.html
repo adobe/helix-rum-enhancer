@@ -1,0 +1,63 @@
+<html>
+<head>
+  <title>A11y Audience - Default User Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin',
+      A11Y_REPORT_DELAY: 1000,
+    };
+    window.events = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.events.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.events.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+</head>
+<body>
+  <p>Some content</p>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+    import { pollForA11y, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+
+    const loadRumScript = () => new Promise((resolve) => {
+      const script = document.createElement('script');
+      script.src = '/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js';
+      script.onload = () => resolve(script);
+      document.head.appendChild(script);
+    });
+
+    runTests(async () => {
+      describe('Accessibility Audience Scoring', () => {
+        it('should report `off` for a standard user', async () => {
+          // 1. Set up mocks for a clean environment
+          const originalMatchMedia = window.matchMedia;
+          const originalVisualViewport = mockVisualViewport(100);
+          const originalMaxTouchPoints = mockMaxTouchPoints(1);
+          window.matchMedia = () => ({ matches: false });
+
+          // 2. Load and execute the RUM script with the mocked environment
+          const rumScript = await loadRumScript();
+
+          // 3. Poll for the result
+          const audience = await pollForA11y();
+          expect(audience).to.exist;
+          expect(audience.source).to.equal('off');
+
+          // 4. Clean up
+          restoreVisualViewport(originalVisualViewport);
+          restoreMaxTouchPoints(originalMaxTouchPoints);
+          window.matchMedia = originalMatchMedia;
+          rumScript.remove();
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

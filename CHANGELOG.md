@@ -1,3 +1,136 @@
+## [2.40.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.40.0...v2.40.1) (2025-07-29)
+
+
+### Bug Fixes
+
+* initialization logic ([a9df224](https://github.com/adobe/helix-rum-enhancer/commit/a9df2242fa0e970f8f730fbf39a985b2bad72937))
+* initialization logic ([2135ec5](https://github.com/adobe/helix-rum-enhancer/commit/2135ec5bde9e7a2ec244113e5731977a957b01cb))
+
+# [2.40.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.39.0...v2.40.0) (2025-07-29)
+
+
+### Features
+
+* escape invalid/special characters from source selector ([#438](https://github.com/adobe/helix-rum-enhancer/issues/438)) ([#452](https://github.com/adobe/helix-rum-enhancer/issues/452)) ([6918ffa](https://github.com/adobe/helix-rum-enhancer/commit/6918ffaffd22d9c444a85815bc26bc8ebf655900))
+
+# [2.39.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.38.0...v2.39.0) (2025-07-28)
+
+
+### Features
+
+* **a11y:** introduce granular a11y level detection ([0f7a4ba](https://github.com/adobe/helix-rum-enhancer/commit/0f7a4bae5148fdb99c46ab122b630ca9ec06ce01))
+* **a11y:** introduce granular a11y level detection ([e8dfcca](https://github.com/adobe/helix-rum-enhancer/commit/e8dfcca547990eb985d1705db2f5752689858db1))
+* **a11y:** introduce granular a11y level detection ([39dc433](https://github.com/adobe/helix-rum-enhancer/commit/39dc433f74a3d9f6b1a241b6770e2759ce2313de))
+
+# [2.38.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.37.1...v2.38.0) (2025-07-23)
+
+
+### Features
+
+* enable allresources flag for hash 543 and add dropins path patterns ([74a393c](https://github.com/adobe/helix-rum-enhancer/commit/74a393c075978f6e7107f003933eccbb228928a2))
+
+## [2.37.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.37.0...v2.37.1) (2025-07-14)
+
+
+### Bug Fixes
+
+* **a11y:** audience is flagged as using accessibility too often ([4449970](https://github.com/adobe/helix-rum-enhancer/commit/444997021c49b45d9162a4a09035e6b75c0360fc))
+* **a11y:** audience is flagged as using accessibility too often ([03e9f1b](https://github.com/adobe/helix-rum-enhancer/commit/03e9f1b185574649741ca4e3a50ecce13165819d))
+
+# [2.37.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.5...v2.37.0) (2025-07-08)
+
+
+### Bug Fixes
+
+* audience reporting ([9f02657](https://github.com/adobe/helix-rum-enhancer/commit/9f0265703aba8ce01fa2850dadc36f993e9e2496))
+
+
+### Features
+
+* **a11y:** add a new accessibility plugin to categorize audience and detect common bugs ([033b425](https://github.com/adobe/helix-rum-enhancer/commit/033b4250ddfd3a3a8887b6fbebd18b92543c70a5))
+* **a11y:** add a new accessibility plugin to flag accessible audience and detect common bugs ([5a39aff](https://github.com/adobe/helix-rum-enhancer/commit/5a39aff315213187ce2b35928f72ad44fcd0e869))
+
+## [2.36.5](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.4...v2.36.5) (2025-06-20)
+
+
+### Bug Fixes
+
+* **release:** Add webcomponent.js to release tagging ([0953552](https://github.com/adobe/helix-rum-enhancer/commit/0953552f424fba66f1e26b2bd32bebeff86015fe))
+
+## [2.36.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.3...v2.36.4) (2025-06-18)
+
+
+### Bug Fixes
+
+* check for OneTrust PC sdk if banner is not present ([#437](https://github.com/adobe/helix-rum-enhancer/issues/437)) ([6a63f79](https://github.com/adobe/helix-rum-enhancer/commit/6a63f79b10f2a983a8748bd9ffb14cafee16d3d7))
+
+## [2.36.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.2...v2.36.3) (2025-06-16)
+
+
+### Bug Fixes
+
+* **consent:** check OneTrust banner div instead of consent div ([#434](https://github.com/adobe/helix-rum-enhancer/issues/434)) ([b71a242](https://github.com/adobe/helix-rum-enhancer/commit/b71a242bfe8e9eea2599be42689a4cfdebdb4a41))
+
+## [2.36.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.1...v2.36.2) (2025-06-13)
+
+
+### Bug Fixes
+
+* added a check for checkVisibility as it is not available on many browsers yet ([#432](https://github.com/adobe/helix-rum-enhancer/issues/432)) ([2963dd9](https://github.com/adobe/helix-rum-enhancer/commit/2963dd9cabb4f4215b9f9b837bd28545dccaa9b2))
+
+## [2.36.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.36.0...v2.36.1) (2025-06-05)
+
+
+### Bug Fixes
+
+* only watch valid customelement tagnames ([034e85f](https://github.com/adobe/helix-rum-enhancer/commit/034e85f5970891dc86ea64cb7f480826e481e2db))
+* tweak regex ([6b65996](https://github.com/adobe/helix-rum-enhancer/commit/6b65996b157b84fdcb200229acfc0bef9c7315ad))
+
+# [2.36.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.3...v2.36.0) (2025-06-01)
+
+
+### Features
+
+* remove ups from all resources flag ([6997dce](https://github.com/adobe/helix-rum-enhancer/commit/6997dce92d828f2b9a0a2196d0550c742615152e))
+
+## [2.35.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.2...v2.35.3) (2025-05-27)
+
+
+### Bug Fixes
+
+* fixing illegal invocation in webcomponent.js ([#419](https://github.com/adobe/helix-rum-enhancer/issues/419)) ([4153899](https://github.com/adobe/helix-rum-enhancer/commit/415389954e3a7b0d4973a9f176909da60ae8b812))
+
+## [2.35.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.1...v2.35.2) (2025-05-22)
+
+
+### Bug Fixes
+
+* get selector within shadowdom ([b3562cb](https://github.com/adobe/helix-rum-enhancer/commit/b3562cbd6180ccd1d10c81267b3518088359fe00))
+* handle webcomponent sources ([0d3fbf2](https://github.com/adobe/helix-rum-enhancer/commit/0d3fbf247db02b9b296958f2859c9a04e36ace2d))
+* include webcomponent tagname in source selector ([5794f5c](https://github.com/adobe/helix-rum-enhancer/commit/5794f5c3156f2572c63f5ea2560383bf924ead5b))
+* observe nested webcomponent mutations ([9c05d0b](https://github.com/adobe/helix-rum-enhancer/commit/9c05d0b9158af10712004642ba1daa182eb7ac53))
+
+## [2.35.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.35.0...v2.35.1) (2025-05-21)
+
+
+### Bug Fixes
+
+* **releaserc:** update path for RUM Enhancer SRI Hash configuration ([2da2aa7](https://github.com/adobe/helix-rum-enhancer/commit/2da2aa7ddcd801d01a99ff16f0ed596320516073))
+
+# [2.35.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.3...v2.35.0) (2025-05-21)
+
+
+### Features
+
+* update to @trieloff/rollup-plugin-checksum v1.1.0 with SHA-384 SRI hash support ([fad9251](https://github.com/adobe/helix-rum-enhancer/commit/fad9251b268951da05391381a4046e5e184ec43d))
+
+## [2.34.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.2...v2.34.3) (2025-05-12)
+
+
+### Reverts
+
+* Revert "chore: ignore psi check not needed ([#383](https://github.com/adobe/helix-rum-enhancer/issues/383))" ([c9d577f](https://github.com/adobe/helix-rum-enhancer/commit/c9d577f535a937f515319431ec56d972188840b4))
+
 ## [2.34.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.34.1...v2.34.2) (2025-04-17)
 
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 Adobe. All rights reserved.
+ * Copyright 2025 Adobe. All rights reserved.
  * This file is licensed to you under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License. You may obtain a copy
  * of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -10,15 +10,15 @@
  * governing permissions and limitations under the License.
  */
 function trackConsent() {
-  const cmpCookie = document.cookie.split(';')
+  const cookies = document.cookie.split(';')
     .map((c) => c.trim())
-    .find((cookie) => cookie.startsWith('OptanonAlertBoxClosed='));
+    .filter((cookie) => (cookie.startsWith('notice_gdpr_prefs=') || cookie.startsWith('notice_preferences=')));
 
-  if (cmpCookie) {
+  if (cookies.length === 2) {
     return 'hidden';
   }
 
-  const banner = document.querySelector('#onetrust-banner-sdk') || document.querySelector('#onetrust-pc-sdk');
+  const banner = document.querySelector('#truste-consent-track') || document.querySelector('#truste-consent-content');
 
   if (banner && banner.offsetHeight > 0) {
     return 'show';
@@ -33,6 +33,6 @@ export default function addCookieConsentTracking({ sampleRUM }) {
     return;
   }
 
-  sampleRUM('consent', { source: 'onetrust', target: trackConsent() });
+  sampleRUM('consent', { source: 'trustarc', target: trackConsent() });
   hasSentData = true;
 }
