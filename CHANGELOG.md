@@ -1,3 +1,10 @@
+## [2.40.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.40.1...v2.40.2) (2025-09-01)
+
+
+### Bug Fixes
+
+* update URL parameter handling in trackCheckpoint function to ensure correct formatting if no URL parameters are required ([c34dfeb](https://github.com/adobe/helix-rum-enhancer/commit/c34dfeb83891c079d2b56b58f85f2be4948eaf60))
+
 ## [2.40.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.40.0...v2.40.1) (2025-07-29)
 
 
