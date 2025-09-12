@@ -12,23 +12,21 @@
 
 /* eslint-env mocha */
 
-import { expect } from '@esm-bundle/chai';
+import assert from 'assert';
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from '../../modules/defaults.js';
 
 describe('test defaults', () => {
   it('KNOWN_PROPERTIES is an array of string', () => {
-    // eslint-disable-next-line no-unused-expressions
-    expect(Array.isArray(KNOWN_PROPERTIES)).to.be.true;
+    assert.ok(Array.isArray(KNOWN_PROPERTIES));
     KNOWN_PROPERTIES.forEach((prop) => {
-      expect(typeof prop).to.be.equal('string');
+      assert.strictEqual(typeof prop, 'string');
     });
   });
 
   it('DEFAULT_TRACKING_EVENTS is an array of string', () => {
-    // eslint-disable-next-line no-unused-expressions
-    expect(Array.isArray(DEFAULT_TRACKING_EVENTS)).to.be.true;
+    assert.ok(Array.isArray(DEFAULT_TRACKING_EVENTS));
     DEFAULT_TRACKING_EVENTS.forEach((prop) => {
-      expect(typeof prop).to.be.equal('string');
+      assert.strictEqual(typeof prop, 'string');
     });
   });
 });

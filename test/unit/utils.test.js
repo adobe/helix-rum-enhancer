@@ -12,72 +12,72 @@
 
 /* eslint-env mocha */
 
-import { expect } from '@esm-bundle/chai';
+import assert from 'assert';
 import { urlSanitizers } from '../../modules/utils.js';
 
 describe('test utils#urlSanitizers', () => {
   it('urlSanitizers.full', () => {
-    expect(urlSanitizers.full).to.be.a('function');
-    expect(urlSanitizers.full()).to.be.a('string');
+    assert.strictEqual(typeof urlSanitizers.full, 'function');
+    assert.strictEqual(typeof urlSanitizers.full(), 'string');
 
-    expect(urlSanitizers.full('https://wwww.sample.com')).to.be.equal('https://wwww.sample.com/');
-    expect(urlSanitizers.full('https://wwww.sample.com/')).to.be.equal('https://wwww.sample.com/');
-    expect(urlSanitizers.full('https://wwww.sample.com/index.html')).to.be.equal('https://wwww.sample.com/index.html');
-    expect(urlSanitizers.full('https://wwww.sample.com/path/')).to.be.equal('https://wwww.sample.com/path/');
-    expect(urlSanitizers.full('https://wwww.sample.com/path/page.html')).to.be.equal('https://wwww.sample.com/path/page.html');
+    assert.strictEqual(urlSanitizers.full('https://wwww.sample.com'), 'https://wwww.sample.com/');
+    assert.strictEqual(urlSanitizers.full('https://wwww.sample.com/'), 'https://wwww.sample.com/');
+    assert.strictEqual(urlSanitizers.full('https://wwww.sample.com/index.html'), 'https://wwww.sample.com/index.html');
+    assert.strictEqual(urlSanitizers.full('https://wwww.sample.com/path/'), 'https://wwww.sample.com/path/');
+    assert.strictEqual(urlSanitizers.full('https://wwww.sample.com/path/page.html'), 'https://wwww.sample.com/path/page.html');
 
-    expect(urlSanitizers.full('https://wwww.sample.com/path/page.html?a=1&b=2')).to.be.equal('https://wwww.sample.com/path/page.html?a=1&b=2');
+    assert.strictEqual(urlSanitizers.full('https://wwww.sample.com/path/page.html?a=1&b=2'), 'https://wwww.sample.com/path/page.html?a=1&b=2');
 
-    expect(urlSanitizers.full('http://localhost:3000')).to.be.equal('http://localhost:3000/');
-    expect(urlSanitizers.full('http://localhost:3000/')).to.be.equal('http://localhost:3000/');
-    expect(urlSanitizers.full('http://localhost:3000/index.html')).to.be.equal('http://localhost:3000/index.html');
-    expect(urlSanitizers.full('http://localhost:3000/path/')).to.be.equal('http://localhost:3000/path/');
-    expect(urlSanitizers.full('http://localhost:3000/path/page.html')).to.be.equal('http://localhost:3000/path/page.html');
+    assert.strictEqual(urlSanitizers.full('http://localhost:3000'), 'http://localhost:3000/');
+    assert.strictEqual(urlSanitizers.full('http://localhost:3000/'), 'http://localhost:3000/');
+    assert.strictEqual(urlSanitizers.full('http://localhost:3000/index.html'), 'http://localhost:3000/index.html');
+    assert.strictEqual(urlSanitizers.full('http://localhost:3000/path/'), 'http://localhost:3000/path/');
+    assert.strictEqual(urlSanitizers.full('http://localhost:3000/path/page.html'), 'http://localhost:3000/path/page.html');
 
-    expect(urlSanitizers.full('http://localhost:3000/path/page.html?a=1&b=2')).to.be.equal('http://localhost:3000/path/page.html?a=1&b=2');
+    assert.strictEqual(urlSanitizers.full('http://localhost:3000/path/page.html?a=1&b=2'), 'http://localhost:3000/path/page.html?a=1&b=2');
   });
 
   it('urlSanitizers.origin', () => {
-    expect(urlSanitizers.origin).to.be.a('function');
-    expect(urlSanitizers.origin()).to.be.a('string');
+    assert.strictEqual(typeof urlSanitizers.origin, 'function');
+    assert.strictEqual(typeof urlSanitizers.origin(), 'string');
 
-    expect(urlSanitizers.origin('https://wwww.sample.com')).to.be.equal('https://wwww.sample.com');
-    expect(urlSanitizers.origin('https://wwww.sample.com/')).to.be.equal('https://wwww.sample.com');
-    expect(urlSanitizers.origin('https://wwww.sample.com/index.html')).to.be.equal('https://wwww.sample.com');
-    expect(urlSanitizers.origin('https://wwww.sample.com/path/')).to.be.equal('https://wwww.sample.com');
-    expect(urlSanitizers.origin('https://wwww.sample.com/path/page.html')).to.be.equal('https://wwww.sample.com');
+    assert.strictEqual(urlSanitizers.origin('https://wwww.sample.com'), 'https://wwww.sample.com');
+    assert.strictEqual(urlSanitizers.origin('https://wwww.sample.com/'), 'https://wwww.sample.com');
+    assert.strictEqual(urlSanitizers.origin('https://wwww.sample.com/index.html'), 'https://wwww.sample.com');
+    assert.strictEqual(urlSanitizers.origin('https://wwww.sample.com/path/'), 'https://wwww.sample.com');
+    assert.strictEqual(urlSanitizers.origin('https://wwww.sample.com/path/page.html'), 'https://wwww.sample.com');
 
-    expect(urlSanitizers.origin('https://wwww.sample.com/path/page.html?a=1&b=2')).to.be.equal('https://wwww.sample.com');
+    assert.strictEqual(urlSanitizers.origin('https://wwww.sample.com/path/page.html?a=1&b=2'), 'https://wwww.sample.com');
 
-    expect(urlSanitizers.origin('http://localhost:3000')).to.be.equal('http://localhost:3000');
-    expect(urlSanitizers.origin('http://localhost:3000/')).to.be.equal('http://localhost:3000');
-    expect(urlSanitizers.origin('http://localhost:3000/index.html')).to.be.equal('http://localhost:3000');
-    expect(urlSanitizers.origin('http://localhost:3000/path/')).to.be.equal('http://localhost:3000');
-    expect(urlSanitizers.origin('http://localhost:3000/path/page.html')).to.be.equal('http://localhost:3000');
+    assert.strictEqual(urlSanitizers.origin('http://localhost:3000'), 'http://localhost:3000');
+    assert.strictEqual(urlSanitizers.origin('http://localhost:3000/'), 'http://localhost:3000');
+    assert.strictEqual(urlSanitizers.origin('http://localhost:3000/index.html'), 'http://localhost:3000');
+    assert.strictEqual(urlSanitizers.origin('http://localhost:3000/path/'), 'http://localhost:3000');
+    assert.strictEqual(urlSanitizers.origin('http://localhost:3000/path/page.html'), 'http://localhost:3000');
 
-    expect(urlSanitizers.origin('http://localhost:3000/path/page.html?a=1&b=2')).to.be.equal('http://localhost:3000');
+    assert.strictEqual(urlSanitizers.origin('http://localhost:3000/path/page.html?a=1&b=2'), 'http://localhost:3000');
   });
 
   it('urlSanitizers.path', () => {
-    expect(urlSanitizers.path).to.be.a('function');
-    expect(urlSanitizers.path()).to.be.a('string');
+    assert.strictEqual(typeof urlSanitizers.path, 'function');
+    assert.strictEqual(typeof urlSanitizers.path(), 'string');
 
-    expect(urlSanitizers.path('https://wwww.sample.com')).to.be.equal('https://wwww.sample.com/');
-    expect(urlSanitizers.path('https://wwww.sample.com/')).to.be.equal('https://wwww.sample.com/');
-    expect(urlSanitizers.path('https://wwww.sample.com/index.html')).to.be.equal('https://wwww.sample.com/index.html');
-    expect(urlSanitizers.path('https://wwww.sample.com/path/')).to.be.equal('https://wwww.sample.com/path/');
-    expect(urlSanitizers.path('https://wwww.sample.com/path/page.html')).to.be.equal('https://wwww.sample.com/path/page.html');
+    assert.strictEqual(urlSanitizers.path('https://wwww.sample.com'), 'https://wwww.sample.com/');
+    assert.strictEqual(urlSanitizers.path('https://wwww.sample.com/'), 'https://wwww.sample.com/');
+    assert.strictEqual(urlSanitizers.path('https://wwww.sample.com/index.html'), 'https://wwww.sample.com/index.html');
+    assert.strictEqual(urlSanitizers.path('https://wwww.sample.com/path/'), 'https://wwww.sample.com/path/');
+    assert.strictEqual(urlSanitizers.path('https://wwww.sample.com/path/page.html'), 'https://wwww.sample.com/path/page.html');
 
-    expect(urlSanitizers.path('https://www.sample.com/?a=1&b=2')).to.be.equal('https://www.sample.com/');
-    expect(urlSanitizers.path('https://www.sample.com/path/page.html?a=1&b=2')).to.be.equal('https://www.sample.com/path/page.html');
+    assert.strictEqual(urlSanitizers.path('https://www.sample.com/?a=1&b=2'), 'https://www.sample.com/');
+    assert.strictEqual(urlSanitizers.path('https://www.sample.com/path/page.html?a=1&b=2'), 'https://www.sample.com/path/page.html');
 
-    expect(urlSanitizers.path('http://localhost:3000')).to.be.equal('http://localhost:3000/');
-    expect(urlSanitizers.path('http://localhost:3000/')).to.be.equal('http://localhost:3000/');
-    expect(urlSanitizers.path('http://localhost:3000/index.html')).to.be.equal('http://localhost:3000/index.html');
-    expect(urlSanitizers.path('http://localhost:3000/path/')).to.be.equal('http://localhost:3000/path/');
-    expect(urlSanitizers.path('http://localhost:3000/path/page.html')).to.be.equal('http://localhost:3000/path/page.html');
+    assert.strictEqual(urlSanitizers.path('http://localhost:3000'), 'http://localhost:3000/');
+    assert.strictEqual(urlSanitizers.path('http://localhost:3000/'), 'http://localhost:3000/');
+    assert.strictEqual(urlSanitizers.path('http://localhost:3000/index.html'), 'http://localhost:3000/index.html');
+    assert.strictEqual(urlSanitizers.path('http://localhost:3000/path/'), 'http://localhost:3000/path/');
+    assert.strictEqual(urlSanitizers.path('http://localhost:3000/path/page.html'), 'http://localhost:3000/path/page.html');
 
-    expect(urlSanitizers.path('http://localhost:3000/?a=1&b=2')).to.be.equal('http://localhost:3000/');
-    expect(urlSanitizers.path('http://localhost:3000/path/page.html?a=1&b=2')).to.be.equal('http://localhost:3000/path/page.html');
+    assert.strictEqual(urlSanitizers.path('http://localhost:3000/?a=1&b=2'), 'http://localhost:3000/');
+    assert.strictEqual(urlSanitizers.path('http://localhost:3000/path/page.html?a=1&b=2'), 'http://localhost:3000/path/page.html');
   });
 });

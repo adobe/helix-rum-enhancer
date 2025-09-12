@@ -12,68 +12,67 @@
 
 /* eslint-env mocha */
 
-import { expect } from '@esm-bundle/chai';
+import assert from 'assert';
 import { getTargetValue, targetSelector, sourceSelector } from '../../modules/dom.js';
 
 describe('test dom#getTargetValue', () => {
   it('getTargetValue - basics', () => {
-    expect(getTargetValue).to.be.a('function');
+    assert.strictEqual(typeof getTargetValue, 'function');
   });
 
   it('getTargetValue - select data-rum-target attr', () => {
     const div = document.createElement('div');
     div.setAttribute('data-rum-target', 'test');
-    expect(getTargetValue(div)).to.be.equal('test');
+    assert.strictEqual(getTargetValue(div), 'test');
   });
 
   it('getTargetValue - select href attr', () => {
     const a = document.createElement('a');
     a.setAttribute('href', 'https://www.example.com');
-    expect(getTargetValue(a)).to.be.equal('https://www.example.com');
+    assert.strictEqual(getTargetValue(a), 'https://www.example.com');
   });
 
   it('getTargetValue - select currentSrc attr', () => {
     const img = document.createElement('img');
     img.src = 'https://www.example.com/img.jpg';
-    expect(getTargetValue(img)).to.be.equal('https://www.example.com/img.jpg');
+    assert.strictEqual(getTargetValue(img), 'https://www.example.com/img.jpg');
   });
 
   it('getTargetValue - select src attr', () => {
     const img = document.createElement('img');
     img.setAttribute('src', 'https://www.example.com/img.jpg');
-    expect(getTargetValue(img)).to.be.equal('https://www.example.com/img.jpg');
+    assert.strictEqual(getTargetValue(img), 'https://www.example.com/img.jpg');
   });
 
   it('getTargetValue - select data-action attr', () => {
     const form = document.createElement('form');
     form.setAttribute('data-action', 'https://www.example.com/action');
-    expect(getTargetValue(form)).to.be.equal('https://www.example.com/action');
+    assert.strictEqual(getTargetValue(form), 'https://www.example.com/action');
   });
 
   it('getTargetValue - select action attr', () => {
     const form = document.createElement('form');
     form.setAttribute('action', 'https://www.example.com/action');
-    expect(getTargetValue(form)).to.be.equal('https://www.example.com/action');
+    assert.strictEqual(getTargetValue(form), 'https://www.example.com/action');
   });
 });
 
 describe('test dom#targetSelector', () => {
   it('targetSelector - basics', () => {
-    expect(targetSelector).to.be.a('function');
-    // eslint-disable-next-line no-unused-expressions
-    expect(targetSelector()).to.be.undefined;
+    assert.strictEqual(typeof targetSelector, 'function');
+    assert.strictEqual(targetSelector(), undefined);
   });
 
   it('targetSelector - select target for link', () => {
     const a = document.createElement('a');
     a.setAttribute('href', 'https://www.example.com');
-    expect(targetSelector(a)).to.be.equal('https://www.example.com');
+    assert.strictEqual(targetSelector(a), 'https://www.example.com');
   });
 
   it('targetSelector - select target for relative link', () => {
     const a = document.createElement('a');
     a.setAttribute('href', '/target.html');
-    expect(targetSelector(a)).to.be.equal(`${window.location.origin}/target.html`);
+    assert.strictEqual(targetSelector(a), `${window.location.origin}/target.html`);
   });
 
   it('targetSelector - select target for span in a link', () => {
@@ -82,7 +81,7 @@ describe('test dom#targetSelector', () => {
     const span = document.createElement('span');
     span.textContent = 'test';
     a.append(span);
-    expect(targetSelector(span)).to.be.equal('https://www.example.com/target.html');
+    assert.strictEqual(targetSelector(span), 'https://www.example.com/target.html');
   });
 
   it('targetSelector - select target for span with data-rum-target in a link', () => {
@@ -92,21 +91,20 @@ describe('test dom#targetSelector', () => {
     span.textContent = 'test';
     span.setAttribute('data-rum-target', 'test');
     a.append(span);
-    expect(targetSelector(span)).to.be.equal(`${window.location.origin}/test`);
+    assert.strictEqual(targetSelector(span), `${window.location.origin}/test`);
   });
 
   it('targetSelector - select target for img', () => {
     const img = document.createElement('img');
     img.src = 'https://www.example.com/img.jpg';
-    expect(targetSelector(img)).to.be.equal('https://www.example.com/img.jpg');
+    assert.strictEqual(targetSelector(img), 'https://www.example.com/img.jpg');
   });
 });
 
 describe('test dom#sourceSelector', () => {
   it('sourceSelector - basics', () => {
-    expect(sourceSelector).to.be.a('function');
-    // eslint-disable-next-line no-unused-expressions
-    expect(sourceSelector()).to.be.undefined;
+    assert.strictEqual(typeof sourceSelector, 'function');
+    assert.strictEqual(sourceSelector(), undefined);
   });
 
   it('sourceSelector - select form by class', () => {
@@ -114,14 +112,14 @@ describe('test dom#sourceSelector', () => {
     form.classList.add('form-class');
     form.classList.add('form-class-2');
     document.body.append(form);
-    expect(sourceSelector(form)).to.be.equal('form.form-class');
+    assert.strictEqual(sourceSelector(form), 'form.form-class');
   });
 
   it('sourceSelector - select form by id', () => {
     const form = document.createElement('form');
     form.id = 'form-id';
     document.body.append(form);
-    expect(sourceSelector(form)).to.be.equal('form#form-id');
+    assert.strictEqual(sourceSelector(form), 'form#form-id');
   });
 
   it('sourceSelector - should escape invalid characters', () => {
@@ -140,8 +138,8 @@ describe('test dom#sourceSelector', () => {
     form3.id = 'eec6b0d9-bd39-42aa-9f96-29a7aced9765/root/container/modal';
     document.body.append(form3);
 
-    expect(sourceSelector(form1)).to.be.equal('#contentcontainer-9065752e10 form#\\33 89');
-    expect(sourceSelector(form2)).to.be.equal('form.\\31 23abc');
-    expect(sourceSelector(form3)).to.be.equal('form#eec6b0d9-bd39-42aa-9f96-29a7aced9765\\/root\\/container\\/modal');
+    assert.strictEqual(sourceSelector(form1), '#contentcontainer-9065752e10 form#\\33 89');
+    assert.strictEqual(sourceSelector(form2), 'form.\\31 23abc');
+    assert.strictEqual(sourceSelector(form3), 'form#eec6b0d9-bd39-42aa-9f96-29a7aced9765\\/root\\/container\\/modal');
   });
 });

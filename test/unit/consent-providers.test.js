@@ -11,7 +11,7 @@
  */
 /* eslint-env mocha */
 
-import { expect } from '@esm-bundle/chai';
+import assert from 'assert';
 
 describe('Consent Provider Plugins - Execution Count Tests', () => {
   let mockCalls;
@@ -43,9 +43,9 @@ describe('Consent Provider Plugins - Execution Count Tests', () => {
       addCookieConsentTracking({ sampleRUM: mockSampleRUM });
 
       const consentCalls = mockCalls.filter((call) => call.checkpoint === 'consent' && call.source === 'trustarc');
-      expect(consentCalls).to.have.lengthOf(1, 'TrustArc plugin should execute only once');
-      expect(consentCalls[0].target).to.equal('show');
-      expect(consentCalls[0].source).to.equal('trustarc');
+      assert.strictEqual(consentCalls.length, 1, 'TrustArc plugin should execute only once');
+      assert.strictEqual(consentCalls[0].target, 'show');
+      assert.strictEqual(consentCalls[0].source, 'trustarc');
     });
   });
 
@@ -62,9 +62,9 @@ describe('Consent Provider Plugins - Execution Count Tests', () => {
       addCookieConsentTracking({ sampleRUM: mockSampleRUM });
 
       const consentCalls = mockCalls.filter((call) => call.checkpoint === 'consent' && call.source === 'onetrust');
-      expect(consentCalls).to.have.lengthOf(1, 'OneTrust plugin should execute only once');
-      expect(consentCalls[0].target).to.equal('show');
-      expect(consentCalls[0].source).to.equal('onetrust');
+      assert.strictEqual(consentCalls.length, 1, 'OneTrust plugin should execute only once');
+      assert.strictEqual(consentCalls[0].target, 'show');
+      assert.strictEqual(consentCalls[0].source, 'onetrust');
     });
   });
 
@@ -85,9 +85,9 @@ describe('Consent Provider Plugins - Execution Count Tests', () => {
       addCookieConsentTracking({ sampleRUM: mockSampleRUM });
 
       const consentCalls = mockCalls.filter((call) => call.checkpoint === 'consent' && call.source === 'usercentrics');
-      expect(consentCalls).to.have.lengthOf(1, 'Usercentrics plugin should execute only once');
-      expect(consentCalls[0].target).to.equal('show');
-      expect(consentCalls[0].source).to.equal('usercentrics');
+      assert.strictEqual(consentCalls.length, 1, 'Usercentrics plugin should execute only once');
+      assert.strictEqual(consentCalls[0].target, 'show');
+      assert.strictEqual(consentCalls[0].source, 'usercentrics');
     });
   });
 });

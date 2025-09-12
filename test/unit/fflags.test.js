@@ -12,35 +12,35 @@
 
 /* eslint-env mocha */
 
-import { expect } from '@esm-bundle/chai';
+import assert from 'assert';
 import { fflags } from '../../modules/fflags.js';
 
 describe('test fflags', () => {
   it('fflags.has is a function', () => {
-    expect(fflags.has).to.be.a('function');
+    assert.strictEqual(typeof fflags.has, 'function');
   });
 
   it('fflags.has returns a boolean', () => {
-    expect(fflags.has('example')).to.be.a('boolean');
+    assert.strictEqual(typeof fflags.has('example'), 'boolean');
   });
 
   it('fflags.enabled is a function', () => {
-    expect(fflags.enabled).to.be.a('function');
+    assert.strictEqual(typeof fflags.enabled, 'function');
   });
 
   it('fflags.enabled returns a boolean', () => {
-    expect(fflags.enabled('example', () => true)).to.be.a('boolean');
+    assert.strictEqual(typeof fflags.enabled('example', () => true), 'boolean');
   });
 
   it('fflags.disabled is a function', () => {
-    expect(fflags.disabled).to.be.a('function');
+    assert.strictEqual(typeof fflags.disabled, 'function');
   });
 
   it('fflags.disabled returns a boolean', () => {
-    expect(fflags.disabled('example', () => true)).to.be.a('boolean');
+    assert.strictEqual(typeof fflags.disabled('example', () => true), 'boolean');
   });
 
   it('fflags.example is an array', () => {
-    expect(fflags.example).to.be.an('array');
+    assert.ok(Array.isArray(fflags.example));
   });
 });
