@@ -23,11 +23,75 @@ export const getSubmitType = (el) => {
   return 'formsubmit';
 };
 
+// Function to get field name for error tracking
+const getFieldName = (field) => {
+  return field.name || field.id;
+};
+
+// Function to detect form fields with validation errors
+const getInvalidFields = (form) => {
+  const invalidFields = [];
+  
+  // Trigger validation by calling checkValidity() first (if supported)
+  // This ensures :invalid pseudo-class is applied
+  if (typeof form.checkValidity === 'function') {
+    form.checkValidity();
+  }
+  
+  // Try to use :invalid pseudo-class first (modern browsers)
+  let invalidFormFields;
+  try {
+    invalidFormFields = form.querySelectorAll(':invalid');
+  } catch (e) {
+    // Fallback for browsers that don't support :invalid pseudo-class
+    invalidFormFields = [];
+  }
+  
+  // If no invalid fields found with :invalid, fallback to checking validity manually
+  if (invalidFormFields.length === 0) {
+    const formFields = form.querySelectorAll('input, textarea, select');
+    formFields.forEach((field) => {
+      if (field.validity && !field.validity.valid) {
+        invalidFormFields.push(field);
+      }
+    });
+  }
+  
+  invalidFormFields.forEach((field) => {
+    invalidFields.push({
+      field,
+      name: getFieldName(field)
+    });
+  });
+  
+  return invalidFields;
+};
+
 export default function addFormTracking({
   sampleRUM, sourceSelector, targetSelector, context, getIntersectionObserver,
 }) {
   context.querySelectorAll('form').forEach((form) => {
-    form.addEventListener('submit', (e) => sampleRUM(getSubmitType(e.target), { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
+    form.addEventListener('submit', (e) => {
+      // Get invalid fields (this will trigger validation if needed)
+      const invalidFields = getInvalidFields(e.target);
+      
+      if (invalidFields.length > 0) {
+        // Form has validation errors - send error checkpoints for each invalid field
+        invalidFields.forEach(({ name }) => {
+          sampleRUM('error', { 
+            target: name, 
+            source: sourceSelector(e.target)
+          });
+        });
+      }
+      
+      // Form is valid - send the regular form submit checkpoint
+      sampleRUM(getSubmitType(e.target), { 
+        target: targetSelector(e.target), 
+        source: sourceSelector(e.target) 
+      });
+    }, { once: true });
+    
     getIntersectionObserver('viewblock').observe(form);
     let lastSource;
     form.addEventListener('change', (e) => {
