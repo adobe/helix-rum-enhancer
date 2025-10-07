@@ -53,7 +53,15 @@ const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
   a11y: `${pluginBasePath}/a11y.js`,
   // Interactive elements
-  form: { url: `${pluginBasePath}/form.js`, when: () => document.querySelector('form'), isBlockDependent: true },
+  form: {
+    url: `${pluginBasePath}/form.js`,
+    when: () => document.querySelector('form'),
+    isBlockDependent: true,
+    mutationObserverParams: {
+      target: document.body,
+      options: { attributes: false, childList: true, subtree: false },
+    },
+  },
   video: { url: `${pluginBasePath}/video.js`, when: () => document.querySelector('video'), isBlockDependent: true },
   webcomponent: {
     url: `${pluginBasePath}/webcomponent.js`,
