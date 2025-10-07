@@ -34,7 +34,7 @@
 </head>
 
 <body>
-  <nav>
+  <!-- <nav>
     <form id="form-in-header">
       <input type="text" name="name" />
       <input type="email" name="email" />
@@ -52,7 +52,7 @@
       <input type="email" name="email" />
         <input type="submit" value="Submit" />
     </form>
-  </footer>
+  </footer> -->
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { setViewport } from '@web/test-runner-commands';
@@ -62,13 +62,20 @@
       describe('Test Block Loading', () => {
         it('Can observe form that enter the viewport', async () => {
           await setViewport({ width: 800, height: 600 });
-
+          const form = `<form id="dynamic-form">
+            <input type="text" name="name" />
+            <input type="email" name="email" />
+            <input type="submit" value="Submit" />
+          </form>`
+          document.body.innerHTML += form;
           await new Promise((resolve) => {
             setTimeout(resolve, 2000);
           });
-          expect(window.called.length).to.equal(3);
+
+          console.log('testing');
+          expect(window.called.length).to.equal(1);
           const actual = new Set(window.called.map((c) => c.source));
-          const expected = new Set(['nav form#form-in-header', 'form#basic-form', 'footer form#form-in-footer']);
+          const expected = new Set(['form#dynamic-form']);
           expect(actual).to.deep.equal(expected);
         });
       });
