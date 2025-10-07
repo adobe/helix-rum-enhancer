@@ -30,7 +30,7 @@ export default function addFormTracking({
     form.addEventListener('submit', (e) => {
       // Check for form validation errors before submitting
       form.querySelectorAll(':invalid').forEach((field) => {
-        if (field?.validity) {
+        if (field && field.validity) {
           const prototype = Object.getPrototypeOf(field.validity);
           const errorType = prototype 
             ? Object.keys(Object.getOwnPropertyDescriptors(prototype))
