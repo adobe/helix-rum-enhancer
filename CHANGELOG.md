@@ -1,3 +1,10 @@
+# [2.41.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.40.2...v2.41.0) (2025-10-07)
+
+
+### Features
+
+* tracking language/redirect checkpoint for all customers ([#484](https://github.com/adobe/helix-rum-enhancer/issues/484)) ([1577df7](https://github.com/adobe/helix-rum-enhancer/commit/1577df7e04da7c075f4d77464bbeb4544e45c2a8))
+
 ## [2.40.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.40.1...v2.40.2) (2025-09-01)
 
 
