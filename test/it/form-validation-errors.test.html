@@ -144,6 +144,41 @@
           assert(emailInput.value === 'invalid-email', 'Email input should have invalid value');
         });
 
+        it('Should track form validation error checkpoints', async function test() {
+          const form = document.querySelector('#required-form');
+          
+          await new Promise((resolve) => {
+            setTimeout(resolve, 3000);
+          });
+
+          // Manually trigger validation to create invalid fields
+          const isValid = form.checkValidity();
+          assert(isValid === false, 'Form should be invalid');
+          
+          // Get invalid fields
+          const invalidFields = form.querySelectorAll(':invalid');
+          assert(invalidFields.length >= 2, 'Should have at least 2 invalid fields');
+          
+          // Manually trigger the submit event to test our error tracking
+          const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+          form.dispatchEvent(submitEvent);
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 2000);
+          });
+
+          // Check that error checkpoints are sent (same pattern as formsubmit.test.html)
+          assert(window.called.some((call) => call.checkpoint === 'error'), 'error checkpoint missing');
+          
+          // Check for specific error types
+          const errorCalls = window.called.filter(call => call.checkpoint === 'error');
+          assert(errorCalls.length >= 2, 'Should have at least 2 error checkpoints');
+          
+          // Check for valueMissing errors
+          const valueMissingErrors = errorCalls.filter(call => call.target === 'valueMissing');
+          assert(valueMissingErrors.length >= 2, 'Should have valueMissing error checkpoints');
+        });
+
       });
     });
   </script>
