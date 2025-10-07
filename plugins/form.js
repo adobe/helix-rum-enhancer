@@ -85,7 +85,6 @@ export default function addFormTracking({
         });
       }
       
-      // Form is valid - send the regular form submit checkpoint
       sampleRUM(getSubmitType(e.target), { 
         target: targetSelector(e.target), 
         source: sourceSelector(e.target) 
