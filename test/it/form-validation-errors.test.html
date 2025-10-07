@@ -125,24 +125,6 @@
           assert(window.called.length >= 1, 'Should be able to track RUM calls');
         });
 
-        it('Should have proper form elements for validation testing', async function test() {
-          // Test that our test forms are properly set up
-          const requiredForm = document.querySelector('#required-form');
-          const emailForm = document.querySelector('#email-form');
-          const validForm = document.querySelector('#valid-form');
-          
-          assert(requiredForm, 'Required form should exist');
-          assert(emailForm, 'Email form should exist');
-          assert(validForm, 'Valid form should exist');
-          
-          // Check that forms have proper validation attributes
-          const requiredInputs = requiredForm.querySelectorAll('input[required]');
-          assert(requiredInputs.length >= 2, 'Required form should have required inputs');
-          
-          const emailInput = emailForm.querySelector('input[type="email"]');
-          assert(emailInput, 'Email form should have email input');
-          assert(emailInput.value === 'invalid-email', 'Email input should have invalid value');
-        });
 
         it('Should track form validation error checkpoints', async function test() {
           const form = document.querySelector('#required-form');

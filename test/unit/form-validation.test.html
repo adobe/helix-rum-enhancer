@@ -13,59 +13,58 @@
 
 <body>
   <!-- Test 1: Required field validation -->
-  <form id="required-form" class="test-form">
+  <form id="required-form" class="test-form" action="javascript:false;" method="POST">
     <input type="text" name="username" required placeholder="Username (required)">
     <input type="email" name="email" required placeholder="Email (required)">
     <input type="submit" value="Submit Required Form">
   </form>
 
   <!-- Test 2: Email format validation -->
-  <form id="email-form" class="test-form">
+  <form id="email-form" class="test-form" action="javascript:false;" method="POST">
     <input type="email" name="email" value="invalid-email" placeholder="Email">
     <input type="submit" value="Submit Email Form">
   </form>
 
   <!-- Test 3: Pattern validation -->
-  <form id="pattern-form" class="test-form">
+  <form id="pattern-form" class="test-form" action="javascript:false;" method="POST">
     <input type="text" name="phone" pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" value="123" placeholder="Phone (XXX-XXX-XXXX)">
     <input type="submit" value="Submit Pattern Form">
   </form>
 
   <!-- Test 4: Length validation -->
-  <form id="length-form" class="test-form">
+  <form id="length-form" class="test-form" action="javascript:false;" method="POST">
     <input type="text" name="short" minlength="5" value="hi" placeholder="Min 5 chars">
     <input type="text" name="long" maxlength="2" value="toolong" placeholder="Max 2 chars">
     <input type="submit" value="Submit Length Form">
   </form>
 
   <!-- Test 5: Range validation -->
-  <form id="range-form" class="test-form">
+  <form id="range-form" class="test-form" action="javascript:false;" method="POST">
     <input type="number" name="age" min="18" max="100" value="15" placeholder="Age (18-100)">
     <input type="submit" value="Submit Range Form">
   </form>
 
   <!-- Test 6: Valid form (no errors) -->
-  <form id="valid-form" class="test-form">
+  <form id="valid-form" class="test-form" action="javascript:false;" method="POST">
     <input type="text" name="name" value="John Doe" placeholder="Name">
     <input type="email" name="email" value="john@example.com" placeholder="Email">
     <input type="submit" value="Submit Valid Form">
   </form>
 
   <!-- Test 7: Multiple validation errors -->
-  <form id="multiple-errors-form" class="test-form">
+  <form id="multiple-errors-form" class="test-form" action="javascript:false;" method="POST">
     <input type="text" name="username" required placeholder="Username (required)">
     <input type="email" name="email" value="invalid-email" placeholder="Email">
     <input type="submit" value="Submit Multiple Errors Form">
   </form>
 
   <script>
-    // Allow form submission to trigger validation, then prevent navigation
+    // Prevent form submission to avoid navigation during tests
     document.querySelectorAll('form').forEach(form => {
       form.addEventListener('submit', (e) => {
-        // Let the validation happen first, then prevent navigation
-        setTimeout(() => {
-          e.preventDefault();
-        }, 0);
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
       });
     });
   </script>
