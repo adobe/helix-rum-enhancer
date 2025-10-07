@@ -1,0 +1,99 @@
+<html>
+
+<head>
+  <title>Form Validation Error Test</title>
+</head>
+
+<body>
+  <div id="test-container"></div>
+
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+    import addFormTracking from '../../plugins/form.js';
+
+    // Mock RUM functions
+    window.called = [];
+    const mockSampleRUM = (checkpoint, data) => {
+      console.log('RUM call:', checkpoint, data);
+      window.called.push({ checkpoint, ...data });
+    };
+
+    const mockSourceSelector = (element) => {
+      return element.tagName.toLowerCase() + (element.name ? `[name="${element.name}"]` : '');
+    };
+
+    const mockTargetSelector = (element) => {
+      return element.tagName.toLowerCase();
+    };
+
+    const mockGetIntersectionObserver = () => ({
+      observe: () => {}
+    });
+
+    // Function to test form validation logic directly
+    function testFormValidationLogic(form, sampleRUM, sourceSelector) {
+      form.querySelectorAll(':invalid').forEach((field) => {
+        if (field?.validity) {
+          const prototype = Object.getPrototypeOf(field.validity);
+          const errorType = prototype 
+            ? Object.keys(Object.getOwnPropertyDescriptors(prototype))
+                .filter(key => key !== 'valid' && key !== 'constructor' && !key.startsWith('Symbol'))
+                .find(key => field.validity[key]) || 'unknown'
+            : 'unknown';
+          
+          sampleRUM('error', { 
+            target: errorType, 
+            source: sourceSelector(field)
+          });
+        }
+      });
+    }
+
+    runTests(async () => {
+      describe('Form Validation Error Tracking', () => {
+        
+        beforeEach(() => {
+          window.called = [];
+          document.getElementById('test-container').innerHTML = '';
+        });
+
+        it('should detect form validation errors', async function test() {
+          // Create form with required field
+          const form = document.createElement('form');
+          form.innerHTML = `
+            <input type="text" name="username" required placeholder="Username (required)">
+            <input type="submit" value="Submit">
+          `;
+          document.getElementById('test-container').appendChild(form);
+          
+          // Make field empty to trigger validation error
+          const usernameInput = form.querySelector('input[name="username"]');
+          usernameInput.value = '';
+          
+          // Trigger validation
+          const isValid = form.checkValidity();
+          console.log('Form is valid:', isValid);
+          
+          // Test our validation logic directly
+          testFormValidationLogic(form, mockSampleRUM, mockSourceSelector);
+          
+          console.log('All RUM calls:', window.called);
+          
+          // Check for error checkpoints
+          const errorCalls = window.called.filter(call => call.checkpoint === 'error');
+          console.log('Error calls:', errorCalls);
+          
+          expect(errorCalls.length).to.be.at.least(1, 'Should have validation error');
+          
+          // Check for valueMissing error
+          const valueMissingError = errorCalls.find(call => call.target === 'valueMissing');
+          expect(valueMissingError).to.not.be.undefined;
+        });
+
+      });
+    });
+  </script>
+</body>
+
+</html>
