@@ -54,6 +54,7 @@ const PLUGINS = {
   a11y: `${pluginBasePath}/a11y.js`,
   // Interactive elements
   form: { url: `${pluginBasePath}/form.js`, when: () => document.querySelector('form'), isBlockDependent: true },
+  'form-storage': { url: `${pluginBasePath}/form-storage.js`, when: () => document.querySelector('form'), isBlockDependent: true },
   video: { url: `${pluginBasePath}/video.js`, when: () => document.querySelector('video'), isBlockDependent: true },
   webcomponent: {
     url: `${pluginBasePath}/webcomponent.js`,
