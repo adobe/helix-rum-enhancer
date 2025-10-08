@@ -55,6 +55,25 @@
     </script>
   </div>
 
+  <!-- Test form with no validation errors -->
+  <div class="block" data-block-status="loaded">
+    <form id="success-test-form" action="javascript:false;" method="POST">
+      <label for="email-field">Email:</label>
+      <input type="email" id="email-field" name="email" value="test@example.com" placeholder="Enter your email">
+      <label for="message-field">Message:</label>
+      <textarea id="message-field" name="message" placeholder="Enter your message">Hello World</textarea>
+      <input type="submit" value="Submit Success Form">
+    </form>
+    
+    <script>
+      // Form submission handler for successful form
+      document.querySelector('#success-test-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        // Form has valid data, no validation errors expected
+      });
+    </script>
+  </div>
+
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { sendMouse, setViewport } from '@web/test-runner-commands';
@@ -102,6 +121,44 @@
           assert(
             valueMissingErrors.length > 0, 
             'Should have valueMissing error for required field that is empty'
+          );
+        });
+
+        it('Should track successful form submission without validation errors', async function test() {
+          const form = document.querySelector('#success-test-form');
+          
+          // Wait for RUM system to initialize
+          await new Promise((resolve) => {
+            setTimeout(resolve, 2000);
+          });
+
+          // Submit the form using natural click (form has valid data)
+          form.querySelector('input[type="submit"]').click();
+
+          // Wait for RUM events to be processed
+          await new Promise((resolve) => {
+            setTimeout(resolve, 2000);
+          });
+
+          // Verify that form submission is tracked
+          assert(
+            window.called.some((call) => call.checkpoint === 'formsubmit'), 
+            'formsubmit checkpoint should be present when form is submitted successfully'
+          );
+          
+          // Verify that no validation errors are tracked for this form
+          const errorCalls = window.called.filter(call => call.checkpoint === 'error');
+          assert(
+            errorCalls.length === 0, 
+            'No error checkpoints should be present when form has valid data'
+          );
+          
+          // Verify the form submission source
+          const formSubmitCalls = window.called.filter(call => call.checkpoint === 'formsubmit');
+          const successFormSubmit = formSubmitCalls.find(call => call.source === 'form#success-test-form');
+          assert(
+            successFormSubmit, 
+            'Should have formsubmit checkpoint for the success test form'
           );
         });
       });
