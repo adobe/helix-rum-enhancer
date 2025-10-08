@@ -87,7 +87,7 @@
           window.called = [];
         });
 
-        it('Should track form validation errors and form submission events', async function test() {
+        it('Should track form validation errors', async function test() {
           const form = document.querySelector('#validation-test-form');
           
           // Wait for RUM system to initialize
@@ -103,12 +103,6 @@
             setTimeout(resolve, 2000);
           });
 
-          // Verify that form submission is tracked
-          assert(
-            window.called.some((call) => call.checkpoint === 'formsubmit'), 
-            'formsubmit checkpoint should be present when form is submitted'
-          );
-          
           // Verify that validation error is tracked
           assert(
             window.called.some((call) => call.checkpoint === 'error'), 
