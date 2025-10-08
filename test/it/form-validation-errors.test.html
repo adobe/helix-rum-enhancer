@@ -141,9 +141,8 @@
           const invalidFields = form.querySelectorAll(':invalid');
           assert(invalidFields.length >= 2, 'Should have at least 2 invalid fields');
           
-          // Manually trigger the submit event to test our error tracking
-          const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-          form.dispatchEvent(submitEvent);
+          // Trigger submit by clicking the submit button (same as formsubmit.test.html)
+          form.querySelector('input[type="submit"]').click();
 
           await new Promise((resolve) => {
             setTimeout(resolve, 2000);

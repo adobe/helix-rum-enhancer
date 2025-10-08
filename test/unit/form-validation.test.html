@@ -250,8 +250,8 @@
             const errorType = prototype
               ? Object.keys(Object.getOwnPropertyDescriptors(prototype))
                   .filter(key => key !== 'valid' && key !== 'constructor' && !key.startsWith('Symbol'))
-                  .find(key => validity[key]) || 'unknown'
-              : 'unknown';
+                  .find(key => validity[key]) || 'custom'
+              : 'custom';
             
             // Since browser might not set tooShort correctly, just verify our logic works
             expect(typeof errorType).to.equal('string', 'Should return a string error type');

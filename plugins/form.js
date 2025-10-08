@@ -35,8 +35,8 @@ export default function addFormTracking({
           const errorType = prototype 
             ? Object.keys(Object.getOwnPropertyDescriptors(prototype))
                 .filter(key => key !== 'valid' && key !== 'constructor' && !key.startsWith('Symbol'))
-                .find(key => field.validity[key]) || 'unknown'
-            : 'unknown';
+                .find(key => field.validity[key]) || 'custom'
+            : 'custom';
           
           sampleRUM('error', { 
             target: errorType, 
