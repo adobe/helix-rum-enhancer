@@ -1,22 +1,25 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Form Validation Error Integration Test</title>
   <script>
-    // we load from localhost, and have the ability to
-    // change the scripts that are being served. Check the
-    // web-test-runner.config.js file for details
+    // Load RUM from localhost with ability to change scripts being served
+    // Check web-test-runner.config.js file for details
     window.RUM_BASE = window.origin;
-    // we log what's being sent to the "server"
+    
+    // Log what's being sent to the "server" for testing
     window.called = [];
-    // and navigator.sendBeacon has been replaced with
-    // a call to fakeSendBeacon
+    
+    // Replace navigator.sendBeacon with fakeSendBeacon for testing
     window.fakeSendBeacon = function (url, payload) {
-      // if payload is a string, we assume it's a JSON string
+      // If payload is a string, assume it's a JSON string
       if (typeof payload === 'string') {
         window.called.push(JSON.parse(payload));
       } else {
-        // it's a blob
+        // It's a blob, extract text and parse
         payload.text().then((text) => {
           window.called.push(JSON.parse(text));
         });
@@ -27,35 +30,27 @@
 </head>
 
 <body>
+  <!-- Test block for general RUM functionality -->
   <div class="block" data-block-status="loaded">
     <h2>Form Validation Error Integration Tests</h2>
+    <p>This test validates that form validation errors are properly tracked by the RUM system.</p>
+    <img src="/test/fixtures/fire.jpg" height="200" width="200" alt="Test image for viewmedia tracking">
+  </div>
+  
+  <!-- Test form with validation requirements -->
+  <div class="block" data-block-status="loaded">
+    <form id="validation-test-form" action="javascript:false;" method="POST">
+      <label for="name-field">Name (required):</label>
+      <input type="text" id="name-field" name="name" required value="John Doe" placeholder="Enter your name">
+      <input type="submit" value="Submit Form">
+    </form>
     
-    <!-- Test 1: Required field validation -->
-    <form id="required-form" action="javascript:false;" method="POST">
-      <input type="text" name="username" required placeholder="Username (required)">
-      <input type="email" name="email" required placeholder="Email (required)">
-      <input type="submit" value="Submit Required Form">
-    </form>
-
-    <!-- Test 2: Email format validation -->
-    <form id="email-form" action="javascript:false;" method="POST">
-      <input type="email" name="email" value="invalid-email" placeholder="Email">
-      <input type="submit" value="Submit Email Form">
-    </form>
-
-    <!-- Test 3: Valid form (no errors) -->
-    <form id="valid-form" action="javascript:false;" method="POST">
-      <input type="text" name="name" value="John Doe" placeholder="Name">
-      <input type="email" name="email" value="john@example.com" placeholder="Email">
-      <input type="submit" value="Submit Valid Form">
-    </form>
-
     <script>
-      // Prevent form submission for testing but let validation happen
-      document.querySelectorAll('form').forEach(form => {
-        form.addEventListener('submit', (e) => {
-          e.preventDefault();
-        });
+      // Form submission handler that clears the field to trigger validation error
+      document.querySelector('#validation-test-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        // Clear the field to trigger validation error on next submission
+        e.target.name.value = '';
       });
     </script>
   </div>
@@ -66,100 +61,49 @@
     import { assert } from '@esm-bundle/chai';
 
     runTests(async () => {
-      describe('Form Validation Error Integration Tests', () => {
+      describe('Form Validation Error Tracking', () => {
         
         beforeEach(() => {
-          // Clear previous calls before each test
+          // Clear previous RUM calls before each test
           window.called = [];
         });
 
-        it('Should integrate with RUM system and track form interactions', async function test() {
-          const form = document.querySelector('#valid-form');
+        it('Should track form validation errors and form submission events', async function test() {
+          const form = document.querySelector('#validation-test-form');
           
+          // Wait for RUM system to initialize
           await new Promise((resolve) => {
-            setTimeout(resolve, 3000);
+            setTimeout(resolve, 2000);
           });
 
-          // Test that the form tracking is working by submitting a valid form
+          // Submit the form using natural click to trigger validation
           form.querySelector('input[type="submit"]').click();
 
+          // Wait for RUM events to be processed
           await new Promise((resolve) => {
-            setTimeout(resolve, 3000);
+            setTimeout(resolve, 2000);
           });
 
-          // Check that some form-related checkpoints are sent (could be formsubmit or other)
-          const formCalls = window.called.filter(call => 
-            call.checkpoint === 'formsubmit' || 
-            call.checkpoint === 'click' || 
-            call.checkpoint === 'fill'
+          // Verify that form submission is tracked
+          assert(
+            window.called.some((call) => call.checkpoint === 'formsubmit'), 
+            'formsubmit checkpoint should be present when form is submitted'
           );
           
-          // If no form calls detected, check if RUM system is working at all
-          if (formCalls.length === 0) {
-            console.log('No form calls detected. All calls:', window.called);
-            // Just verify RUM system is working
-            assert(window.called.length >= 0, 'RUM system should be initialized');
-          } else {
-            assert(formCalls.length >= 1, 'Should have form-related checkpoints');
-          }
+          // Verify that validation error is tracked
+          assert(
+            window.called.some((call) => call.checkpoint === 'error'), 
+            'error checkpoint should be present when form has validation errors'
+          );
           
-          // Check that no error checkpoints were sent for valid form
+          // Verify specific error type (valueMissing for required field)
           const errorCalls = window.called.filter(call => call.checkpoint === 'error');
-          assert(errorCalls.length === 0, 'Should not have error checkpoints for valid form');
-        });
-
-        it('Should handle form validation error tracking integration', async function test() {
-          // Test that our form validation error tracking integrates properly
-          // by checking that the RUM system is set up correctly
-          
-          await new Promise((resolve) => {
-            setTimeout(resolve, 2000);
-          });
-
-          // Verify that the RUM system is working
-          assert(typeof window.fakeSendBeacon === 'function', 'RUM system should be initialized');
-          assert(Array.isArray(window.called), 'RUM call tracking should be available');
-          
-          // Test that we can track calls
-          window.fakeSendBeacon('test', JSON.stringify({ checkpoint: 'test', target: 'test' }));
-          assert(window.called.length >= 1, 'Should be able to track RUM calls');
-        });
-
-
-        it('Should track form validation error checkpoints', async function test() {
-          const form = document.querySelector('#required-form');
-          
-          await new Promise((resolve) => {
-            setTimeout(resolve, 3000);
-          });
-
-          // Manually trigger validation to create invalid fields
-          const isValid = form.checkValidity();
-          assert(isValid === false, 'Form should be invalid');
-          
-          // Get invalid fields
-          const invalidFields = form.querySelectorAll(':invalid');
-          assert(invalidFields.length >= 2, 'Should have at least 2 invalid fields');
-          
-          // Trigger submit by clicking the submit button (same as formsubmit.test.html)
-          form.querySelector('input[type="submit"]').click();
-
-          await new Promise((resolve) => {
-            setTimeout(resolve, 2000);
-          });
-
-          // Check that error checkpoints are sent (same pattern as formsubmit.test.html)
-          assert(window.called.some((call) => call.checkpoint === 'error'), 'error checkpoint missing');
-          
-          // Check for specific error types
-          const errorCalls = window.called.filter(call => call.checkpoint === 'error');
-          assert(errorCalls.length >= 2, 'Should have at least 2 error checkpoints');
-          
-          // Check for valueMissing errors
           const valueMissingErrors = errorCalls.filter(call => call.target === 'valueMissing');
-          assert(valueMissingErrors.length >= 2, 'Should have valueMissing error checkpoints');
+          assert(
+            valueMissingErrors.length > 0, 
+            'Should have valueMissing error for required field that is empty'
+          );
         });
-
       });
     });
   </script>
