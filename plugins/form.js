@@ -23,10 +23,15 @@ export const getSubmitType = (el) => {
   return 'formsubmit';
 };
 
+let rootMo = null;
+
 export default function addFormTracking({
+  createMO,
   sampleRUM, sourceSelector, targetSelector, context, getIntersectionObserver,
 }) {
-  context.querySelectorAll('form').forEach((form) => {
+  // Track existing forms
+
+  function trackForm(form) {
     form.addEventListener('submit', (e) => {
       // Check for form validation errors before submitting
       const invalidFields = form.querySelectorAll(':invalid');
@@ -73,5 +78,27 @@ export default function addFormTracking({
         sampleRUM('click', { source: sourceSelector(e.target) });
       }
     });
+  }
+
+  context.querySelectorAll('form').forEach((form) => {
+    trackForm(form);
   });
+
+  // Create mutation observer to track dynamically added forms
+  if (!rootMo) {
+    rootMo = createMO((mutationList) => {
+      mutationList.forEach((mutation) => {
+        if (mutation.addedNodes) {
+          mutation.addedNodes.filter((node) => node.tagName === 'FORM').forEach(trackForm);
+        }
+      });
+    });
+
+    // Start observing the document for form additions
+    rootMo.observe(document.body, {
+      childList: true,
+      attributes: false,
+      subtree: true,
+    });
+  }
 }
