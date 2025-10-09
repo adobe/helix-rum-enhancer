@@ -89,7 +89,9 @@ export default function addFormTracking({
     rootMo = createMO((mutationList) => {
       mutationList.forEach((mutation) => {
         if (mutation.addedNodes) {
-          mutation.addedNodes.filter((node) => node.tagName === 'FORM').forEach(trackForm);
+          [...mutation.addedNodes]
+            .filter((node) => node.tagName === 'FORM' || node.querySelector('form'))
+            .forEach((e) => trackForm(e.querySelector('form') || e));
         }
       });
     });
