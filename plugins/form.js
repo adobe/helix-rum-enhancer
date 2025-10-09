@@ -27,7 +27,35 @@ export default function addFormTracking({
   sampleRUM, sourceSelector, targetSelector, context, getIntersectionObserver,
 }) {
   context.querySelectorAll('form').forEach((form) => {
-    form.addEventListener('submit', (e) => sampleRUM(getSubmitType(e.target), { target: targetSelector(e.target), source: sourceSelector(e.target) }), { once: true });
+    form.addEventListener('submit', (e) => {
+      // Check for form validation errors before submitting
+      const invalidFields = form.querySelectorAll(':invalid');
+      // Send error checkpoints for each invalid field
+      invalidFields.forEach((field) => {
+        if (field && field.validity) {
+          const prototype = Object.getPrototypeOf(field.validity);
+          const errorType = prototype
+            ? Object.keys(Object.getOwnPropertyDescriptors(prototype))
+              .filter((key) => key !== 'valid' && key !== 'constructor' && !key.startsWith('Symbol'))
+              .find((key) => field.validity[key]) || 'custom'
+            : 'custom';
+
+          sampleRUM('error', {
+            target: errorType,
+            source: sourceSelector(field),
+          });
+        }
+      });
+
+      // Only send formsubmit event if there are no validation errors
+      if (invalidFields.length === 0) {
+        sampleRUM(getSubmitType(e.target), {
+          target: targetSelector(e.target),
+          source: sourceSelector(e.target),
+        });
+      }
+    }, { once: true });
+
     getIntersectionObserver('viewblock').observe(form);
     let lastSource;
     form.addEventListener('change', (e) => {

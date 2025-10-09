@@ -225,12 +225,10 @@ function addNavigationTracking() {
     } else {
       sampleRUM('enter', payload); // enter site
     }
-    fflags.enabled('redirect', () => {
-      const from = new URLSearchParams(window.location.search).get('redirect_from');
-      if (redirectCount || from) {
-        sampleRUM('redirect', { source: from, target: redirectCount || 1 });
-      }
-    });
+    const from = new URLSearchParams(window.location.search).get('redirect_from');
+    if (redirectCount || from) {
+      sampleRUM('redirect', { source: from, target: redirectCount || 1 });
+    }
   };
 
   const processed = new Set(); // avoid processing duplicate types
@@ -362,11 +360,9 @@ function addTrackingFromConfig() {
   // Tracking extensions
   loadPlugins();
 
-  fflags.enabled('language', () => {
-    const target = navigator.language;
-    const source = document.documentElement.lang;
-    sampleRUM('language', { source, target });
-  });
+  const target = navigator.language;
+  const source = document.documentElement.lang;
+  sampleRUM('language', { source, target });
 }
 
 function initEnhancer() {
