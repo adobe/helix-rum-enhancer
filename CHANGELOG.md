@@ -1,3 +1,10 @@
+# [2.42.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.41.0...v2.42.0) (2025-10-09)
+
+
+### Features
+
+* Add form validation error tracking to form plugin ([4a8f89e](https://github.com/adobe/helix-rum-enhancer/commit/4a8f89e33976147e941a0f4288cc7deafff47182))
+
 # [2.41.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.40.2...v2.41.0) (2025-10-07)
 
 

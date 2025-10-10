@@ -51,7 +51,6 @@ export default function addFormTracking({
           });
         }
       });
-
       // Only send formsubmit event if there are no validation errors
       if (invalidFields.length === 0) {
         sampleRUM(getSubmitType(e.target), {
