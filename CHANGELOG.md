@@ -1,3 +1,10 @@
+## [2.42.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.0...v2.42.1) (2025-10-16)
+
+
+### Bug Fixes
+
+* update semantic-release to v25 and node to 24.x for OIDC ([5629fdd](https://github.com/adobe/helix-rum-enhancer/commit/5629fdd8b7b88b4f2655a4ce0d00477e369581c2))
+
 # [2.42.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.41.0...v2.42.0) (2025-10-09)
 
 
