@@ -1,3 +1,10 @@
+## [2.42.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.2...v2.42.3) (2025-10-17)
+
+
+### Bug Fixes
+
+* upgrade to @semantic-release/npm v13 for OIDC support ([b780819](https://github.com/adobe/helix-rum-enhancer/commit/b78081961841d038ca24aadf53ffe4dbb856404c))
+
 ## [2.42.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.1...v2.42.2) (2025-10-17)
 
 
