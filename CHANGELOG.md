@@ -1,3 +1,10 @@
+## [2.42.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.3...v2.42.4) (2025-10-17)
+
+
+### Bug Fixes
+
+* trigger release to test npm trusted publisher configuration ([e11606d](https://github.com/adobe/helix-rum-enhancer/commit/e11606d4a5e81b24c20277feff5ab363b557ec96))
+
 ## [2.42.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.2...v2.42.3) (2025-10-17)
 
 
