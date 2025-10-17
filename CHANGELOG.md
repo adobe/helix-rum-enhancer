@@ -1,3 +1,11 @@
+## [2.42.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.1...v2.42.2) (2025-10-17)
+
+
+### Bug Fixes
+
+* configure npm provenance for OIDC publishing with 2FA ([e01fa6a](https://github.com/adobe/helix-rum-enhancer/commit/e01fa6a920f93048053a509ce54a05eb7dd92666))
+* configure npm provenance for OIDC publishing with 2FA ([033eba5](https://github.com/adobe/helix-rum-enhancer/commit/033eba56bef2184d7bf1a09a44f72c4464dc8b98))
+
 ## [2.42.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.0...v2.42.1) (2025-10-16)
 
 
