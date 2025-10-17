@@ -7,8 +7,7 @@ module.exports = {
     }],
     ["@semantic-release/npm", {
       "npmPublish": true,
-      "pkgRoot": ".",
-      "tarballDir": false
+      "pkgRoot": "."
     }],
     ["@semantic-release/git", {
       "assets": ["package.json", "package-lock.json", "CHANGELOG.md"],
