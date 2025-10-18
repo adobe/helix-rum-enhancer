@@ -34,7 +34,7 @@
   },
   "devDependencies": {
     "@adobe/eslint-config-helix": "3.0.12",
-    "@adobe/helix-rum-js": "2.13.3",
+    "@adobe/helix-rum-js": "2.13.6",
     "@adobe/rollup-plugin-checksum": "1.2.0",
     "@eslint/config-helpers": "0.4.0",
     "@esm-bundle/chai": "4.3.4-fix.0",
