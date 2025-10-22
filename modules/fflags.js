@@ -16,8 +16,7 @@ export const fflags = {
   enabled: (f, c) => fflags.has(f) && c(),
   disabled: (f, c) => !fflags.has(f) && c(),
   eagercwv: [683],
-  redirect: [620, 1139],
   example: [543, 770, 1136],
-  language: [543, 959, 1139, 620],
-  allresources: [1139, 457],
+  allresources: [543, 1139],
+  a11y: [557, 781, 897, 955, 959],
 };

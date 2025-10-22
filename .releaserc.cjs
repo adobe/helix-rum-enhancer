@@ -19,14 +19,21 @@ module.exports = {
         {
           "path": "src/index.md5",
           "label": "RUM Enhancer Hash"
+        },
+        {
+          "path": "src/index.sri",
+          "label": "RUM Enhancer SRI Hash"
         }
       ]
+    }],
+    ["@semantic-release/exec", {
+      "publishCmd": "./tagger.sh ${nextRelease.version} src/index.js src/plugins/cwv.js src/plugins/form.js src/plugins/martech.js src/plugins/onetrust.js src/plugins/video.js src/plugins/webcomponent.js --push"
     }],
     ["semantic-release-slack-bot", {
       notifyOnSuccess: true,
       notifyOnFail: true,
       markdownReleaseNotes: true,
-      slackChannel: "rum-explorers",
+      slackChannel: "optel-explorers",
     }],
   ],
   branches: ['main'],

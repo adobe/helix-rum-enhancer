@@ -108,4 +108,40 @@ describe('test dom#sourceSelector', () => {
     // eslint-disable-next-line no-unused-expressions
     expect(sourceSelector()).to.be.undefined;
   });
+
+  it('sourceSelector - select form by class', () => {
+    const form = document.createElement('form');
+    form.classList.add('form-class');
+    form.classList.add('form-class-2');
+    document.body.append(form);
+    expect(sourceSelector(form)).to.be.equal('form.form-class');
+  });
+
+  it('sourceSelector - select form by id', () => {
+    const form = document.createElement('form');
+    form.id = 'form-id';
+    document.body.append(form);
+    expect(sourceSelector(form)).to.be.equal('form#form-id');
+  });
+
+  it('sourceSelector - should escape invalid characters', () => {
+    const form1 = document.createElement('form');
+    const container = document.createElement('div');
+    container.id = 'contentcontainer-9065752e10';
+    form1.id = '389';
+    container.append(form1);
+    document.body.append(container);
+
+    const form2 = document.createElement('form');
+    form2.classList.add('123abc');
+    document.body.append(form2);
+
+    const form3 = document.createElement('form');
+    form3.id = 'eec6b0d9-bd39-42aa-9f96-29a7aced9765/root/container/modal';
+    document.body.append(form3);
+
+    expect(sourceSelector(form1)).to.be.equal('#contentcontainer-9065752e10 form#\\33 89');
+    expect(sourceSelector(form2)).to.be.equal('form.\\31 23abc');
+    expect(sourceSelector(form3)).to.be.equal('form#eec6b0d9-bd39-42aa-9f96-29a7aced9765\\/root\\/container\\/modal');
+  });
 });

@@ -1,0 +1,68 @@
+<html>
+<head>
+  <title>A11y Audience - High Score Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin',
+      A11Y_REPORT_DELAY: 1000,
+    };
+    window.events = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.events.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.events.push(JSON.parse(text));
+        });
+      }
+    };
+    window.originalMatchMedia = window.matchMedia;
+    window.matchMedia = (query) => ({
+      matches: query === '(forced-colors: active)' || 
+               query === '(pointer: coarse)' ||
+               query === '(prefers-contrast: more)' ||
+               query === '(hover: none)'
+    });
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+<body>
+  <p>Some content for high accessibility score test</p>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+    import { pollForA11y, mockVisualViewport, restoreVisualViewport, mockMaxTouchPoints, restoreMaxTouchPoints } from './a11y.test.utils.js';
+    
+    // Mock high zoom level (≥200%) for 2 points
+    window.originalVisualViewport = mockVisualViewport(200);
+    // Mock maxTouchPoints = 0 to trigger the specific condition
+    window.originalMaxTouchPoints = mockMaxTouchPoints(0);
+
+    runTests(async () => {
+      describe('Accessibility Audience Scoring', () => {
+        after(() => {
+          window.matchMedia = window.originalMatchMedia;
+          restoreVisualViewport(window.originalVisualViewport);
+          restoreMaxTouchPoints(window.originalMaxTouchPoints);
+        });
+
+        it('should report `high` for a device with high accessibility needs', async () => {
+          // This test should trigger multiple conditions to ensure >7 points:
+          // - (forced-colors: active) = 4 points (AAA_WEIGHT)
+          // - (prefers-contrast: more) = 2 points (AA_WEIGHT)
+          // - (hover: none) = 2 points (AA_WEIGHT)
+          // - High zoom (≥200%) = 2 points (AA_WEIGHT) 
+          // - navigator.maxTouchPoints === 0 && (pointer: coarse) = 2 points (AA_WEIGHT)
+          // Total: 4 + 2 + 2 + 2 + 2 = 12 points > 7, should be "high"
+          
+          const audience = await pollForA11y();
+          expect(audience).to.exist;
+          expect(audience.source).to.equal('high');
+          expect(audience.target).to.equal('off:low:medium:high');
+        });
+      });
+    });
+  </script>
+</body>
+</html> 

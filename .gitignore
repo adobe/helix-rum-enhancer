@@ -7,7 +7,9 @@ tmp
 logs
 .DS_Store
 test-results.xml
+test-output.log
 .env
 .idea
 src
 test-results/test-results.json
+*.bak

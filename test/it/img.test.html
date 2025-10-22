@@ -15,12 +15,18 @@
         it('rum enhancer reports image in the DOM onload', async () => {
           let called = false;
           const imagesSeen = [];
+          let viewMediaResolve;
+          const viewMediaPromise = new Promise((resolve) => {
+            viewMediaResolve = resolve;
+          });
+
           window.hlx = {
             rum: {
               sampleRUM: (checkpoint, data) => {
                 called = true;
                 if (checkpoint === 'viewmedia') {
                   imagesSeen.push(data.target);
+                  viewMediaResolve();
                 }
               }
             }
@@ -35,10 +41,11 @@
             script.onload = resolve;
           });
 
-          // wait one second for the script to run
-          await new Promise((resolve) => {
-            setTimeout(resolve, 1500);
-          });
+          // Wait for the viewmedia event or timeout after 5 seconds
+          await Promise.race([
+            viewMediaPromise,
+            new Promise((resolve) => setTimeout(resolve, 5000))
+          ]);
 
           expect(called).to.be.true;
           expect(imagesSeen).to.deep.equal(['https://www.example.com/loadstart.jpg']);

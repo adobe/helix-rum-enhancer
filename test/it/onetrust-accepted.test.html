@@ -40,6 +40,7 @@
         const usp = new URLSearchParams(window.location.search);
         usp.append('utm_medium', 'test');
         window.history.replaceState({}, '', `${window.location.pathname}?${usp.toString()}`);
+        document.body.innerHTML = '';
       });
 
       describe('HTML Integration Tests (With OneTrust hidden)', () => {

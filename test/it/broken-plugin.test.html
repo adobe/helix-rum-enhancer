@@ -19,6 +19,10 @@
           window.hlx = {
             rum: {
               sampleRUM: (...args) => {
+                if (args[0] === 'missingresource' && navigator.userAgent.includes('Firefox')) {
+                  // firefox tries to load the favicon.ico file while other browsers don't
+                  return;
+                }
                 called.push(args);
               }
             }
