@@ -36,20 +36,29 @@
 <body>
   <nav>
     <form id="form-in-header">
-      <input type="text" name="name" />
-      <input type="email" name="email" />
+      <legend>Header Form</legend>
+      <label for="header-form-name">Name</label>
+      <input type="text" name="name" id="header-form-name"/>
+      <label for="header-form-email">Email</label>
+      <input type="email" name="email" id="header-form-email"/>
       <input type="submit" value="Submit" />
     </form>
   </nav>
   <form id="basic-form">
-    <input type="text" name="name" />
-    <input type="email" name="email" />
+    <legend>Basic Form</legend>
+    <label for="basic-form-name">Name</label>
+    <input type="text" name="name" id="basic-form-name"/>
+    <label for="basic-form-email">Email</label>
+    <input type="email" name="email" id="basic-form-email"/>
     <input type="submit" value="Submit" />
   </form>
   <footer>
     <form id="form-in-footer">
-      <input type="text" name="name" />
-      <input type="email" name="email" />
+      <legend>Footer Form</legend>
+      <label for="footer-form-name">Name</label>
+      <input type="text" name="name" id="footer-form-name"/>
+      <label for="footer-form-email">Email</label>
+      <input type="email" name="email" id="footer-form-email"/>
         <input type="submit" value="Submit" />
     </form>
   </footer>
@@ -59,16 +68,27 @@
     import { expect } from '@esm-bundle/chai';
 
     runTests(async () => {
-      describe('Test Block Loading', () => {
-        it('Can observe form that enter the viewport', async () => {
+      describe('Test Form View after the plugin is loaded', () => {
+        it('Can observe form that are created dynamically', async () => {
           await setViewport({ width: 800, height: 600 });
-
+          const form = `<form id="dynamic-form">
+            <label for="dynamic-form-name">Name</label>
+            <input type="text" name="name" id="dynamic-form-name"/>
+            <label for="dynamic-form-email">Email</label>
+            <input type="email" name="email" id="dynamic-form-email"/>
+            <input type="submit" value="Submit" />
+          </form>`
+          const formElement = document.createElement('div');
+          formElement.innerHTML = form;
+          document.body.appendChild(formElement);
           await new Promise((resolve) => {
             setTimeout(resolve, 2000);
           });
-          expect(window.called.length).to.equal(3);
+
+          expect(window.called.length).to.equal(4);
           const actual = new Set(window.called.map((c) => c.source));
-          const expected = new Set(['nav form#form-in-header', 'form#basic-form', 'footer form#form-in-footer']);
+          const expected = new Set(['nav form#form-in-header', 'form#basic-form', 'footer form#form-in-footer','form#dynamic-form']);
+          console.log([...actual], [...expected]);
           expect(actual).to.deep.equal(expected);
         });
       });

@@ -88,6 +88,14 @@
       return element.tagName.toLowerCase();
     };
 
+    const mockCreateMO = (cb) => {
+      return {
+        observe: (target, options) => {
+          cb([]);
+        }
+      };
+    };
+
     const mockGetIntersectionObserver = () => ({
       observe: () => {}
     });
@@ -109,6 +117,7 @@
             sourceSelector: mockSourceSelector,
             targetSelector: mockTargetSelector,
             context: document,
+            createMO: mockCreateMO,
             getIntersectionObserver: mockGetIntersectionObserver
           });
 

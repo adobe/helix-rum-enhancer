@@ -34,41 +34,31 @@
 </head>
 
 <body>
-  <nav>
-    <form id="form-in-header">
-      <input type="text" name="name" />
-      <input type="email" name="email" />
-      <input type="submit" value="Submit" />
-    </form>
-  </nav>
-  <form id="basic-form">
-    <input type="text" name="name" />
-    <input type="email" name="email" />
-    <input type="submit" value="Submit" />
-  </form>
-  <footer>
-    <form id="form-in-footer">
-      <input type="text" name="name" />
-      <input type="email" name="email" />
-        <input type="submit" value="Submit" />
-    </form>
-  </footer>
+  <nav></nav>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { setViewport } from '@web/test-runner-commands';
     import { expect } from '@esm-bundle/chai';
 
     runTests(async () => {
-      describe('Test Block Loading', () => {
-        it('Can observe form that enter the viewport', async () => {
+      describe('Test Form View created after the page is loaded', () => {
+        it('Can observe form that are created dynamically', async () => {
           await setViewport({ width: 800, height: 600 });
-
+          const form = `<form id="dynamic-form">
+            <input type="text" name="name" />
+            <input type="email" name="email" />
+            <input type="submit" value="Submit" />
+          </form>`
+          const formElement = document.createElement('div');
+          formElement.innerHTML = form;
+          document.body.appendChild(formElement);
           await new Promise((resolve) => {
             setTimeout(resolve, 2000);
           });
-          expect(window.called.length).to.equal(3);
+
+          expect(window.called.length).to.equal(1);
           const actual = new Set(window.called.map((c) => c.source));
-          const expected = new Set(['nav form#form-in-header', 'form#basic-form', 'footer form#form-in-footer']);
+          const expected = new Set(['form#dynamic-form']);
           expect(actual).to.deep.equal(expected);
         });
       });
