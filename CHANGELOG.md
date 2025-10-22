@@ -1,3 +1,10 @@
+# [2.43.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.4...v2.43.0) (2025-10-22)
+
+
+### Features
+
+* adding tracking of dynamic forms in the page ([#483](https://github.com/adobe/helix-rum-enhancer/issues/483)) ([c2d5495](https://github.com/adobe/helix-rum-enhancer/commit/c2d5495736f2693d31126bddbcce4c66c6fd40f4))
+
 ## [2.42.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.3...v2.42.4) (2025-10-17)
 
 
