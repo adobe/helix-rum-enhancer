@@ -102,7 +102,7 @@
 
     runTests(async () => {
       describe('Form Validation Error Tracking', () => {
-
+        
         beforeEach(() => {
           // Clear previous calls before each test
           window.called = [];
@@ -110,7 +110,7 @@
 
         it('should track valueMissing validation errors', async function test() {
           const form = document.querySelector('#required-form');
-
+          
           // Initialize form tracking
           addFormTracking({
             sampleRUM: mockSampleRUM,
@@ -128,11 +128,11 @@
           // Manually trigger validation to create invalid fields
           const isValid = form.checkValidity();
           expect(isValid).to.be.false; // Form should be invalid
-
+          
           // Get invalid fields
           const invalidFields = form.querySelectorAll(':invalid');
           expect(invalidFields.length).to.be.at.least(2, 'Should have at least 2 invalid fields');
-
+          
           // Manually trigger the submit event to test our error tracking
           const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
           form.dispatchEvent(submitEvent);
@@ -144,7 +144,7 @@
           // Check for error checkpoints
           const errorCalls = window.called.filter(call => call.checkpoint === 'error');
           expect(errorCalls.length).to.be.at.least(2, 'Should have at least 2 validation errors');
-
+          
           // Check for valueMissing errors
           const valueMissingErrors = errorCalls.filter(call => call.target === 'valueMissing');
           expect(valueMissingErrors.length).to.be.at.least(2, 'Should have valueMissing errors for required fields');
@@ -152,7 +152,7 @@
 
         it('should track typeMismatch validation errors', async function test() {
           const form = document.querySelector('#email-form');
-
+          
           // Initialize form tracking
           addFormTracking({
             sampleRUM: mockSampleRUM,
@@ -169,11 +169,11 @@
           // Manually trigger validation to create invalid fields
           const isValid = form.checkValidity();
           expect(isValid).to.be.false; // Form should be invalid
-
+          
           // Get invalid fields
           const invalidFields = form.querySelectorAll(':invalid');
           expect(invalidFields.length).to.be.at.least(1, 'Should have at least 1 invalid field');
-
+          
           // Manually trigger the submit event to test our error tracking
           const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
           form.dispatchEvent(submitEvent);
@@ -190,7 +190,7 @@
 
         it('should track patternMismatch validation errors', async function test() {
           const form = document.querySelector('#pattern-form');
-
+          
           // Initialize form tracking
           addFormTracking({
             sampleRUM: mockSampleRUM,
@@ -207,11 +207,11 @@
           // Manually trigger validation to create invalid fields
           const isValid = form.checkValidity();
           expect(isValid).to.be.false; // Form should be invalid
-
+          
           // Get invalid fields
           const invalidFields = form.querySelectorAll(':invalid');
           expect(invalidFields.length).to.be.at.least(1, 'Should have at least 1 invalid field');
-
+          
           // Manually trigger the submit event to test our error tracking
           const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
           form.dispatchEvent(submitEvent);
@@ -228,7 +228,7 @@
 
         it('should track tooShort validation errors', async function test() {
           const form = document.querySelector('#length-form');
-
+          
           // Initialize form tracking
           addFormTracking({
             sampleRUM: mockSampleRUM,
@@ -244,15 +244,15 @@
 
           // Check if form has validation errors
           const isValid = form.checkValidity();
-
+          
           // If form is valid, skip the test (browser behavior with minlength validation)
           if (isValid) {
             // Test that our form validation logic works by testing the tooShort field specifically
             const shortField = form.querySelector('input[name="short"]');
-
+            
             // The field should be too short based on minlength
             expect(shortField.value.length).to.be.below(shortField.minLength, 'Short field should be below minlength');
-
+            
             // Test our error detection logic directly
             const validity = shortField.validity;
             const prototype = Object.getPrototypeOf(validity);
@@ -261,16 +261,16 @@
                   .filter(key => key !== 'valid' && key !== 'constructor' && !key.startsWith('Symbol'))
                   .find(key => validity[key]) || 'custom'
               : 'custom';
-
+            
             // Since browser might not set tooShort correctly, just verify our logic works
             expect(typeof errorType).to.equal('string', 'Should return a string error type');
             return;
           }
-
+          
           // If form is invalid, proceed with normal test
           const invalidFields = form.querySelectorAll(':invalid');
           expect(invalidFields.length).to.be.at.least(1, 'Should have at least 1 invalid field');
-
+          
           // Manually trigger the submit event to test our error tracking
           const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
           form.dispatchEvent(submitEvent);
@@ -282,13 +282,13 @@
           // Check for length validation errors
           const errorCalls = window.called.filter(call => call.checkpoint === 'error');
           const tooShortErrors = errorCalls.filter(call => call.target === 'tooShort');
-
+          
           expect(tooShortErrors.length).to.be.at.least(1, 'Should have tooShort error for field below minlength');
         });
 
         it('should track rangeUnderflow validation errors', async function test() {
           const form = document.querySelector('#range-form');
-
+          
           // Initialize form tracking
           addFormTracking({
             sampleRUM: mockSampleRUM,
@@ -305,11 +305,11 @@
           // Manually trigger validation to create invalid fields
           const isValid = form.checkValidity();
           expect(isValid).to.be.false; // Form should be invalid
-
+          
           // Get invalid fields
           const invalidFields = form.querySelectorAll(':invalid');
           expect(invalidFields.length).to.be.at.least(1, 'Should have at least 1 invalid field');
-
+          
           // Manually trigger the submit event to test our error tracking
           const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
           form.dispatchEvent(submitEvent);
@@ -326,7 +326,7 @@
 
         it('should not track errors for valid forms', async function test() {
           const form = document.querySelector('#valid-form');
-
+          
           // Initialize form tracking
           addFormTracking({
             sampleRUM: mockSampleRUM,
@@ -343,11 +343,11 @@
           // Manually trigger validation to verify form is valid
           const isValid = form.checkValidity();
           expect(isValid).to.be.true; // Form should be valid
-
+          
           // Get invalid fields (should be none)
           const invalidFields = form.querySelectorAll(':invalid');
           expect(invalidFields.length).to.equal(0, 'Should have no invalid fields');
-
+          
           // Manually trigger the submit event to test our error tracking
           const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
           form.dispatchEvent(submitEvent);
@@ -359,7 +359,7 @@
           // Check that no error checkpoints were sent
           const errorCalls = window.called.filter(call => call.checkpoint === 'error');
           expect(errorCalls.length).to.equal(0, 'Should not have error checkpoints for valid form');
-
+          
           // But should still have form submit checkpoint
           const submitCalls = window.called.filter(call => call.checkpoint === 'formsubmit');
           expect(submitCalls.length).to.be.at.least(1, 'Should still have formsubmit checkpoint for valid form');
@@ -367,7 +367,7 @@
 
         it('should track multiple validation errors on single form', async function test() {
           const form = document.querySelector('#multiple-errors-form');
-
+          
           // Initialize form tracking
           addFormTracking({
             sampleRUM: mockSampleRUM,
@@ -384,11 +384,11 @@
           // Manually trigger validation to create invalid fields
           const isValid = form.checkValidity();
           expect(isValid).to.be.false; // Form should be invalid
-
+          
           // Get invalid fields
           const invalidFields = form.querySelectorAll(':invalid');
           expect(invalidFields.length).to.be.at.least(2, 'Should have at least 2 invalid fields');
-
+          
           // Manually trigger the submit event to test our error tracking
           const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
           form.dispatchEvent(submitEvent);
@@ -400,7 +400,7 @@
           // Check for multiple error types
           const errorCalls = window.called.filter(call => call.checkpoint === 'error');
           expect(errorCalls.length).to.be.at.least(2, 'Should have multiple validation errors');
-
+          
           const errorTypes = errorCalls.map(call => call.target);
           expect(errorTypes).to.include('valueMissing', 'Should include valueMissing error');
           expect(errorTypes).to.include('typeMismatch', 'Should include typeMismatch error');
@@ -408,7 +408,7 @@
 
         it('should handle dynamic error type detection', async function test() {
           const form = document.querySelector('#required-form');
-
+          
           // Initialize form tracking
           addFormTracking({
             sampleRUM: mockSampleRUM,
@@ -425,11 +425,11 @@
           // Manually trigger validation to create invalid fields
           const isValid = form.checkValidity();
           expect(isValid).to.be.false; // Form should be invalid
-
+          
           // Get invalid fields
           const invalidFields = form.querySelectorAll(':invalid');
           expect(invalidFields.length).to.be.at.least(1, 'Should have at least 1 invalid field');
-
+          
           // Manually trigger the submit event to test our error tracking
           const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
           form.dispatchEvent(submitEvent);
@@ -441,14 +441,14 @@
           // Check that error types are detected dynamically
           const errorCalls = window.called.filter(call => call.checkpoint === 'error');
           expect(errorCalls.length).to.be.at.least(1, 'Should have validation errors');
-
+          
           // Verify that we're getting actual error type names, not 'unknown'
           const unknownErrors = errorCalls.filter(call => call.target === 'unknown');
           expect(unknownErrors.length).to.equal(0, 'Should not have unknown error types');
-
+          
           // Verify we have specific error types
-          const specificErrors = errorCalls.filter(call =>
-            ['valueMissing', 'typeMismatch', 'patternMismatch', 'tooLong', 'tooShort',
+          const specificErrors = errorCalls.filter(call => 
+            ['valueMissing', 'typeMismatch', 'patternMismatch', 'tooLong', 'tooShort', 
              'rangeUnderflow', 'rangeOverflow', 'stepMismatch', 'badInput', 'customError'].includes(call.target)
           );
           expect(specificErrors.length).to.be.at.least(1, 'Should have specific error types detected');
