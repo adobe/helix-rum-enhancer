@@ -1,3 +1,32 @@
+## [2.42.4](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.3...v2.42.4) (2025-10-17)
+
+
+### Bug Fixes
+
+* trigger release to test npm trusted publisher configuration ([e11606d](https://github.com/adobe/helix-rum-enhancer/commit/e11606d4a5e81b24c20277feff5ab363b557ec96))
+
+## [2.42.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.2...v2.42.3) (2025-10-17)
+
+
+### Bug Fixes
+
+* upgrade to @semantic-release/npm v13 for OIDC support ([b780819](https://github.com/adobe/helix-rum-enhancer/commit/b78081961841d038ca24aadf53ffe4dbb856404c))
+
+## [2.42.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.1...v2.42.2) (2025-10-17)
+
+
+### Bug Fixes
+
+* configure npm provenance for OIDC publishing with 2FA ([e01fa6a](https://github.com/adobe/helix-rum-enhancer/commit/e01fa6a920f93048053a509ce54a05eb7dd92666))
+* configure npm provenance for OIDC publishing with 2FA ([033eba5](https://github.com/adobe/helix-rum-enhancer/commit/033eba56bef2184d7bf1a09a44f72c4464dc8b98))
+
+## [2.42.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.0...v2.42.1) (2025-10-16)
+
+
+### Bug Fixes
+
+* update semantic-release to v25 and node to 24.x for OIDC ([5629fdd](https://github.com/adobe/helix-rum-enhancer/commit/5629fdd8b7b88b4f2655a4ce0d00477e369581c2))
+
 # [2.42.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.41.0...v2.42.0) (2025-10-09)
 
 
