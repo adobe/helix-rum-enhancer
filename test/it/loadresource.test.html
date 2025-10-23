@@ -1,0 +1,173 @@
+<html>
+
+<head>
+  <title>Test Runner - Load Resource Tracking</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    // we log what's being sent to the "server"
+    window.called = [];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = function (url, payload) {
+      // if payload is a string, we assume it's a JSON string
+      if (typeof payload === 'string') {
+        window.called.push(JSON.parse(payload));
+      } else {
+        // it's a blob
+        payload.text().then((text) => {
+          window.called.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <div class="block" data-block-status="loaded">
+    Test content for resource loading
+  </div>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { assert, expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('Test Resource Loading', () => {
+
+        beforeEach(() => {
+          window.called = [];
+        });
+
+        it('Can track .plain.html resources from same hostname', async function test() {
+          // // if user agent is webkit, we skip this test
+          // if (navigator.userAgent.includes('WebKit') && !navigator.userAgent.includes('Chrome')) {
+          //   this.skip();
+          // }
+          // // same for firefox
+          // if (navigator.userAgent.includes('Firefox')) {
+          //   this.skip();
+          // }
+
+          // Fetch .plain.html file - this should be tracked
+          await fetch('/test/fixtures/block.plain.html');
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200);
+          });
+
+          assert(window.called.some((call) =>
+            call.checkpoint === 'loadresource'
+            && call.source.endsWith('/test/fixtures/block.plain.html')
+          ), 'loadresource checkpoint should track .plain.html files');
+        });
+
+        it('Can track .json resources from same hostname', async function test() {
+          // Fetch JSON file - this should be tracked
+          await fetch('/test/fixtures/test-data.json');
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200);
+          });
+
+          assert(window.called.some((call) =>
+            call.checkpoint === 'loadresource'
+            && call.source.endsWith('/test/fixtures/test-data.json')
+          ), 'loadresource checkpoint should track .json files');
+        });
+
+        it('Does not track regular .html files from same hostname', async function test() {
+          // Fetch regular .html file - this should NOT be tracked
+          try {
+            await fetch('/test/fixtures/regular-page.html');
+          } catch (e) {
+            // May fail with 404, but should not be tracked as loadresource
+          }
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200);
+          });
+
+          const afterCount = window.called.filter((call) =>
+            call.checkpoint === 'loadresource' && call.source.includes('regular-page.html')
+          ).length;
+
+          expect(afterCount).to.equal(0, 'regular .html files should not be tracked');
+        });
+
+        it('Does not track .js resources from same hostname', async function test() {
+          // .js files from same hostname are NOT tracked (only .plain.html, .json, graphql, api)
+          // unless they come from external domains with allresources flag
+
+          // Load a local script - should NOT be tracked
+          const scriptUrl = '/test/fixtures/test-script.js';
+
+          try {
+            await fetch(scriptUrl);
+          } catch (e) {
+            // Script may not exist
+          }
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200);
+          });
+
+          const jsResourceCalls = window.called.filter((call) =>
+            call.checkpoint === 'loadresource' && call.source.includes('test-script.js')
+          );
+
+          // Local .js files should NOT be tracked
+          expect(jsResourceCalls.length).to.equal(0, '.js files from same hostname should not be tracked');
+        });
+
+        it('Can track graphql endpoints from same hostname', async function test() {
+          // graphql endpoints should be tracked
+
+          try {
+            await fetch('/graphql?query=test');
+          } catch (e) {
+            // Expected to fail (404)
+          }
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200);
+          });
+
+          const graphqlCalls = window.called.filter((call) =>
+            (call.checkpoint === 'loadresource' || call.checkpoint === 'missingresource') &&
+            call.source.includes('graphql')
+          );
+
+          // graphql endpoints should be tracked (either as loadresource or missingresource)
+          expect(graphqlCalls.length).to.be.greaterThan(0, 'graphql endpoints should be tracked');
+        });
+
+        it('Can track api endpoints from same hostname', async function test() {
+          // api endpoints should be tracked (as missingresource if they return 404)
+
+          try {
+            await fetch('/test/fixtures/api/text');
+          } catch (e) {
+            // Expected to fail (404)
+          }
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 200);
+          });
+
+          const apiCalls = window.called.filter((call) =>
+            (call.checkpoint === 'loadresource') && call.source.includes('/api/')
+          );
+
+          // api endpoints should be tracked (either as loadresource or missingresource)
+          expect(apiCalls.length).to.equal(1, 'api endpoints should be tracked');
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>
+
