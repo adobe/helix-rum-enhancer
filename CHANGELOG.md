@@ -1,3 +1,10 @@
+# [2.44.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.43.0...v2.44.0) (2025-10-23)
+
+
+### Features
+
+* track js and html resources from external domains ([#503](https://github.com/adobe/helix-rum-enhancer/issues/503)) ([ff512bb](https://github.com/adobe/helix-rum-enhancer/commit/ff512bbb04fc51b442359301480073d9264d57a6))
+
 # [2.43.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.42.4...v2.43.0) (2025-10-22)
 
 
