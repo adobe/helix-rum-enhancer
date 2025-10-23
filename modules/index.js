@@ -250,7 +250,16 @@ function addLoadResourceTracking() {
       entries
         .filter((e) => !e.responseStatus || e.responseStatus < 400)
         .filter((e) => window.location.hostname === new URL(e.name).hostname || fflags.has('allresources'))
-        .filter((e) => new URL(e.name).pathname.match('.*(\\.plain\\.html$|\\.json|graphql|api)') || (fflags.has('allresources') && (new URL(e.name).pathname.includes('__dropins__/storefront-') || new URL(e.name).pathname.includes('scripts/dropins/storefront-'))))
+        .filter((e) => {
+          const { pathname, hostname } = new URL(e.name);
+          const extensionMatch = pathname.match(
+            hostname !== window.location.hostname
+              ? '.*(\\.html$|\\.json|\\.js|graphql|api)'
+              : '.*(\\.plain\\.html$|\\.json|graphql|api)',
+          );
+          const isDropIn = fflags.has('allresources') && (pathname.includes('__dropins__/storefront-') || pathname.includes('scripts/dropins/storefront-'));
+          return extensionMatch || isDropIn;
+        })
         .forEach((e) => {
           sampleRUM('loadresource', { source: e.name, target: Math.round(e.duration) });
         });

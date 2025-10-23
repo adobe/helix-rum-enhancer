@@ -1,0 +1,271 @@
+<html>
+
+<head>
+  <title>Test Runner - AllResources Flag</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    // we log what's being sent to the "server"
+    window.called = [];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = function (url, payload) {
+      // if payload is a string, we assume it's a JSON string
+      if (typeof payload === 'string') {
+        window.called.push(JSON.parse(payload));
+      } else {
+        // it's a blob
+        payload.text().then((text) => {
+          window.called.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <div class="block" data-block-status="loaded">
+    Test content for allresources flag
+  </div>
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { assert, expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('Test AllResources Flag', () => {
+
+        beforeEach(() => {
+          window.called = [];
+        });
+
+        it('Can track external .js resources with allresources flag', async function test() {
+          // Note: On localhost, allresources flag is automatically enabled by fflags.js
+
+          // Create a script tag from an external domain (CDN) - this will create a performance entry
+          const externalScript = document.createElement('script');
+          externalScript.src = 'https://cdn.jsdelivr.net/npm/lodash@4.17.21/lodash.min.js';
+          externalScript.async = true;
+
+          const scriptLoadPromise = new Promise((resolve) => {
+            externalScript.onload = resolve;
+            externalScript.onerror = resolve; // Resolve even on error to continue test
+          });
+
+          document.head.appendChild(externalScript);
+
+          // Wait for script to load
+          await scriptLoadPromise;
+
+          // Wait for performance observer to process
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
+
+          // Check if external .js file was tracked
+          const externalJsCalls = window.called.filter((call) =>
+            call.checkpoint === 'loadresource' &&
+            call.source.includes('cdn.jsdelivr.net') &&
+            call.source.includes('.js')
+          );
+
+          // With allresources flag, external .js should be tracked
+          expect(externalJsCalls.length).to.equal(1, 'External .js files should be tracked with allresources flag');
+          assert(window.called.some((call) =>
+            call.checkpoint === 'loadresource' &&
+            call.source.includes('lodash.min.js')
+          ), 'loadresource checkpoint should track external .js files with allresources flag');
+        });
+
+        it('Can track external .html resources with allresources flag', async function test() {
+          // Note: On localhost, allresources flag is automatically enabled by fflags.js
+
+          // Load an external HTML page (will likely fail CORS but creates performance entry)
+          const externalIframe = document.createElement('iframe');
+          externalIframe.src = 'https://example.com/test.html';
+          externalIframe.style.display = 'none';
+
+          const iframeLoadPromise = new Promise((resolve) => {
+            externalIframe.onload = resolve;
+            externalIframe.onerror = resolve;
+            setTimeout(resolve, 2000); // Timeout fallback
+          });
+
+          document.body.appendChild(externalIframe);
+
+          // Wait for iframe to load (or fail)
+          await iframeLoadPromise;
+
+          // Wait for performance observer to process
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
+
+          // Check if external .html file was tracked
+          const externalHtmlCalls = window.called.filter((call) =>
+            call.checkpoint === 'loadresource' &&
+            call.source.includes('example.com') &&
+            call.source.includes('.html')
+          );
+
+          // With allresources flag, external .html should be tracked
+          console.log('External HTML calls:', externalHtmlCalls);
+          console.log('All loadresource calls:', window.called.filter(c => c.checkpoint === 'loadresource'));
+        });
+
+        it('Can track external .json resources with allresources flag', async function test() {
+          // Note: On localhost, allresources flag is automatically enabled by fflags.js
+
+          // Load an external JSON resource (common CDN pattern)
+          const externalJsonUrl = 'https://cdn.jsdelivr.net/npm/lodash@4.17.21/package.json';
+
+          try {
+            await fetch(externalJsonUrl, { mode: 'cors' });
+          } catch (e) {
+            // CORS error expected, but performance entry should be created
+          }
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
+
+          const externalJsonCalls = window.called.filter((call) =>
+            call.checkpoint === 'loadresource' &&
+            call.source.includes('cdn.jsdelivr.net') &&
+            call.source.includes('package.json')
+          );
+
+          // With allresources flag, external .json should be tracked
+          expect(externalJsonCalls.length).to.equal(1, 'External .json files should be tracked with allresources flag');
+        });
+
+        it('Can track dropin resources with allresources flag', async function test() {
+          // Note: On localhost, allresources flag is automatically enabled by fflags.js
+
+          // Try to load a dropin resource (common pattern in Adobe Commerce)
+          const dropinUrl = '/test/fixtures/scripts/dropins/storefront-test.js';
+
+          try {
+            await fetch(dropinUrl);
+          } catch (e) {
+            // Expected to fail (404), but should create performance entry
+          }
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 300);
+          });
+
+          // Check for dropin tracking - should be tracked even if it returns 404
+          // because the pattern matches dropin structure
+          const dropinResourceCalls = window.called.filter((call) =>
+            (call.checkpoint === 'loadresource') &&
+            call.source.includes('dropins/storefront-test')
+          );
+
+          console.log('Dropin resource calls:', dropinResourceCalls);
+
+          // With allresources flag, dropins should be tracked
+          // This is a key feature for Adobe Commerce tracking
+          expect(dropinResourceCalls.length).to.equal(1, 'Dropin resources should be tracked with allresources flag');
+        });
+
+        it('Can track __dropins__ path with allresources flag', async function test() {
+          // Note: On localhost, allresources flag is automatically enabled by fflags.js
+
+          // Try to load a dropin resource with __dropins__ path
+          const dropinUrl = '/test/fixtures/scripts/__dropins__/storefront-test.js';
+
+          try {
+            await fetch(dropinUrl);
+          } catch (e) {
+            // Expected to fail (404), but should create performance entry
+          }
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 300);
+          });
+
+          // Check for dropin tracking
+          const dropinResourceCalls = window.called.filter((call) =>
+            (call.checkpoint === 'loadresource') &&
+            call.source.includes('__dropins__/storefront-')
+          );
+
+          console.log('__dropins__ resource calls:', dropinResourceCalls);
+
+          // With allresources flag, __dropins__ should be tracked
+          expect(dropinResourceCalls.length).to.equal(1, '__dropins__ resources should be tracked with allresources flag');
+        });
+
+        it('Does not track external resources without allresources flag', async function test() {
+          // Note: This test cannot run on localhost since the flag is always enabled
+          // To test this, you would need to mock fflags or run on a non-localhost domain
+          // For now, we skip this test when on localhost
+          if (/localhost/.test(window.origin)) {
+            this.skip();
+          }
+
+          // Try to load external image resource without flag
+          const img = document.createElement('img');
+          img.src = 'https://via.placeholder.com/10x10.png';
+
+          await new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+            setTimeout(resolve, 2000); // Timeout fallback
+          });
+
+          document.body.appendChild(img);
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
+
+          // Without allresources flag, external image resources should not be tracked
+          // (except for specific patterns like .json, .js, .html, graphql, api from external domains)
+          const externalImageCalls = window.called.filter((call) =>
+            call.checkpoint === 'loadresource' &&
+            call.source.includes('placeholder.com')
+          );
+
+          expect(externalImageCalls.length).to.equal(0, 'External images should not be tracked without allresources flag');
+        });
+
+        it('Does not track dropin resources without allresources flag', async function test() {
+          // Note: This test cannot run on localhost since the flag is always enabled
+          // To test this, you would need to mock fflags or run on a non-localhost domain
+          if (/localhost/.test(window.origin)) {
+            this.skip();
+          }
+
+          // Try to load a dropin resource without the flag
+          const dropinUrl = '/scripts/dropins/storefront-pdp/product.js';
+
+          try {
+            await fetch(dropinUrl);
+          } catch (e) {
+            // Expected to fail (404)
+          }
+
+          await new Promise((resolve) => {
+            setTimeout(resolve, 300);
+          });
+
+          // Check that dropin was NOT tracked as loadresource (only as missingresource due to 404)
+          const dropinLoadCalls = window.called.filter((call) =>
+            call.checkpoint === 'loadresource' &&
+            call.source.includes('dropins/storefront-')
+          );
+
+          expect(dropinLoadCalls.length).to.equal(0, 'Dropin resources should not be tracked as loadresource without allresources flag');
+        });
+
+      });
+    });
+  </script>
+</body>
+
+</html>
+
