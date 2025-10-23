@@ -72,7 +72,7 @@
           );
 
           // With allresources flag, external .js should be tracked
-          expect(externalJsCalls.length).to.be.greaterThan(0, 'External .js files should be tracked with allresources flag');
+          expect(externalJsCalls.length).to.equal(1, 'External .js files should be tracked with allresources flag');
           assert(window.called.some((call) =>
             call.checkpoint === 'loadresource' &&
             call.source.includes('lodash.min.js')
@@ -138,7 +138,7 @@
           );
 
           // With allresources flag, external .json should be tracked
-          expect(externalJsonCalls.length).to.be.greaterThan(0, 'External .json files should be tracked with allresources flag');
+          expect(externalJsonCalls.length).to.equal(1, 'External .json files should be tracked with allresources flag');
         });
 
         it('Can track dropin resources with allresources flag', async function test() {
@@ -168,7 +168,7 @@
 
           // With allresources flag, dropins should be tracked
           // This is a key feature for Adobe Commerce tracking
-          expect(dropinResourceCalls.length).to.be.greaterThan(0, 'Dropin resources should be tracked with allresources flag');
+          expect(dropinResourceCalls.length).to.equal(1, 'Dropin resources should be tracked with allresources flag');
         });
 
         it('Can track __dropins__ path with allresources flag', async function test() {
@@ -196,7 +196,7 @@
           console.log('__dropins__ resource calls:', dropinResourceCalls);
 
           // With allresources flag, __dropins__ should be tracked
-          expect(dropinResourceCalls.length).to.be.greaterThan(0, '__dropins__ resources should be tracked with allresources flag');
+          expect(dropinResourceCalls.length).to.equal(1, '__dropins__ resources should be tracked with allresources flag');
         });
 
         it('Does not track external resources without allresources flag', async function test() {
@@ -260,50 +260,8 @@
           );
 
           expect(dropinLoadCalls.length).to.equal(0, 'Dropin resources should not be tracked as loadresource without allresources flag');
-
-          // It may still be tracked as missingresource (404)
-          const dropinMissingCalls = window.called.filter((call) =>
-            call.checkpoint === 'missingresource' &&
-            call.source.includes('dropins/storefront-')
-          );
-
-          console.log('Dropin missing calls:', dropinMissingCalls);
         });
 
-        it('Verifies hostname-based filtering with allresources flag', async function test() {
-          // Note: On localhost, allresources flag is automatically enabled by fflags.js
-
-          // Load external .js file from CDN (supported extension)
-          const externalScript = document.createElement('script');
-          externalScript.src = 'https://unpkg.com/react@18.2.0/umd/react.production.min.js';
-          externalScript.async = true;
-
-          const scriptLoadPromise = new Promise((resolve) => {
-            externalScript.onload = resolve;
-            externalScript.onerror = resolve;
-            setTimeout(resolve, 2000); // Timeout fallback
-          });
-
-          document.head.appendChild(externalScript);
-
-          await scriptLoadPromise;
-
-          await new Promise((resolve) => {
-            setTimeout(resolve, 500);
-          });
-
-          // Check for tracked resources from external domain
-          const externalResourceCalls = window.called.filter((call) =>
-            call.checkpoint === 'loadresource' &&
-            call.source.includes('unpkg.com') &&
-            call.source.includes('react')
-          );
-
-          console.log('External resource calls:', externalResourceCalls);
-
-          // Verify that external .js resources are being tracked
-          expect(externalResourceCalls.length).to.be.greaterThan(0, 'External .js resources from CDN should be tracked with allresources flag');
-        });
       });
     });
   </script>

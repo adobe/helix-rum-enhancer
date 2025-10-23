@@ -42,16 +42,6 @@
         });
 
         it('Can track .plain.html resources from same hostname', async function test() {
-          // // if user agent is webkit, we skip this test
-          // if (navigator.userAgent.includes('WebKit') && !navigator.userAgent.includes('Chrome')) {
-          //   this.skip();
-          // }
-          // // same for firefox
-          // if (navigator.userAgent.includes('Firefox')) {
-          //   this.skip();
-          // }
-
-          // Fetch .plain.html file - this should be tracked
           await fetch('/test/fixtures/block.plain.html');
 
           await new Promise((resolve) => {
@@ -65,7 +55,6 @@
         });
 
         it('Can track .json resources from same hostname', async function test() {
-          // Fetch JSON file - this should be tracked
           await fetch('/test/fixtures/test-data.json');
 
           await new Promise((resolve) => {
@@ -79,7 +68,6 @@
         });
 
         it('Does not track regular .html files from same hostname', async function test() {
-          // Fetch regular .html file - this should NOT be tracked
           try {
             await fetch('/test/fixtures/regular-page.html');
           } catch (e) {
@@ -123,10 +111,8 @@
         });
 
         it('Can track graphql endpoints from same hostname', async function test() {
-          // graphql endpoints should be tracked
-
           try {
-            await fetch('/graphql?query=test');
+            await fetch('/test/fixtures/graphql?query=test');
           } catch (e) {
             // Expected to fail (404)
           }
@@ -136,12 +122,12 @@
           });
 
           const graphqlCalls = window.called.filter((call) =>
-            (call.checkpoint === 'loadresource' || call.checkpoint === 'missingresource') &&
+            (call.checkpoint === 'loadresource') &&
             call.source.includes('graphql')
           );
 
           // graphql endpoints should be tracked (either as loadresource or missingresource)
-          expect(graphqlCalls.length).to.be.greaterThan(0, 'graphql endpoints should be tracked');
+          expect(graphqlCalls.length).to.equal(1, 'graphql endpoints should be tracked');
         });
 
         it('Can track api endpoints from same hostname', async function test() {
