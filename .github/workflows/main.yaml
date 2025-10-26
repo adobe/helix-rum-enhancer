@@ -18,9 +18,7 @@ jobs:
         with:
           node-version: '22.x'
       - run: npm ci
-      - run: |
-          set -o pipefail
-          npm run test:ci 2>&1 | tee test-output.log
+      - run: npm run test:ci > test-output.log 2>&1
       - name: Upload test logs
         uses: actions/upload-artifact@v4
         if: always()
