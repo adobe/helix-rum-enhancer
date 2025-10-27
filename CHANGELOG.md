@@ -1,3 +1,10 @@
+## [2.44.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.44.0...v2.44.1) (2025-10-27)
+
+
+### Bug Fixes
+
+* ensuring no errors are thrown if text element is added in the dom ([#506](https://github.com/adobe/helix-rum-enhancer/issues/506)) ([4d9756c](https://github.com/adobe/helix-rum-enhancer/commit/4d9756c02eb4d0831c30563bd43a8ee428927f76))
+
 # [2.44.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.43.0...v2.44.0) (2025-10-23)
 
 

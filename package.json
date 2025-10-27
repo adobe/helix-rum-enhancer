@@ -1,6 +1,6 @@
 {
   "name": "@adobe/helix-rum-enhancer",
-  "version": "2.44.0",
+  "version": "2.44.1",
   "description": "Helix RUM Enhancer",
   "main": "src/index.js",
   "type": "module",
