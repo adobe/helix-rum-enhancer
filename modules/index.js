@@ -172,6 +172,11 @@ function createPluginMO(key, params, usp) {
 let maxEvents = 1023;
 
 function trackCheckpoint(checkpoint, data, t) {
+  // Skip all tracking if notracking flag is enabled
+  if (fflags.has('notracking')) {
+    return;
+  }
+
   const { weight, id } = window.hlx.rum;
   if (isSelected && maxEvents) {
     maxEvents -= 1;
@@ -244,11 +249,6 @@ function addNavigationTracking() {
 }
 
 function addLoadResourceTracking() {
-  // Skip resource tracking if noresources flag is enabled
-  if (fflags.has('noresources')) {
-    return;
-  }
-
   const observer = new PerformanceObserver((list) => {
     try {
       const entries = list.getEntries();
