@@ -19,4 +19,5 @@ export const fflags = {
   example: [543, 770, 1136],
   allresources: [543, 1139],
   a11y: [557, 781, 897, 955, 959],
+  noresources: [397], // applyonline.hdfcbank.com - disable resource tracking
 };

@@ -244,6 +244,11 @@ function addNavigationTracking() {
 }
 
 function addLoadResourceTracking() {
+  // Skip resource tracking if noresources flag is enabled
+  if (fflags.has('noresources')) {
+    return;
+  }
+
   const observer = new PerformanceObserver((list) => {
     try {
       const entries = list.getEntries();
