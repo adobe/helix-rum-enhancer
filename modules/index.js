@@ -198,9 +198,16 @@ function processQueue() {
   }
 }
 
+function estimateRedirectCount(ms) {
+  const rtt = navigator.connection?.rtt || 100;
+  // Conservative: DNS(1) + TCP(1) + TLS(2) + HTTP(1) = 5 RTTs
+  // minus 1 for the page itself
+  return Math.max(1, Math.round(ms / (rtt * 5)) - 1);
+}
+
 function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
-  const navigate = (source, type, redirectCount) => {
+  const navigate = (source, type, navEntry) => {
     const payload = { source, target: document.visibilityState };
     /* c8 ignore next 13 */
     // prerendering cannot be tested yet with headless browsers
@@ -226,8 +233,20 @@ function addNavigationTracking() {
       sampleRUM('enter', payload); // enter site
     }
     const from = new URLSearchParams(window.location.search).get('redirect_from');
-    if (redirectCount || from) {
-      sampleRUM('redirect', { source: from, target: redirectCount || 1 });
+    let redirectValue;
+    // - Internal: use reported redirectCount and duration (redirectEnd - redirectStart)
+    // - External: infer from fetchStart (> threshold)
+    // - Fall baack to query parameter
+    if (navEntry && navEntry.redirectCount) {
+      redirectValue = `${navEntry.redirectCount}:${Math.round(navEntry.redirectEnd - navEntry.redirectStart)}`;
+    } else if (navEntry && navEntry.fetchStart > 50) {
+      redirectValue = `${estimateRedirectCount(navEntry.fetchStart)}~${navEntry.fetchStart}`;
+    } else if (new URLSearchParams(window.location.search).get('redirect_from')) {
+      redirectValue = `1~${navEntry.fetchStart}`;
+    }
+
+    if (redirectValue || from) {
+      sampleRUM('redirect', { source: from, target: redirectValue });
     }
   };
 
@@ -239,7 +258,7 @@ function addNavigationTracking() {
     .map(([e]) => navigate(
       window.hlx.referrer || document.referrer,
       e.type,
-      e.redirectCount,
+      e,
     ))).observe({ type: 'navigation', buffered: true });
 }
 
