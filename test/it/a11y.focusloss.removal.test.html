@@ -1,0 +1,70 @@
+<html>
+<head>
+  <title>A11y - Focus Loss Positive Test (Element Removal)</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin',
+      A11Y_REPORT_DELAY: 1000,
+    };
+    window.events = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.events.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.events.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+<body>
+  <div id="container">
+    <input id="victim" type="text" />
+  </div>
+
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendKeys } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+    import { pollForError } from './a11y.test.utils.js';
+
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    runTests(async () => {
+      describe('A11y Focus-Loss - Positive detection on element removal', () => {
+        it('reports focus-loss when focused element is removed after Tab', async () => {
+          const victim = document.getElementById('victim');
+          const container = document.getElementById('container');
+
+          // Prevent default Tab behavior so focus stays on the victim element
+          victim.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+              e.preventDefault();
+            }
+          });
+
+          victim.focus();
+          await wait(50);
+
+          // Press Tab to set isKeyboardNav=true in the plugin
+          await sendKeys({ press: 'Tab' });
+          await wait(150); // ensure >100ms since last meaningful focus
+
+          // Remove the focused element to force focus to fall back to <body> and trigger a mutation
+          container.removeChild(victim);
+
+          // Confirm the positive signal is eventually reported
+          const err = await pollForError('focus-loss', 3000);
+          expect(err).to.exist;
+          expect(err.source).to.equal('focus-loss');
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+
+

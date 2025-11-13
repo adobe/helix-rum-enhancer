@@ -65,6 +65,7 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
   let totalCount = 0;
   let lastFocusTime = 0;
   let hadMeaningfulFocus = false;
+  let isKeyboardNav = false;
 
   const reportAudience = () => {
     /* c8 ignore next 3 */
@@ -147,6 +148,7 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
   };
 
   const trackFocusForTrap = (event) => {
+    isKeyboardNav = true;
     setTimeout(() => {
       const { activeElement } = document;
       /* c8 ignore next 3 */
@@ -214,6 +216,33 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
     checkBehavioralScore();
   });
 
+  // Disarm focus-loss tracking on pointer interactions
+  const disarm = () => {
+    isKeyboardNav = false;
+  };
+  document.addEventListener('pointerdown', disarm);
+  document.addEventListener('mousedown', disarm);
+  document.addEventListener('touchstart', disarm, { passive: true });
+
+  // Override pushState
+  const originalPushState = history.pushState;
+  history.pushState = (...args) => {
+    originalPushState.apply(history, args);
+    hadMeaningfulFocus = false;
+  };
+
+  // Override replaceState
+  const originalReplaceState = history.replaceState;
+  history.replaceState = (...args) => {
+    originalReplaceState.apply(history, args);
+    hadMeaningfulFocus = false;
+  };
+
+  // Also catch back/forward browser nav (optional)
+  window.addEventListener('popstate', () => {
+    hadMeaningfulFocus = false;
+  });
+
   document.addEventListener('focusin', (event) => {
     if (event.target !== document.body) {
       lastFocusTime = performance.now();
@@ -222,9 +251,10 @@ export default function addAccessibilityAudienceTracking({ sampleRUM, sourceSele
   });
 
   const focusLossObserver = new MutationObserver((mutations) => {
-    if (hadMeaningfulFocus
-        && document.activeElement === document.body
-        && (performance.now() - lastFocusTime > 100)) {
+    if (hadMeaningfulFocus // we had a focused element before the focus change
+        && isKeyboardNav // the focus change happened via keyboard navigation
+        && document.activeElement === document.body // the new focused element is just the page body
+        && (performance.now() - lastFocusTime > 100)) { // let async focus events finish
       /* c8 ignore next 9 */
       const mutation = mutations.find((m) => (
         m.type === 'childList' && (m.addedNodes.length > 0 || m.removedNodes.length > 0)

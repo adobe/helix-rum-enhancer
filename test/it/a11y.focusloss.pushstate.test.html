@@ -1,0 +1,72 @@
+<html>
+<head>
+  <title>A11y - Focus Loss SPA pushState Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin',
+      A11Y_REPORT_DELAY: 1000,
+    };
+    window.events = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.events.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.events.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+<body>
+  <div id="container">
+    <input id="victim" type="text" />
+  </div>
+
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendKeys } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+    import { pollForError } from './a11y.test.utils.js';
+
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    runTests(async () => {
+      describe('A11y Focus-Loss - SPA pushState should reset focus tracking', () => {
+        it('does not report focus-loss after pushState during keyboard nav', async () => {
+          const victim = document.getElementById('victim');
+          const container = document.getElementById('container');
+
+          // Keep focus on victim when pressing Tab (so we can remove it while focused)
+          victim.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab') {
+              e.preventDefault();
+            }
+          });
+
+          victim.focus();
+          await wait(50);
+
+          // Trigger keyboard navigation state in the plugin
+          await sendKeys({ press: 'Tab' });
+          await wait(150); // allow >100ms past last focus time
+
+          // Simulate SPA navigation which should reset hadMeaningfulFocus
+          history.pushState({}, '', `${window.location.pathname}#spa-${Math.random().toString(36).slice(2)}`);
+
+          // Now remove the focused element to force focus to body and cause a mutation
+          container.removeChild(victim);
+
+          // Since pushState reset hadMeaningfulFocus, focus-loss should NOT be reported
+          const err = await pollForError('focus-loss', 2000);
+          expect(err).to.not.exist;
+        });
+      });
+    });
+  </script>
+</body>
+</html>
+
+
