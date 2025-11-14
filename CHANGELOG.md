@@ -1,3 +1,12 @@
+## [2.44.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.44.1...v2.44.2) (2025-11-14)
+
+
+### Bug Fixes
+
+* focus loss error misfires in forms and SPA navgation ([60217de](https://github.com/adobe/helix-rum-enhancer/commit/60217dea75e714e8e4094dd2a0b48966135c9085))
+* focus loss error misfires in forms and SPA navgation ([5a47d3b](https://github.com/adobe/helix-rum-enhancer/commit/5a47d3b8bccc6229efd2318a0c80b2358907b604))
+* focus loss error misfires in forms and SPA navigation ([4eca02a](https://github.com/adobe/helix-rum-enhancer/commit/4eca02a6fc2be345394972eef2dde5ada44d0e8a))
+
 ## [2.44.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.44.0...v2.44.1) (2025-10-27)
 
 
