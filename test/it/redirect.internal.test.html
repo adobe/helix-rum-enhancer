@@ -1,0 +1,74 @@
+<html>
+
+<head>
+  <title>Test Runner</title>
+  <script>
+    // we load from localhost, and have the ability to
+    // change the scripts that are being served. Check the
+    // web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'full'
+    };
+    // we log what's being sent to the "server"
+    window.called = [];
+    // and navigator.sendBeacon has been replaced with
+    // a call to fakeSendBeacon
+    window.fakeSendBeacon = function (url, payload) {
+      // if payload is a string, we assume it's a JSON string
+      if (typeof payload === 'string') {
+        window.called.push(JSON.parse(payload));
+      } else {
+        // it's a blob
+        payload.text().then((text) => {
+          window.called.push(JSON.parse(text));
+        });
+      }
+    };
+    class MockPerformanceEntries {
+      getEntries() {
+        return [{
+          type: 'navigate',
+          redirectCount: 2,
+          redirectStart: 50,
+          redirectEnd: 130, // 80ms
+          fetchStart: 0,
+        }];
+      }
+    }
+    window.PerformanceObserver = class {
+      constructor(cb) {
+        this.cb = cb;
+      }
+      observe() {
+        this.cb(new MockPerformanceEntries());
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <img src="/test/it/img.test.html">
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendMouse } from '@web/test-runner-commands';
+    import { assert, expect } from '@esm-bundle/chai';
+
+    runTests(async () => {
+      describe('HTML Integration Tests', () => {
+
+        it('emits internal redirect with count:duration', async () => {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 3000);
+          });
+
+          const redirect = window.called.find((c) => c.checkpoint === 'redirect');
+          expect(redirect).to.exist;
+          expect(redirect.target).to.equal('2:80');
+        });
+
+      });
+    });
+  </script>
+</body>
