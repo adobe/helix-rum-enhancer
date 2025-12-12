@@ -48,6 +48,10 @@ const CONSENT_PROVIDERS = [
 ];
 
 const getConsentProvider = () => CONSENT_PROVIDERS.find(({ detect }) => detect());
+const bodyChildMO = {
+  target: document.body,
+  options: { attributes: false, childList: true, subtree: false },
+};
 
 const PLUGINS = {
   cwv: `${pluginBasePath}/cwv.js`,
@@ -57,10 +61,13 @@ const PLUGINS = {
     url: `${pluginBasePath}/form.js`,
     when: () => document.querySelector('form'),
     isBlockDependent: true,
-    mutationObserverParams: {
-      target: document.body,
-      options: { attributes: false, childList: true, subtree: false },
-    },
+    mutationObserverParams: bodyChildMO,
+  },
+  redirect: {
+    url: `${pluginBasePath}/redirect.js`,
+    when: ({ perfEntry: pe, urlParameters: usp }) => (
+      pe && (usp.get('redirect_from') || pe.redirectCount > 0 || pe.fetchStart > 50)
+    ),
   },
   video: { url: `${pluginBasePath}/video.js`, when: () => document.querySelector('video'), isBlockDependent: true },
   webcomponent: {
@@ -73,10 +80,7 @@ const PLUGINS = {
   consent: {
     when: () => getConsentProvider(),
     isBlockDependent: true,
-    mutationObserverParams: {
-      target: document.body,
-      options: { attributes: false, childList: true, subtree: false },
-    },
+    mutationObserverParams: bodyChildMO,
   },
   // test: broken-plugin
 };
@@ -119,14 +123,13 @@ const pluginCache = new Map();
 function loadPlugin(key, params) {
   const plugin = PLUGINS[key];
   const usp = new URLSearchParams(window.location.search);
-  if (!pluginCache.has(key) && plugin.when && !plugin.when({ urlParameters: usp })) {
+  if (!pluginCache.has(key) && plugin.when && !plugin.when({ ...params, urlParameters: usp })) {
     if (plugin.mutationObserverParams && !plugin.isBeingObserved) {
       // eslint-disable-next-line no-use-before-define
       createPluginMO(key, params, usp);
     }
     return null;
   }
-
   if (key === 'consent') {
     plugin.url = `${pluginBasePath}/${getConsentProvider().name}.js`;
   }
@@ -198,16 +201,9 @@ function processQueue() {
   }
 }
 
-function estimateRedirectCount(ms) {
-  const rtt = navigator.connection?.rtt || 100;
-  // Conservative: DNS(1) + TCP(1) + TLS(2) + HTTP(1) = 5 RTTs
-  // minus 1 for the page itself
-  return Math.max(1, Math.round(ms / (rtt * 5)) - 1);
-}
-
 function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
-  const navigate = (source, type, navEntry) => {
+  const navigate = (source, type, perfEntry) => {
     const payload = { source, target: document.visibilityState };
     /* c8 ignore next 13 */
     // prerendering cannot be tested yet with headless browsers
@@ -232,24 +228,8 @@ function addNavigationTracking() {
     } else {
       sampleRUM('enter', payload); // enter site
     }
-    const from = new URLSearchParams(window.location.search).get('redirect_from');
-    let redirectValue;
-    // - Internal: use reported redirectCount and duration (redirectEnd - redirectStart)
-    // - External: infer from fetchStart (> threshold)
-    // - Fall baack to query parameter
-    if (navEntry && navEntry.redirectCount) {
-      redirectValue = `${navEntry.redirectCount}:${Math.round(navEntry.redirectEnd - navEntry.redirectStart)}`;
-    } else if (navEntry && navEntry.fetchStart > 50) {
-      redirectValue = `${estimateRedirectCount(navEntry.fetchStart)}~${navEntry.fetchStart}`;
-    } else if (new URLSearchParams(window.location.search).get('redirect_from')) {
-      redirectValue = `1~${navEntry.fetchStart}`;
-    }
-
-    if (redirectValue || from) {
-      sampleRUM('redirect', { source: from, target: redirectValue });
-    }
+    loadPlugin('redirect', { ...PLUGIN_PARAMETERS, perfEntry });
   };
-
   const processed = new Set(); // avoid processing duplicate types
   new PerformanceObserver((list) => list
     .getEntries()
