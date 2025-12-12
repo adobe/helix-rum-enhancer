@@ -39,6 +39,19 @@
       beforeEach(() => {
         const usp = new URLSearchParams(window.location.search);
         usp.append('redirect_from', 'https://www.example.com');
+        class MockPerformanceEntries {
+          getEntries() {
+            return [{ type: 'navigate' }];
+          }
+        }
+        window.PerformanceObserver = class {
+          constructor(cb) {
+            this.cb = cb;
+          }
+          observe() {
+            this.cb(new MockPerformanceEntries());
+          }
+        };
         window.history.replaceState({}, '', `${window.location.pathname}?${usp.toString()}`);
         const script = document.createElement('script');
         script.type = 'text/javascript';
