@@ -39,6 +39,7 @@ export default function addRedirectTracking({ sampleRUM, perfEntry }) {
       const fallback = perfEntry && perfEntry.fetchStart ? Math.round(perfEntry.fetchStart) : 0;
       sampleRUM('redirect', { source: from, target: redirectValue || `1~${fallback}` });
     }
+    /* c8 ignore next 3 */
   } catch (e) {
     // silent failure
   }
