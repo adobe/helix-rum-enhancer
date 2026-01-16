@@ -58,7 +58,7 @@
     runTests(async () => {
       describe('HTML Integration Tests', () => {
 
-        it('emits internal redirect with count:duration', async () => {
+        it('emits internal redirect with encoded target', async () => {
           await new Promise((resolve) => {
             setTimeout(resolve, 3000);
           });

@@ -39,11 +39,15 @@
       beforeEach(() => {
         const usp = new URLSearchParams(window.location.search);
         usp.append('redirect_from', 'https://www.example.com');
-        class MockPerformanceEntries {
-          getEntries() {
-            return [{ type: 'navigate' }];
-          }
-        }
+    class MockPerformanceEntries {
+      getEntries() {
+        return [{ 
+          type: 'navigate',
+          redirectCount: 0,
+          fetchStart: 50
+        }];
+      }
+    }
         window.PerformanceObserver = class {
           constructor(cb) {
             this.cb = cb;
