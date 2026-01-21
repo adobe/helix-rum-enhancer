@@ -1,3 +1,11 @@
+# [2.45.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.44.2...v2.45.0) (2026-01-21)
+
+
+### Features
+
+* track external redirect estimates ([aff3105](https://github.com/adobe/helix-rum-enhancer/commit/aff3105c3676da3c3a0bb8ab2479fb456147d064))
+* track external redirect estimates ([4015e9d](https://github.com/adobe/helix-rum-enhancer/commit/4015e9d0c626ff5b06f13bf1e62db45813446cf1))
+
 ## [2.44.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.44.1...v2.44.2) (2025-11-14)
 
 
