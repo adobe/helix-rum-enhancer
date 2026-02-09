@@ -1,3 +1,10 @@
+## [2.45.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.45.0...v2.45.1) (2026-02-09)
+
+
+### Bug Fixes
+
+* remove blackbar-only TrustArc detection ([#532](https://github.com/adobe/helix-rum-enhancer/issues/532)) ([7fe4efc](https://github.com/adobe/helix-rum-enhancer/commit/7fe4efc196afd189b6dca73ea7e9eb8307f5936f))
+
 # [2.45.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.44.2...v2.45.0) (2026-01-21)
 
 
