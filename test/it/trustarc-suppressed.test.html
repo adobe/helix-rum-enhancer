@@ -42,11 +42,10 @@
       });
 
       describe('TrustArc Integration Tests', () => {
-        it('Sends consent event with target "suppressed" when only #consent-blackbar is present', async () => {
-          await loadFixture('/test/fixtures/trustarc-suppressed.html')
+        it('Does not detect TrustArc when only #consent_blackbar is present', async () => {
+          await loadFixture('/test/fixtures/trustarc-suppressed.html');
           await new Promise((resolve) => setTimeout(resolve, 3000));
-          assert(window.called.some((call) => call.checkpoint === 'consent'), 'consent checkpoint missing');
-          assert(window.called.some((call) => call.checkpoint === 'consent' && call.target === 'suppressed' && call.source === 'trustarc'), 'trustarc did not report suppressed when elements hidden');
+          assert(!window.called.some((call) => call.checkpoint === 'consent' && call.source === 'trustarc'), 'trustarc should not be detected from blackbar-only markup');
         });
 
         it('Sends consent event with target "suppressed" when only #truste-consent-content is present and hidden', async () => {

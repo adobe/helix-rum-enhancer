@@ -39,7 +39,7 @@ const CONSENT_PROVIDERS = [
   },
   {
     name: 'trustarc',
-    detect: () => ['notice_gdpr_prefs', 'notice_preferences'].some(hasCookieKey) || document.querySelector('#truste-consent-track, #consent_blackbar'),
+    detect: () => ['notice_gdpr_prefs', 'notice_preferences'].some(hasCookieKey) || document.querySelector('#truste-consent-track'),
   },
   {
     name: 'usercentrics',
