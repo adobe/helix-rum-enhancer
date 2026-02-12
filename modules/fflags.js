@@ -17,6 +17,6 @@ export const fflags = {
   disabled: (f, c) => !fflags.has(f) && c(),
   eagercwv: [683],
   example: [543, 770, 1136],
-  allresources: [543, 1139],
+  allresources: [543, 1139, 397],
   a11y: [557, 781, 897, 955, 959],
 };
