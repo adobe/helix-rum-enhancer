@@ -199,6 +199,42 @@
           expect(dropinResourceCalls.length).to.equal(1, '__dropins__ resources should be tracked with allresources flag');
         });
 
+        it('Can track local image resources with allresources flag', async function test() {
+          // Note: On localhost, allresources flag is automatically enabled by fflags.js
+          // Images (.png, .jpg, .jpeg, .gif, .webp, .svg) should be tracked as loadresource
+
+          // Load a local image
+          const img = document.createElement('img');
+          img.src = '/test/fixtures/fire.jpg';
+
+          const imgLoadPromise = new Promise((resolve) => {
+            img.onload = resolve;
+            img.onerror = resolve;
+            setTimeout(resolve, 2000); // Timeout fallback
+          });
+
+          document.body.appendChild(img);
+
+          // Wait for image to load
+          await imgLoadPromise;
+
+          // Wait for performance observer to process
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
+
+          // Check if image was tracked as loadresource
+          const imageResourceCalls = window.called.filter((call) =>
+            call.checkpoint === 'loadresource' &&
+            call.source.includes('fire.jpg')
+          );
+
+          console.log('Image resource calls:', imageResourceCalls);
+
+          // With allresources flag, images should be tracked as loadresource
+          expect(imageResourceCalls.length).to.equal(1, 'Image files should be tracked as loadresource with allresources flag');
+        });
+
         it('Does not track external resources without allresources flag', async function test() {
           // Note: This test cannot run on localhost since the flag is always enabled
           // To test this, you would need to mock fflags or run on a non-localhost domain
