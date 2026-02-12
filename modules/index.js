@@ -251,10 +251,11 @@ function addLoadResourceTracking() {
         .filter((e) => window.location.hostname === new URL(e.name).hostname || fflags.has('allresources'))
         .filter((e) => {
           const { pathname, hostname } = new URL(e.name);
+          const imagePattern = fflags.has('allresources') ? '|\\.(png|jpe?g|svg)' : '';
           const extensionMatch = pathname.match(
             hostname !== window.location.hostname
-              ? '.*(\\.html$|\\.json|\\.js|graphql|api)'
-              : '.*(\\.plain\\.html$|\\.json|graphql|api)',
+              ? `.*(\\.html$|\\.json|\\.js${imagePattern}|graphql|api)`
+              : `.*(\\.plain\\.html$|\\.json${imagePattern}|graphql|api)`,
           );
           const isDropIn = fflags.has('allresources') && (pathname.includes('__dropins__/storefront-') || pathname.includes('scripts/dropins/storefront-'));
           return extensionMatch || isDropIn;
