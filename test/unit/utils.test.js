@@ -15,9 +15,6 @@
 import { expect } from '@esm-bundle/chai';
 import { urlSanitizers } from '../../modules/utils.js';
 
-// Intentional linting error: unused variable
-const unusedVariable = 'this should trigger a linting error';
-
 describe('test utils#urlSanitizers', () => {
   it('urlSanitizers.full', () => {
     expect(urlSanitizers.full).to.be.a('function');
