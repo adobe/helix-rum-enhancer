@@ -89,7 +89,8 @@ export default function addFormTracking({
       mutationList.forEach((mutation) => {
         if (mutation.addedNodes) {
           [...mutation.addedNodes]
-            .filter((node) => node.tagName === 'FORM' || node.querySelector('form'))
+            // text nodes do not have querySelector method
+            .filter((node) => node.tagName === 'FORM' || (node.querySelector && node.querySelector('form')))
             .forEach((e) => trackForm(e.querySelector('form') || e));
         }
       });

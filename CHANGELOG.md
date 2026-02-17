@@ -1,3 +1,34 @@
+## [2.45.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.45.0...v2.45.1) (2026-02-09)
+
+
+### Bug Fixes
+
+* remove blackbar-only TrustArc detection ([#532](https://github.com/adobe/helix-rum-enhancer/issues/532)) ([7fe4efc](https://github.com/adobe/helix-rum-enhancer/commit/7fe4efc196afd189b6dca73ea7e9eb8307f5936f))
+
+# [2.45.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.44.2...v2.45.0) (2026-01-21)
+
+
+### Features
+
+* track external redirect estimates ([aff3105](https://github.com/adobe/helix-rum-enhancer/commit/aff3105c3676da3c3a0bb8ab2479fb456147d064))
+* track external redirect estimates ([4015e9d](https://github.com/adobe/helix-rum-enhancer/commit/4015e9d0c626ff5b06f13bf1e62db45813446cf1))
+
+## [2.44.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.44.1...v2.44.2) (2025-11-14)
+
+
+### Bug Fixes
+
+* focus loss error misfires in forms and SPA navgation ([60217de](https://github.com/adobe/helix-rum-enhancer/commit/60217dea75e714e8e4094dd2a0b48966135c9085))
+* focus loss error misfires in forms and SPA navgation ([5a47d3b](https://github.com/adobe/helix-rum-enhancer/commit/5a47d3b8bccc6229efd2318a0c80b2358907b604))
+* focus loss error misfires in forms and SPA navigation ([4eca02a](https://github.com/adobe/helix-rum-enhancer/commit/4eca02a6fc2be345394972eef2dde5ada44d0e8a))
+
+## [2.44.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.44.0...v2.44.1) (2025-10-27)
+
+
+### Bug Fixes
+
+* ensuring no errors are thrown if text element is added in the dom ([#506](https://github.com/adobe/helix-rum-enhancer/issues/506)) ([4d9756c](https://github.com/adobe/helix-rum-enhancer/commit/4d9756c02eb4d0831c30563bd43a8ee428927f76))
+
 # [2.44.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.43.0...v2.44.0) (2025-10-23)
 
 

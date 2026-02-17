@@ -25,7 +25,7 @@
       }
       console.log('fakeSendBeacon ', data.checkpoint);
 
-      if (data.checkpoint === 'viewblock') {
+      if (data.checkpoint === 'viewblock' || data.checkpoint === 'error') {
         window.called.push(data);
       }
     };
@@ -35,12 +35,18 @@
 
 <body>
   <nav></nav>
+  <div id="text-container"></div>
   <script type="module">
     import { runTests } from '@web/test-runner-mocha';
     import { setViewport } from '@web/test-runner-commands';
     import { expect } from '@esm-bundle/chai';
 
     runTests(async () => {
+
+      beforeEach(() => {
+        window.called = [];
+      });
+
       describe('Test Form View created after the page is loaded', () => {
         it('Can observe form that are created dynamically', async () => {
           await setViewport({ width: 800, height: 600 });
@@ -56,10 +62,43 @@
             setTimeout(resolve, 2000);
           });
 
-          expect(window.called.length).to.equal(1);
-          const actual = new Set(window.called.map((c) => c.source));
+          const viewblockCalls = window.called.filter((c) => c.checkpoint === 'viewblock');
+          expect(viewblockCalls.length).to.equal(1);
+          const actual = new Set(viewblockCalls.map((c) => c.source));
           const expected = new Set(['form#dynamic-form']);
           expect(actual).to.deep.equal(expected);
+        });
+
+        it('should not throw error if non form element is added', async () => {
+          await setViewport({ width: 800, height: 600 });
+          const element = `<div>Hello</div>`
+          const parentElement = document.createElement('div');
+          parentElement.innerHTML = element;
+          document.body.appendChild(parentElement);
+          await new Promise((resolve) => {
+            setTimeout(resolve, 2000);
+          });
+
+          const errorCalls = window.called.filter((c) => c.checkpoint === 'error');
+          const viewblockCalls = window.called.filter((c) => c.checkpoint === 'viewblock');
+
+          expect(errorCalls.length).to.equal(0);
+          expect(viewblockCalls.length).to.equal(0, 'should not throw viewblock if non form element is added');
+        });
+
+        it('should not throw error if text is added', async () => {
+          await setViewport({ width: 800, height: 600 });
+          const textContainer = document.getElementById('text-container');
+          textContainer.textContent = 'Hello';
+          await new Promise((resolve) => {
+            setTimeout(resolve, 2000);
+          });
+
+          const errorCalls = window.called.filter((c) => c.checkpoint === 'error');
+          const viewblockCalls = window.called.filter((c) => c.checkpoint === 'viewblock');
+
+          expect(errorCalls.length).to.equal(0);
+          expect(viewblockCalls.length).to.equal(0);
         });
       });
     });

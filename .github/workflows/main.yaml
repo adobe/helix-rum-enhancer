@@ -14,15 +14,17 @@ jobs:
         with:
           persist-credentials: false
       - name: Use Node.js 20.x
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
-          node-version: '22.x'
+          node-version: '24.x'
       - run: npm ci
       - name: Lint
         run: npm run lint
-      - run: npm run test:ci 2>&1 | tee test-output.log
+      - run: |
+          set -o pipefail
+          npm run test:ci 2>&1 | tee test-output.log
       - name: Upload test logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: always()
         with:
           name: test-logs
@@ -60,7 +62,7 @@ jobs:
           persist-credentials: true
           token: ${{ secrets.ADOBE_BOT_GITHUB_TOKEN }}
       - name: Use Node.js 24.x
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
           node-version: '24.x'
       - run: npm ci
