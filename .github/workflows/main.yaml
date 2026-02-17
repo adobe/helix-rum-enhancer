@@ -18,6 +18,8 @@ jobs:
         with:
           node-version: '22.x'
       - run: npm ci
+      - name: Lint
+        run: npm run lint
       - run: npm run test:ci 2>&1 | tee test-output.log
       - name: Upload test logs
         uses: actions/upload-artifact@v4
