@@ -33,8 +33,8 @@
     "reporter-options": "configFile=.mocha-multi.json"
   },
   "devDependencies": {
-    "@adobe/eslint-config-helix": "3.0.13",
-    "@adobe/helix-rum-js": "2.13.6",
+    "@adobe/eslint-config-helix": "3.0.19",
+    "@adobe/helix-rum-js": "2.14.1",
     "@adobe/rollup-plugin-checksum": "1.2.0",
     "@eslint/config-helpers": "0.5.2",
     "@esm-bundle/chai": "4.3.4-fix.0",
