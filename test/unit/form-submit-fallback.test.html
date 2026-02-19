@@ -1,0 +1,155 @@
+<html>
+
+<head>
+  <title>Form Submit Click-Fallback Test Runner</title>
+  <style>
+    .test-form {
+      margin: 20px 0;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Test 1: Form submit fires normally – click fallback should be cancelled -->
+  <div id="submit-fires-container">
+    <form id="submit-fires-form" class="test-form" action="javascript:false;" method="POST">
+      <input type="text" name="name" value="John Doe">
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+  <script>
+    // Allow submit to fire, but prevent navigation
+    document.querySelector('#submit-fires-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+    });
+  </script>
+
+  <!-- Test 2: Form submit is blocked – click fallback should fire -->
+  <div id="submit-blocked-container">
+    <form id="submit-blocked-form" class="test-form" action="javascript:false;" method="POST">
+      <input type="text" name="name" value="Jane Doe">
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+  <script>
+    // Block submit entirely so the plugin's submit handler never runs
+    document.querySelector('#submit-blocked-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    });
+  </script>
+
+  <!-- Test 3: Multiple rapid clicks – only one formsubmit should be sent -->
+  <div id="multi-click-container">
+    <form id="multi-click-form" class="test-form" action="javascript:false;" method="POST">
+      <input type="text" name="name" value="Multi Click">
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+  <script>
+    // Block submit entirely
+    document.querySelector('#multi-click-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+    });
+  </script>
+
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { expect } from '@esm-bundle/chai';
+    import addFormTracking from '../../plugins/form.js';
+
+    // Mock helpers
+    const mockSourceSelector = (element) => {
+      return element.tagName.toLowerCase() + (element.name ? `[name="${element.name}"]` : '');
+    };
+
+    const mockTargetSelector = (element) => {
+      return element.tagName.toLowerCase();
+    };
+
+    const mockCreateMO = (cb) => ({
+      observe: () => { cb([]); },
+    });
+
+    const mockGetIntersectionObserver = () => ({
+      observe: () => {},
+    });
+
+    function initTracking(sampleRUM, context) {
+      addFormTracking({
+        sampleRUM,
+        sourceSelector: mockSourceSelector,
+        targetSelector: mockTargetSelector,
+        context,
+        createMO: mockCreateMO,
+        getIntersectionObserver: mockGetIntersectionObserver,
+      });
+    }
+
+    runTests(async () => {
+      describe('Form Submit Click-Fallback', () => {
+        let calls;
+
+        beforeEach(() => {
+          calls = [];
+        });
+
+        it('should cancel click fallback when form submit fires', async function test() {
+          const form = document.querySelector('#submit-fires-form');
+          const recorder = (checkpoint, data) => { calls.push({ checkpoint, ...data }); };
+          initTracking(recorder, document.querySelector('#submit-fires-container'));
+
+          // Click the submit button – submit event will fire (only prevented, not stopped)
+          form.querySelector('input[type="submit"]').click();
+
+          // Wait for the setTimeout(0) fallback window to pass
+          await new Promise((resolve) => { setTimeout(resolve, 50); });
+
+          // The submit handler fires and cancels the fallback, so we should get
+          // exactly one formsubmit – from the submit handler, not the click fallback.
+          const submits = calls.filter((c) => c.checkpoint === 'formsubmit');
+          expect(submits.length).to.equal(1, 'Should have exactly 1 formsubmit from the submit handler');
+        });
+
+        it('should fire click fallback when form submit is blocked', async function test() {
+          const form = document.querySelector('#submit-blocked-form');
+          const recorder = (checkpoint, data) => { calls.push({ checkpoint, ...data }); };
+          initTracking(recorder, document.querySelector('#submit-blocked-container'));
+
+          // Click the submit button – submit event is blocked by stopImmediatePropagation
+          form.querySelector('button[type="submit"]').click();
+
+          // Wait for the setTimeout(0) fallback to execute
+          await new Promise((resolve) => { setTimeout(resolve, 50); });
+
+          const submits = calls.filter((c) => c.checkpoint === 'formsubmit');
+          expect(submits.length).to.equal(1, 'Should have exactly 1 formsubmit from the click fallback');
+        });
+
+        it('should send only one formsubmit on multiple rapid clicks', async function test() {
+          const form = document.querySelector('#multi-click-form');
+          const recorder = (checkpoint, data) => { calls.push({ checkpoint, ...data }); };
+          initTracking(recorder, document.querySelector('#multi-click-container'));
+
+          const btn = form.querySelector('input[type="submit"]');
+
+          // Rapid-fire three clicks
+          btn.click();
+          btn.click();
+          btn.click();
+
+          // Wait for the fallback timeout to settle
+          await new Promise((resolve) => { setTimeout(resolve, 50); });
+
+          const submits = calls.filter((c) => c.checkpoint === 'formsubmit');
+          expect(submits.length).to.equal(1, 'Should have exactly 1 formsubmit despite multiple clicks');
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

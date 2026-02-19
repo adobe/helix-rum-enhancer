@@ -31,28 +31,72 @@ export default function addFormTracking({
 }) {
   // Track existing forms
 
-  function trackForm(form) {
-    form.addEventListener('submit', (e) => {
-      // Check for form validation errors before submitting
-      const invalidFields = form.querySelectorAll(':invalid');
-      // Send error checkpoints for each invalid field
-      invalidFields.forEach((field) => {
-        if (field && field.validity) {
-          const prototype = Object.getPrototypeOf(field.validity);
-          const errorType = prototype
-            ? Object.keys(Object.getOwnPropertyDescriptors(prototype))
-              .filter((key) => key !== 'valid' && key !== 'constructor' && !key.startsWith('Symbol'))
-              .find((key) => field.validity[key]) || 'custom'
-            : 'custom';
+  // Shared across all tracked forms — one WeakMap is sufficient
+  const pendingSubmitFallback = new WeakMap();
 
-          sampleRUM('error', {
-            target: errorType,
-            source: sourceSelector(field),
-          });
-        }
-      });
+  function cancelSubmitFallback(form) {
+    const pending = pendingSubmitFallback.get(form);
+    if (!pending) return;
+    clearTimeout(pending.timerId);
+    pendingSubmitFallback.delete(form);
+  }
+
+  function sendValidationErrors(form) {
+    const invalidFields = form.querySelectorAll(':invalid');
+    // Send error checkpoints for each invalid field
+    invalidFields.forEach((field) => {
+      if (field && field.validity) {
+        const prototype = Object.getPrototypeOf(field.validity);
+        const errorType = prototype
+          ? Object.keys(Object.getOwnPropertyDescriptors(prototype))
+            .filter((key) => key !== 'valid' && key !== 'constructor' && !key.startsWith('Symbol'))
+            .find((key) => field.validity[key]) || 'custom'
+          : 'custom';
+
+        sampleRUM('error', {
+          target: errorType,
+          source: sourceSelector(field),
+        });
+      }
+    });
+    return invalidFields.length;
+  }
+
+  function scheduleSubmitFallback(form) {
+    cancelSubmitFallback(form);
+    const timerId = globalThis.setTimeout(() => {
+      pendingSubmitFallback.delete(form);
+
+      const invalidCount = sendValidationErrors(form);
       // Only send formsubmit event if there are no validation errors
-      if (invalidFields.length === 0) {
+      if (invalidCount === 0) {
+        sampleRUM(getSubmitType(form), {
+          target: targetSelector(form),
+          source: sourceSelector(form),
+        });
+      }
+    }, 0);
+
+    pendingSubmitFallback.set(form, { timerId });
+  }
+
+  function trackForm(form) {
+    // Click fallback: if submit does not fire (e.g., prevented by JS),
+    // send the submit checkpoint on the next tick.
+    form.addEventListener('click', (e) => {
+      const el = e.target;
+      if (!(el instanceof Element)) return;
+      const submitControl = el.closest?.('button[type="submit"], input[type="submit"]');
+      if (!submitControl) return;
+      scheduleSubmitFallback(form);
+    }, true);
+
+    form.addEventListener('submit', (e) => {
+      cancelSubmitFallback(form);
+
+      const invalidCount = sendValidationErrors(form);
+      // Only send formsubmit event if there are no validation errors
+      if (invalidCount === 0) {
         sampleRUM(getSubmitType(e.target), {
           target: targetSelector(e.target),
           source: sourceSelector(e.target),
