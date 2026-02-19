@@ -257,7 +257,8 @@ function addLoadResourceTracking() {
               : '.*(\\.plain\\.html$|\\.json|graphql|api)',
           );
           const isDropIn = fflags.has('allresources') && (pathname.includes('__dropins__/storefront-') || pathname.includes('scripts/dropins/storefront-'));
-          return extensionMatch || isDropIn;
+          const isImage = fflags.has('allresources') && pathname.match(/\.(png|jpe?g|svg)$/i);
+          return extensionMatch || isDropIn || isImage;
         })
         .forEach((e) => {
           sampleRUM('loadresource', { source: e.name, target: Math.round(e.duration) });
