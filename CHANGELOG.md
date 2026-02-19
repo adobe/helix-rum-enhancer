@@ -1,3 +1,10 @@
+# [2.46.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.45.1...v2.46.0) (2026-02-19)
+
+
+### Features
+
+* add image tracking for allresources flag ([#536](https://github.com/adobe/helix-rum-enhancer/issues/536)) ([01df2a4](https://github.com/adobe/helix-rum-enhancer/commit/01df2a4a944277bd991f3e8da313f17e19d98d13))
+
 ## [2.45.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.45.0...v2.45.1) (2026-02-09)
 
 
