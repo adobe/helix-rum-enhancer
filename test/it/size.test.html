@@ -48,15 +48,15 @@
           expect(called).to.have.lengthOf(3, 'three calls should have been made, got: ' + called.map((c) => c[0]).join(', '));
           expect(called[2][0]).to.equal('click');
 
-          let transferSize = 0;
-          // check the size of loaded JS files
+          let payloadSize = 0;
+          // check the size of loaded JS files (payload only; transferSize includes response headers)
           const p = new PerformanceObserver((list) => {
             const entries = list.getEntries();
             const jsEntries = entries
               .filter((entry) => entry.initiatorType === 'script')
               .filter((entry) => entry.name.endsWith('/src/index.js'));
             jsEntries.forEach((entry) => {
-              transferSize = entry.transferSize;
+              payloadSize = entry.decodedBodySize || entry.encodedBodySize || entry.transferSize;
             });
           });
           p.observe({ type: 'resource', buffered: true });
@@ -65,8 +65,8 @@
           await new Promise((resolve) => {
             setTimeout(resolve, 1000);
           });
-          expect(transferSize).to.be.greaterThan(0, 'the file should not be empty');
-          expect(transferSize).to.be.lessThan(16 * 1024, 'we limit the size of the file to 16KB');
+          expect(payloadSize).to.be.greaterThan(0, 'the file should not be empty');
+          expect(payloadSize).to.be.lessThan(16 * 1024, 'we limit the size of the file to 16KB');
 
         });
 
