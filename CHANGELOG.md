@@ -1,3 +1,10 @@
+## [2.46.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.46.1...v2.46.2) (2026-04-13)
+
+
+### Bug Fixes
+
+* add checks:write permission for test-summary action ([5131293](https://github.com/adobe/helix-rum-enhancer/commit/51312932163dcb3ccc233172f42952bd597740a6))
+
 ## [2.46.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.46.0...v2.46.1) (2026-04-13)
 
 
