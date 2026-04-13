@@ -1,3 +1,10 @@
+## [2.46.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.46.0...v2.46.1) (2026-04-13)
+
+
+### Bug Fixes
+
+* use npm OIDC trusted publishers and fix Node.js version ([0bbcb3d](https://github.com/adobe/helix-rum-enhancer/commit/0bbcb3d5a7dc3ad8272f699a008f7c6efc957cd8))
+
 # [2.46.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.45.1...v2.46.0) (2026-02-19)
 
 
