@@ -85,6 +85,8 @@ const PLUGINS = {
   // test: broken-plugin
 };
 
+const emittedViewMediaBySourceTarget = new Set();
+
 function getIntersectionObserver(checkpoint) {
   /* c8 ignore next 3 */
   if (!window.IntersectionObserver) {
@@ -98,6 +100,13 @@ function getIntersectionObserver(checkpoint) {
           observer.unobserve(e.target); // observe only once
           const target = targetSelector(e.target);
           const source = sourceSelector(e.target);
+          if (checkpoint === 'viewmedia') {
+            const key = JSON.stringify([source, target]);
+            if (emittedViewMediaBySourceTarget.has(key)) {
+              return;
+            }
+            emittedViewMediaBySourceTarget.add(key);
+          }
           sampleRUM(checkpoint, { target, source });
         });
       /* c8 ignore next 3 */
