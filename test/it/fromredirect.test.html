@@ -75,6 +75,9 @@
 
           await sendMouse({ type: 'click', position: [10, 10] });
 
+          // wait for Blob .text() promises in fakeSendBeacon to resolve
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
           assert(window.called.some((call) => call.checkpoint === 'top'), 'top checkpoint missing');
           assert(window.called.some((call) => call.checkpoint === 'redirect'), 'redirect checkpoint missing');
           assert(window.called.some((call) => call.checkpoint === 'enter'), 'enter checkpoint missing');
