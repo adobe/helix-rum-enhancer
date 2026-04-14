@@ -1,3 +1,16 @@
+# [2.47.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.46.2...v2.47.0) (2026-04-14)
+
+
+### Bug Fixes
+
+* **ci:** guard dry-run against tag pushes ([c9d8a92](https://github.com/adobe/helix-rum-enhancer/commit/c9d8a92ffe5cce0b7f02169576bee819ec4c87ca))
+* **ci:** restore semantic-release dry-run on all branches ([2b276f9](https://github.com/adobe/helix-rum-enhancer/commit/2b276f93e94a5f8466f0e01215b596537b84f1cb))
+
+
+### Features
+
+* **viewmedia:** dedupe checkpoints by source+target pair ([e02ac91](https://github.com/adobe/helix-rum-enhancer/commit/e02ac910c7143487ca867bb952d7db88d6ffae1a))
+
 ## [2.46.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.46.1...v2.46.2) (2026-04-13)
 
 
