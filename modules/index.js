@@ -107,7 +107,9 @@ function getIntersectionObserver(checkpoint) {
             if (vmDedupe.has(key)) {
               return;
             }
-            if (vmDedupe.size < MAX_EV) vmDedupe.add(key);
+            if (vmDedupe.size < MAX_EV) {
+              vmDedupe.add(key);
+            }
           }
           sampleRUM(checkpoint, { target, source });
         });
