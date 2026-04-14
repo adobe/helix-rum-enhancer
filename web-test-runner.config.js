@@ -74,7 +74,7 @@ export default {
           context.url = '/node_modules/@adobe/helix-rum-js/dist/rum-standalone.js';
           await next();
           context.body = context.body
-            .replace(/const weight =/, 'const weight = 1 ||')
+            .replace(/const weight = .*?;/, 'const weight = 1;')
             .replace(/navigator\.sendBeacon/g, 'fakeSendBeacon')
             // eslint-disable-next-line no-template-curly-in-string
             .replace('.rum/@adobe/helix-rum-enhancer@${enhancerVersion || \'^2\'}/src/index.js', 'src/index.map.js');

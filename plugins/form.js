@@ -11,16 +11,15 @@
  */
 
 export const getSubmitType = (el) => {
-  if (!el || el.tagName !== 'FORM') return undefined;
-  // if the form has a search role or a search field, it's a search form
+  if (!el || el.tagName !== 'FORM') {
+    return undefined;
+  }
   if (el.getAttribute('role') === 'search'
-    || el.querySelector('input[type="search"], input[role="searchbox"]')) return 'search';
-  // if the form has one password input, it's a login form
-  // if the form has more than one password input, it's a signup form
+    || el.querySelector('input[type="search"], input[role="searchbox"]')) {
+    return 'search';
+  }
   const pwCount = el.querySelectorAll('input[type="password"]').length;
-  if (pwCount === 1) return 'login';
-  if (pwCount > 1) return 'signup';
-  return 'formsubmit';
+  return (pwCount === 1 && 'login') || (pwCount > 1 && 'signup') || 'formsubmit';
 };
 
 let rootMo = null;

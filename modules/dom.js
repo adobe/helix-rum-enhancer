@@ -14,7 +14,9 @@ export const getTargetValue = (el) => el.getAttribute('data-rum-target') || el.g
 
 export const targetSelector = (el) => {
   try {
-    if (!el) return undefined;
+    if (!el) {
+      return undefined;
+    }
     let v = getTargetValue(el);
     if (!v && el.tagName !== 'A' && el.closest('a')) {
       v = getTargetValue(el.closest('a'));
@@ -39,21 +41,19 @@ function walk(el, checkFn) {
 }
 
 function isDialog(el) {
-  // doing it well
-  if (el.tagName === 'DIALOG') return true;
-  // making the best of it
   const cs = window.getComputedStyle(el);
-  return ['dialog', 'alertdialog'].find((r) => el.getAttribute('role') === r)
+  return el.tagName === 'DIALOG'
+    || ['dialog', 'alertdialog'].find((r) => el.getAttribute('role') === r)
     || el.getAttribute('aria-modal') === 'true'
     || (cs && cs.position === 'fixed' && cs.zIndex > 100);
 }
 
 function isButton(el) {
-  if (el.tagName === 'BUTTON') return true;
-  if (el.tagName === 'INPUT' && el.getAttribute('type') === 'button') return true;
+  if (el.tagName === 'BUTTON' || (el.tagName === 'INPUT' && el.getAttribute('type') === 'button')) {
+    return true;
+  }
   if (el.tagName === 'A') {
-    const classes = Array.from(el.classList);
-    return classes.some((className) => className.match(/button|cta/));
+    return Array.from(el.classList).some((className) => className.match(/button|cta/));
   }
   return el.getAttribute('role') === 'button';
 }
@@ -83,14 +83,14 @@ function getSourceElement(el) {
         ? `[type='${el.getAttribute('type') || ''}']`
         : ''));
   }
-  if (walk(el, isButton)) return 'button';
-  return el.tagName.toLowerCase().match(/^(a|img|video|form)$/) && el.tagName.toLowerCase();
+  return (walk(el, isButton) && 'button')
+    || (el.tagName.toLowerCase().match(/^(a|img|video|form)$/) && el.tagName.toLowerCase());
 }
 
 function getSourceIdentifier(el) {
-  if (el.id) return `#${CSS.escape(el.id)}`;
-  if (el.getAttribute('data-block-name')) return `.${el.getAttribute('data-block-name')}`;
-  return (el.classList.length > 0 && `.${CSS.escape(el.classList[0])}`);
+  return (el.id && `#${CSS.escape(el.id)}`)
+    || (el.getAttribute('data-block-name') && `.${el.getAttribute('data-block-name')}`)
+    || (el.classList.length > 0 && `.${CSS.escape(el.classList[0])}`);
 }
 
 export const sourceSelector = (el) => {
