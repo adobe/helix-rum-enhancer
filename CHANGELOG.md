@@ -1,3 +1,11 @@
+## [2.47.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.47.0...v2.47.1) (2026-04-14)
+
+
+### Bug Fixes
+
+* **test:** resolve race condition in fromredirect integration test ([37c7f59](https://github.com/adobe/helix-rum-enhancer/commit/37c7f5951e16d597c5b45356299092ef48478f84))
+* **test:** use deterministic await instead of fixed timeout ([aa1c0c9](https://github.com/adobe/helix-rum-enhancer/commit/aa1c0c9eb00415df8afa0c918dc7102e614bb5a0))
+
 # [2.47.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.46.2...v2.47.0) (2026-04-14)
 
 
