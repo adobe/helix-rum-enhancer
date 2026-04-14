@@ -21,12 +21,14 @@ jobs:
               pull_number: context.issue.number
             });
 
-            // Replace any non-alphanumeric, non-hyphen character with '-' for AEM URLs
-            // (adopted from helix-rum-js)
-            const branchName = context.payload.pull_request.head.ref.replace(/[^a-zA-Z0-9-]/g, '-');
+            // Sanitize branch name: replace non-alphanumeric chars, collapse consecutive hyphens, trim leading/trailing hyphens
+            const branchName = context.payload.pull_request.head.ref
+              .replace(/[^a-zA-Z0-9-]/g, '-')
+              .replace(/-+/g, '-')
+              .replace(/^-+|-+$/g, '');
             const domainLabel = `${branchName}--helix-rum-enhancer--adobe`;
             const testContent = domainLabel.length > 63
-              ? 'Branch name is too long to generate a valid preview URL (DNS label exceeds 63 characters).'
+              ? `Branch name is too long to generate a valid preview URL (${domainLabel.length}/63 DNS label characters).`
               : `https://${domainLabel}.aem.page/test/fixtures/otsdk-with-banner.html`;
             const testSection = `
 
