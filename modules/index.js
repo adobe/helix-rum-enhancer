@@ -85,6 +85,10 @@ const PLUGINS = {
   // test: broken-plugin
 };
 
+const MAX_EV = 1023;
+
+const vmDedupe = new Set();
+
 function getIntersectionObserver(checkpoint) {
   /* c8 ignore next 3 */
   if (!window.IntersectionObserver) {
@@ -98,6 +102,13 @@ function getIntersectionObserver(checkpoint) {
           observer.unobserve(e.target); // observe only once
           const target = targetSelector(e.target);
           const source = sourceSelector(e.target);
+          if (checkpoint === 'viewmedia') {
+            const key = `${source}\0${target}`;
+            if (vmDedupe.has(key)) {
+              return;
+            }
+            if (vmDedupe.size < MAX_EV) vmDedupe.add(key);
+          }
           sampleRUM(checkpoint, { target, source });
         });
       /* c8 ignore next 3 */
@@ -170,9 +181,9 @@ function createPluginMO(key, params, usp) {
 
 /**
  * Maximum number of events. The first call will be made by rum-js,
- * leaving 1023 events for the enhancer to track
+ * leaving MAX_EV for the enhancer to track
  */
-let maxEvents = 1023;
+let maxEvents = MAX_EV;
 
 function trackCheckpoint(checkpoint, data, t) {
   const { weight, id } = window.hlx.rum;
