@@ -1,3 +1,10 @@
+## [2.47.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.47.1...v2.47.2) (2026-04-15)
+
+
+### Bug Fixes
+
+* **lint:** add curly braces to satisfy updated eslint config ([137a9ed](https://github.com/adobe/helix-rum-enhancer/commit/137a9ed7452fe6695d642d3a94f97860813e3304))
+
 ## [2.47.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.47.0...v2.47.1) (2026-04-14)
 
 
