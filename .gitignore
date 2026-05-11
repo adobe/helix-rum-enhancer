@@ -12,4 +12,5 @@ test-output.log
 .idea
 src
 test-results/test-results.json
-*.bak.worktrees
+*.bak
+.worktrees
