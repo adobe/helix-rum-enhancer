@@ -217,7 +217,8 @@ function processQueue() {
 function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
   const navigate = (source, type, perfEntry) => {
-    const payload = { source, target: document.visibilityState };
+    const sanitizedSource = source ? urlSanitizers.path(source) : source;
+    const payload = { source: sanitizedSource, target: document.visibilityState };
     /* c8 ignore next 13 */
     // prerendering cannot be tested yet with headless browsers
     if (document.prerendering) {
