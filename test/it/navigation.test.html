@@ -54,7 +54,7 @@
             }
           };
 
-          const url = new URL('/test/fixtures/referrer.html', window.location);
+          const url = new URL('/test/fixtures/referrer.html?tracking=abc&session=xyz', window.location);
           window.hlx.referrer = url.href;
 
 
@@ -77,6 +77,12 @@
           expect(called[2][0]).to.equal('back_forward');
           expect(called[3][0]).to.equal('prerender');
           expect(called[4][0]).to.equal('language');
+
+          // referrer had query params — source must be stripped to origin+pathname only
+          expect(called[0][1].source).to.not.include('?', 'navigate source must not contain query params');
+          expect(called[0][1].source).to.equal(
+            window.location.origin + '/test/fixtures/referrer.html',
+          );
         });
 
       });
