@@ -1,3 +1,10 @@
+## [2.47.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.47.2...v2.47.3) (2026-05-13)
+
+
+### Bug Fixes
+
+* strip query params from referrer source in navigate/enter checkpoints ([#567](https://github.com/adobe/helix-rum-enhancer/issues/567)) ([0dcb990](https://github.com/adobe/helix-rum-enhancer/commit/0dcb9907214972d8462b7d33f99973095b5cb39d))
+
 ## [2.47.2](https://github.com/adobe/helix-rum-enhancer/compare/v2.47.1...v2.47.2) (2026-04-15)
 
 
