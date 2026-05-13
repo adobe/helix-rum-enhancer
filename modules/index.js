@@ -217,7 +217,8 @@ function processQueue() {
 function addNavigationTracking() {
   // enter checkpoint when referrer is not the current page url
   const navigate = (source, type, perfEntry) => {
-    const payload = { source, target: document.visibilityState };
+    // eslint-disable-next-line object-curly-newline, max-len
+    const payload = { source: source && urlSanitizers.path(source), target: document.visibilityState };
     /* c8 ignore next 13 */
     // prerendering cannot be tested yet with headless browsers
     if (document.prerendering) {
