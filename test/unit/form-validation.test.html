@@ -58,15 +58,86 @@
     <input type="submit" value="Submit Multiple Errors Form">
   </form>
 
+  <!-- Test 8: SPA-style form — novalidate, sets aria-invalid asynchronously (React/Vue pattern) -->
+  <form id="spa-form" class="test-form" novalidate action="javascript:false;" method="POST">
+    <input type="text" name="email" placeholder="Email">
+    <input type="submit" value="Submit SPA Form">
+  </form>
+
+  <!-- Test 9: Marketo-style form — adds .mktoInvalid synchronously on submit -->
+  <form id="marketo-form" class="test-form mktoForm" novalidate action="javascript:false;" method="POST">
+    <input type="text" name="FirstName" placeholder="First Name">
+    <input type="submit" value="Submit Marketo Form">
+  </form>
+
+  <!-- Test 10: Bootstrap-style form — adds .is-invalid synchronously on submit -->
+  <form id="bootstrap-form" class="test-form" novalidate action="javascript:false;" method="POST">
+    <input type="text" name="email" placeholder="Email">
+    <input type="submit" value="Submit Bootstrap Form">
+  </form>
+
+  <!-- Test 11: SPA-style form with no validation errors (clean valid submit) -->
+  <form id="spa-valid-form" class="test-form" novalidate action="javascript:false;" method="POST">
+    <input type="text" name="email" placeholder="Email">
+    <input type="submit" value="Submit SPA Valid Form">
+  </form>
+
+  <!-- Test 12: Revolt.tv-style form — populates .error-message divs synchronously, no aria/native signals -->
+  <form id="revolt-form" class="test-form" action="javascript:false;" method="POST">
+    <input type="text" name="email" placeholder="Email">
+    <div class="error-message" data-target="email"></div>
+    <input type="submit" value="Submit Revolt Form">
+  </form>
+
+  <!-- Test 13: Native form that will "navigate" (no preventDefault) — must fire formsubmit synchronously -->
+  <form id="navigation-form" class="test-form" action="javascript:false;" method="POST">
+    <input type="text" name="email" value="test@example.com">
+    <input type="submit" value="Submit Navigation Form">
+  </form>
+
   <script>
-    // Prevent form submission to avoid navigation during tests
-    document.querySelectorAll('form').forEach(form => {
+    // Prevent navigation during tests (no stopPropagation — events MUST bubble to document
+    // so the new document-level submit listener can read e.defaultPrevented).
+    // The navigation-form is excluded — it tests the no-preventDefault path.
+    document.querySelectorAll('form:not(#spa-form):not(#spa-valid-form):not(#marketo-form):not(#bootstrap-form):not(#revolt-form):not(#navigation-form)').forEach(form => {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
-        e.stopPropagation();
-        return false;
       });
     });
+
+    // SPA form (invalid): validates on submit, sets aria-invalid asynchronously (React setState + re-render)
+    document.querySelector('#spa-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      setTimeout(() => {
+        document.querySelector('#spa-form input[name="email"]').setAttribute('aria-invalid', 'true');
+      }, 0);
+    });
+
+    // Marketo-style: sets .mktoInvalid synchronously
+    document.querySelector('#marketo-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      document.querySelector('#marketo-form input[name="FirstName"]').classList.add('mktoInvalid');
+    });
+
+    // Bootstrap-style: sets .is-invalid synchronously
+    document.querySelector('#bootstrap-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      document.querySelector('#bootstrap-form input[name="email"]').classList.add('is-invalid');
+    });
+
+    // SPA valid form: just prevents default, no errors set
+    document.querySelector('#spa-valid-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+    });
+
+    // Revolt.tv-style: preventDefault and populate error-message div with text synchronously
+    // No :invalid, no aria-invalid, no framework classes — only visible error text.
+    document.querySelector('#revolt-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      document.querySelector('#revolt-form .error-message').textContent = 'Please enter a valid email address.';
+    });
+
+    // navigation-form has NO submit handler — defaultPrevented stays false → sync path fires formsubmit.
   </script>
 
   <script type="module">
@@ -452,6 +523,134 @@
              'rangeUnderflow', 'rangeOverflow', 'stepMismatch', 'badInput', 'customError'].includes(call.target)
           );
           expect(specificErrors.length).to.be.at.least(1, 'Should have specific error types detected');
+        });
+
+        it('should NOT fire formsubmit when Marketo sets .mktoInvalid synchronously', async function test() {
+          const form = document.querySelector('#marketo-form');
+          window.called = [];
+
+          addFormTracking({
+            sampleRUM: mockSampleRUM,
+            sourceSelector: mockSourceSelector,
+            targetSelector: mockTargetSelector,
+            context: document,
+            createMO: mockCreateMO,
+            getIntersectionObserver: mockGetIntersectionObserver,
+          });
+
+          form.querySelector('input[type="submit"]').click();
+
+          await new Promise((resolve) => { setTimeout(resolve, 100); });
+
+          const submitCalls = window.called.filter((c) => c.checkpoint === 'formsubmit');
+          expect(submitCalls.length).to.equal(0, 'formsubmit must not fire when .mktoInvalid is set');
+        });
+
+        it('should NOT fire formsubmit when Bootstrap sets .is-invalid synchronously', async function test() {
+          const form = document.querySelector('#bootstrap-form');
+          window.called = [];
+
+          addFormTracking({
+            sampleRUM: mockSampleRUM,
+            sourceSelector: mockSourceSelector,
+            targetSelector: mockTargetSelector,
+            context: document,
+            createMO: mockCreateMO,
+            getIntersectionObserver: mockGetIntersectionObserver,
+          });
+
+          form.querySelector('input[type="submit"]').click();
+
+          await new Promise((resolve) => { setTimeout(resolve, 100); });
+
+          const submitCalls = window.called.filter((c) => c.checkpoint === 'formsubmit');
+          expect(submitCalls.length).to.equal(0, 'formsubmit must not fire when .is-invalid is set');
+        });
+
+        it('should NOT fire formsubmit when framework sets aria-invalid asynchronously', async function test() {
+          const form = document.querySelector('#spa-form');
+          window.called = [];
+
+          addFormTracking({
+            sampleRUM: mockSampleRUM,
+            sourceSelector: mockSourceSelector,
+            targetSelector: mockTargetSelector,
+            context: document,
+            createMO: mockCreateMO,
+            getIntersectionObserver: mockGetIntersectionObserver,
+          });
+
+          form.querySelector('input[type="submit"]').click();
+
+          // Wait past our deferred check (setTimeout 0)
+          await new Promise((resolve) => { setTimeout(resolve, 100); });
+
+          const submitCalls = window.called.filter((c) => c.checkpoint === 'formsubmit');
+          expect(submitCalls.length).to.equal(0, 'formsubmit must not fire when aria-invalid is set by framework');
+        });
+
+        it('should fire formsubmit when SPA form has no aria-invalid errors', async function test() {
+          const form = document.querySelector('#spa-valid-form');
+          window.called = [];
+
+          addFormTracking({
+            sampleRUM: mockSampleRUM,
+            sourceSelector: mockSourceSelector,
+            targetSelector: mockTargetSelector,
+            context: document,
+            createMO: mockCreateMO,
+            getIntersectionObserver: mockGetIntersectionObserver,
+          });
+
+          form.querySelector('input[type="submit"]').click();
+
+          await new Promise((resolve) => { setTimeout(resolve, 100); });
+
+          const submitCalls = window.called.filter((c) => c.checkpoint === 'formsubmit');
+          expect(submitCalls.length).to.be.at.least(1, 'formsubmit must fire when SPA form has no errors');
+        });
+
+        it('should NOT fire formsubmit when form populates an .error-message div (Revolt.tv pattern)', async function test() {
+          const form = document.querySelector('#revolt-form');
+          window.called = [];
+
+          addFormTracking({
+            sampleRUM: mockSampleRUM,
+            sourceSelector: mockSourceSelector,
+            targetSelector: mockTargetSelector,
+            context: document,
+            createMO: mockCreateMO,
+            getIntersectionObserver: mockGetIntersectionObserver,
+          });
+
+          form.querySelector('input[type="submit"]').click();
+
+          await new Promise((resolve) => { setTimeout(resolve, 100); });
+
+          const submitCalls = window.called.filter((c) => c.checkpoint === 'formsubmit');
+          expect(submitCalls.length).to.equal(0, 'formsubmit must not fire when an error-message div has text');
+        });
+
+        it('should fire formsubmit SYNCHRONOUSLY when form does not preventDefault (navigation path)', async function test() {
+          const form = document.querySelector('#navigation-form');
+          window.called = [];
+
+          addFormTracking({
+            sampleRUM: mockSampleRUM,
+            sourceSelector: mockSourceSelector,
+            targetSelector: mockTargetSelector,
+            context: document,
+            createMO: mockCreateMO,
+            getIntersectionObserver: mockGetIntersectionObserver,
+          });
+
+          // Dispatch a synthetic submit event (no preventDefault called, no real navigation).
+          // The sync path must fire formsubmit immediately, before any setTimeout could run.
+          form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+          // No await — verify formsubmit is already present synchronously.
+          const submitCalls = window.called.filter((c) => c.checkpoint === 'formsubmit');
+          expect(submitCalls.length).to.be.at.least(1, 'formsubmit must fire synchronously when nothing prevents the submit');
         });
 
       });

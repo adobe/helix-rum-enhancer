@@ -23,42 +23,82 @@ export const getSubmitType = (el) => {
 };
 
 let rootMo = null;
+let submitListenerInstalled = false;
+const firedForms = new WeakSet();
+
+// Field-level validation signals across native, ARIA, Marketo, and Bootstrap conventions.
+const ERROR_FIELD_SELECTORS = ':invalid, [aria-invalid="true"], .mktoInvalid, .is-invalid';
+// Generic visible error-message containers (e.g. Revolt.tv .error-message divs).
+const ERROR_TEXT_SELECTORS = '[class*="error" i]:not(:empty), [class*="invalid" i]:not(:empty), [role="alert"]:not(:empty)';
+
+function reportFieldErrors(form, sampleRUM, sourceSelector) {
+  const invalidFields = form.querySelectorAll(ERROR_FIELD_SELECTORS);
+  invalidFields.forEach((field) => {
+    if (field && field.validity) {
+      const prototype = Object.getPrototypeOf(field.validity);
+      const errorType = prototype
+        ? Object.keys(Object.getOwnPropertyDescriptors(prototype))
+          .filter((key) => key !== 'valid' && key !== 'constructor' && !key.startsWith('Symbol'))
+          .find((key) => field.validity[key]) || 'custom'
+        : 'custom';
+      sampleRUM('error', { target: errorType, source: sourceSelector(field) });
+    }
+  });
+  return invalidFields.length > 0;
+}
+
+function hasVisibleErrorText(form) {
+  return [...form.querySelectorAll(ERROR_TEXT_SELECTORS)]
+    .some((el) => el.offsetParent !== null && el.textContent.trim());
+}
+
+function fireFormSubmit(form, sampleRUM, sourceSelector, targetSelector) {
+  if (firedForms.has(form)) {
+    return;
+  }
+  firedForms.add(form);
+  sampleRUM(getSubmitType(form), {
+    target: targetSelector(form),
+    source: sourceSelector(form),
+  });
+}
 
 export default function addFormTracking({
   createMO,
   sampleRUM, sourceSelector, targetSelector, context, getIntersectionObserver,
 }) {
-  // Track existing forms
+  // Install ONE document-level submit listener for the whole page.
+  // Bubble phase on document runs after every per-form handler, so
+  // e.defaultPrevented reflects the final decision: did anything cancel the submission?
+  if (!submitListenerInstalled) {
+    submitListenerInstalled = true;
+    document.addEventListener('submit', (e) => {
+      const form = e.target;
+      if (!form || form.tagName !== 'FORM') {
+        return;
+      }
+
+      if (!e.defaultPrevented) {
+        // Nothing cancelled it - form will navigate. Fire synchronously so
+        // sendBeacon survives the page unload. Native validation already
+        // blocked invalid submissions before reaching us.
+        fireFormSubmit(form, sampleRUM, sourceSelector, targetSelector);
+        return;
+      }
+
+      // preventDefault was called - form is staying on this page.
+      // Defer one tick so framework validators can populate error indicators.
+      setTimeout(() => {
+        const hasFieldErrors = reportFieldErrors(form, sampleRUM, sourceSelector);
+        if (hasFieldErrors || hasVisibleErrorText(form)) {
+          return;
+        }
+        fireFormSubmit(form, sampleRUM, sourceSelector, targetSelector);
+      }, 0);
+    });
+  }
 
   function trackForm(form) {
-    form.addEventListener('submit', (e) => {
-      // Check for form validation errors before submitting
-      const invalidFields = form.querySelectorAll(':invalid');
-      // Send error checkpoints for each invalid field
-      invalidFields.forEach((field) => {
-        if (field && field.validity) {
-          const prototype = Object.getPrototypeOf(field.validity);
-          const errorType = prototype
-            ? Object.keys(Object.getOwnPropertyDescriptors(prototype))
-              .filter((key) => key !== 'valid' && key !== 'constructor' && !key.startsWith('Symbol'))
-              .find((key) => field.validity[key]) || 'custom'
-            : 'custom';
-
-          sampleRUM('error', {
-            target: errorType,
-            source: sourceSelector(field),
-          });
-        }
-      });
-      // Only send formsubmit event if there are no validation errors
-      if (invalidFields.length === 0) {
-        sampleRUM(getSubmitType(e.target), {
-          target: targetSelector(e.target),
-          source: sourceSelector(e.target),
-        });
-      }
-    }, { once: true });
-
     getIntersectionObserver('viewblock').observe(form);
     let lastSource;
     form.addEventListener('change', (e) => {
