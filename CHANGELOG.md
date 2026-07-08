@@ -1,3 +1,11 @@
+# [2.48.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.47.3...v2.48.0) (2026-07-08)
+
+
+### Features
+
+* report source for the largest CLS layout shift ([53a0432](https://github.com/adobe/helix-rum-enhancer/commit/53a04321044b444b8f883b63f71dd4394814877b))
+* report source for the largest CLS layout shift ([a74c6f4](https://github.com/adobe/helix-rum-enhancer/commit/a74c6f453b639504b82874750d247b27c5a78f21))
+
 ## [2.47.3](https://github.com/adobe/helix-rum-enhancer/compare/v2.47.2...v2.47.3) (2026-05-13)
 
 
