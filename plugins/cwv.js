@@ -35,6 +35,17 @@ export default function addCWVTracking({
             data.target = targetSelector(element);
             data.source = sourceSelector(element) || (element && element.outerHTML.slice(0, 30));
           }
+          if (measurement.name === 'CLS' && measurement.entries.length > 0) {
+            // Attribute CLS to the element of the single largest layout shift
+            // (mirrors web-vitals' `largestShiftTarget`, derived from the standard entries).
+            const largest = measurement.entries
+              .reduce((a, b) => (b.value > (a ? a.value : 0) ? b : a), undefined);
+            const node = largest && largest.sources
+              && largest.sources.map((s) => s.node).find((n) => n && n.nodeType === 1);
+            if (node) {
+              data.source = sourceSelector(node) || node.outerHTML.slice(0, 30);
+            }
+          }
           sampleRUM('cwv', data);
         };
 
