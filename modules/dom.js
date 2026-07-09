@@ -32,12 +32,12 @@ export const targetSelector = (el) => {
   }
 };
 
-function walk(el, checkFn) {
+function walk(el, check) {
   if (!el || el === document.body || el === document.documentElement) {
     return undefined;
   }
 
-  return checkFn(el) || walk(el.parentElement || (el.parentNode && el.parentNode.host), checkFn);
+  return check(el) || walk(el.parentElement || (el.parentNode && el.parentNode.host), check);
 }
 
 function isDialog(el) {
@@ -53,19 +53,19 @@ function isButton(el) {
     return true;
   }
   if (el.tagName === 'A') {
-    return Array.from(el.classList).some((className) => className.match(/button|cta/));
+    return Array.from(el.classList).some((cls) => cls.match(/button|cta/));
   }
   return el.getAttribute('role') === 'button';
 }
 
-function getSourceContext(el) {
-  const formEl = el.closest('form');
-  if (formEl) {
-    const id = formEl.getAttribute('id');
+function srcContext(el) {
+  const form = el.closest('form');
+  if (form) {
+    const id = form.getAttribute('id');
     if (id) {
       return `form#${CSS.escape(id)}`;
     }
-    return `form${formEl.classList.length > 0 ? `.${CSS.escape(formEl.classList[0])}` : ''}`;
+    return `form${form.classList.length > 0 ? `.${CSS.escape(form.classList[0])}` : ''}`;
   }
   const block = el.closest('.block[data-block-name]');
   return ((block && `.${block.getAttribute('data-block-name')}`)
@@ -75,7 +75,7 @@ function getSourceContext(el) {
     || walk(el, (e) => e.id && `#${CSS.escape(e.id)}`));
 }
 
-function getSourceElement(el) {
+function srcElement(el) {
   const f = el.closest('form');
   if (f && Array.from(f.elements).includes(el)) {
     return (el.tagName.toLowerCase()
@@ -87,7 +87,7 @@ function getSourceElement(el) {
     || (el.tagName.toLowerCase().match(/^(a|img|video|form)$/) && el.tagName.toLowerCase());
 }
 
-function getSourceIdentifier(el) {
+function srcId(el) {
   return (el.id && `#${CSS.escape(el.id)}`)
     || (el.getAttribute('data-block-name') && `.${el.getAttribute('data-block-name')}`)
     || (el.classList.length > 0 && `.${CSS.escape(el.classList[0])}`);
@@ -101,9 +101,9 @@ export const sourceSelector = (el) => {
     if (el.getAttribute('data-rum-source')) {
       return el.getAttribute('data-rum-source');
     }
-    const ctx = getSourceContext(el.parentElement) || '';
-    const name = getSourceElement(el) || '';
-    const id = getSourceIdentifier(el) || '';
+    const ctx = srcContext(el.parentElement) || '';
+    const name = srcElement(el) || '';
+    const id = srcId(el) || '';
     return `${ctx} ${name}${id}`.trim() || `"${el.textContent.substring(0, 10)}"`;
     /* c8 ignore next 3 */
   } catch (error) {

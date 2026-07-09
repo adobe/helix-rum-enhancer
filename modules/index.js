@@ -27,19 +27,19 @@ const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
 const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 
 // Check for the presence of a given cookie
-const hasCookieKey = (key) => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
+const hasCookie = (key) => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
 
 // Set the base path for the plugins
-const pluginBasePath = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
+const pluginBase = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
 
 const CONSENT_PROVIDERS = [
   {
     name: 'onetrust',
-    detect: () => hasCookieKey('OptanonAlertBoxClosed') || document.querySelector('#onetrust-banner-sdk, #onetrust-pc-sdk'),
+    detect: () => hasCookie('OptanonAlertBoxClosed') || document.querySelector('#onetrust-banner-sdk, #onetrust-pc-sdk'),
   },
   {
     name: 'trustarc',
-    detect: () => ['notice_gdpr_prefs', 'notice_preferences'].some(hasCookieKey) || document.querySelector('#truste-consent-track'),
+    detect: () => ['notice_gdpr_prefs', 'notice_preferences'].some(hasCookie) || document.querySelector('#truste-consent-track'),
   },
   {
     name: 'usercentrics',
@@ -47,40 +47,40 @@ const CONSENT_PROVIDERS = [
   },
 ];
 
-const getConsentProvider = () => CONSENT_PROVIDERS.find(({ detect }) => detect());
+const getConsent = () => CONSENT_PROVIDERS.find(({ detect }) => detect());
 const bodyChildMO = {
   target: document.body,
   options: { attributes: false, childList: true, subtree: false },
 };
 
 const PLUGINS = {
-  cwv: `${pluginBasePath}/cwv.js`,
-  a11y: `${pluginBasePath}/a11y.js`,
+  cwv: `${pluginBase}/cwv.js`,
+  a11y: `${pluginBase}/a11y.js`,
   // Interactive elements
   form: {
-    url: `${pluginBasePath}/form.js`,
+    url: `${pluginBase}/form.js`,
     when: () => document.querySelector('form'),
     isBlockDependent: true,
-    mutationObserverParams: bodyChildMO,
+    moParams: bodyChildMO,
   },
   redirect: {
-    url: `${pluginBasePath}/redirect.js`,
+    url: `${pluginBase}/redirect.js`,
     when: ({ perfEntry: pe, urlParameters: usp }) => (
       pe && (usp.get('redirect_from') || pe.redirectCount > 0 || pe.fetchStart > 50)
     ),
   },
-  video: { url: `${pluginBasePath}/video.js`, when: () => document.querySelector('video'), isBlockDependent: true },
+  video: { url: `${pluginBase}/video.js`, when: () => document.querySelector('video'), isBlockDependent: true },
   webcomponent: {
-    url: `${pluginBasePath}/webcomponent.js`,
+    url: `${pluginBase}/webcomponent.js`,
     when: () => [...document.querySelectorAll('*')].some((el) => el.tagName && el.tagName.includes('-')),
     isBlockDependent: true,
   },
   // Martech
-  martech: { url: `${pluginBasePath}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
+  martech: { url: `${pluginBase}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
   consent: {
-    when: () => getConsentProvider(),
+    when: () => getConsent(),
     isBlockDependent: true,
-    mutationObserverParams: bodyChildMO,
+    moParams: bodyChildMO,
   },
   // test: broken-plugin
 };
@@ -94,12 +94,12 @@ function getIntersectionObserver(checkpoint) {
   if (!window.IntersectionObserver) {
     return null;
   }
-  const observer = new IntersectionObserver((entries) => {
+  const obs = new IntersectionObserver((entries) => {
     try {
       entries
         .filter((e) => e.isIntersecting)
         .forEach((e) => {
-          observer.unobserve(e.target); // observe only once
+          obs.unobserve(e.target); // observe only once
           const target = targetSelector(e.target);
           const source = sourceSelector(e.target);
           if (checkpoint === 'viewmedia') {
@@ -118,10 +118,10 @@ function getIntersectionObserver(checkpoint) {
       // something went wrong
     }
   });
-  return observer;
+  return obs;
 }
 
-const PLUGIN_PARAMETERS = {
+const PLUGIN_PARAMS = {
   context: document.body,
   fflags,
   sampleRUM,
@@ -137,14 +137,14 @@ function loadPlugin(key, params) {
   const plugin = PLUGINS[key];
   const usp = new URLSearchParams(window.location.search);
   if (!pluginCache.has(key) && plugin.when && !plugin.when({ ...params, urlParameters: usp })) {
-    if (plugin.mutationObserverParams && !plugin.isBeingObserved) {
+    if (plugin.moParams && !plugin.isBeingObserved) {
       // eslint-disable-next-line no-use-before-define
       createPluginMO(key, params, usp);
     }
     return null;
   }
   if (key === 'consent') {
-    plugin.url = `${pluginBasePath}/${getConsentProvider().name}.js`;
+    plugin.url = `${pluginBase}/${getConsent().name}.js`;
   }
 
   if (!pluginCache.has(key)) {
@@ -156,7 +156,7 @@ function loadPlugin(key, params) {
     .catch(() => { /* silent plugin error catching */ });
 }
 
-function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
+function loadPlugins(filter = () => true, params = PLUGIN_PARAMS) {
   Object.entries(PLUGINS)
     .filter(([, plugin]) => filter(plugin))
     .map(([key]) => loadPlugin(key, params));
@@ -164,19 +164,19 @@ function loadPlugins(filter = () => true, params = PLUGIN_PARAMETERS) {
 
 function createPluginMO(key, params, usp) {
   const plugin = PLUGINS[key];
-  const observer = createMO(() => {
+  const obs = createMO(() => {
     if (plugin.when({ urlParameters: usp })) {
       plugin.isBeingObserved = false;
-      observer.disconnect();
+      obs.disconnect();
       loadPlugin(key, params);
     }
   });
 
-  if (observer instanceof MutationObserver) {
+  if (obs instanceof MutationObserver) {
     plugin.isBeingObserved = true;
-    observer.observe(
-      plugin.mutationObserverParams.target,
-      plugin.mutationObserverParams.options,
+    obs.observe(
+      plugin.moParams.target,
+      plugin.moParams.options,
     );
   }
 }
@@ -242,7 +242,7 @@ function addNavigationTracking() {
     } else {
       sampleRUM('enter', payload); // enter site
     }
-    loadPlugin('redirect', { ...PLUGIN_PARAMETERS, perfEntry });
+    loadPlugin('redirect', { ...PLUGIN_PARAMS, perfEntry });
   };
   const processed = new Set(); // avoid processing duplicate types
   new PerformanceObserver((list) => list
@@ -257,7 +257,7 @@ function addNavigationTracking() {
 }
 
 function addLoadResourceTracking() {
-  const observer = new PerformanceObserver((list) => {
+  const obs = new PerformanceObserver((list) => {
     try {
       const entries = list.getEntries();
       entries
@@ -265,14 +265,14 @@ function addLoadResourceTracking() {
         .filter((e) => window.location.hostname === new URL(e.name).hostname || fflags.has('allresources'))
         .filter((e) => {
           const { pathname, hostname } = new URL(e.name);
-          const extensionMatch = pathname.match(
+          const extMatch = pathname.match(
             hostname !== window.location.hostname
               ? '.*(\\.html$|\\.json|\\.js|graphql|api)'
               : '.*(\\.plain\\.html$|\\.json|graphql|api)',
           );
           const isDropIn = fflags.has('allresources') && (pathname.includes('__dropins__/storefront-') || pathname.includes('scripts/dropins/storefront-'));
           const isImage = fflags.has('allresources') && pathname.match(/\.(png|jpe?g|svg)$/i);
-          return extensionMatch || isDropIn || isImage;
+          return extMatch || isDropIn || isImage;
         })
         .forEach((e) => {
           sampleRUM('loadresource', { source: e.name, target: Math.round(e.duration) });
@@ -288,7 +288,7 @@ function addLoadResourceTracking() {
       // something went wrong
     }
   });
-  observer.observe({ type: 'resource', buffered: true });
+  obs.observe({ type: 'resource', buffered: true });
 }
 
 // activate blocks mutation observer
@@ -317,22 +317,22 @@ function activateMediaMO() {
   );
 }
 
-function addViewBlockTracking(element) {
-  const blockobserver = getIntersectionObserver('viewblock');
-  if (blockobserver) {
-    const blocks = element.getAttribute('data-block-status') ? [element] : element.querySelectorAll('div[data-block-status="loaded"]');
-    blocks.forEach((b) => blockobserver.observe(b));
+function addViewBlockTracking(el) {
+  const blockObs = getIntersectionObserver('viewblock');
+  if (blockObs) {
+    const blocks = el.getAttribute('data-block-status') ? [el] : el.querySelectorAll('div[data-block-status="loaded"]');
+    blocks.forEach((b) => blockObs.observe(b));
   }
 }
 
 const observedMedia = new Set();
 function addViewMediaTracking(parent) {
-  const mediaobserver = getIntersectionObserver('viewmedia');
-  if (mediaobserver) {
+  const mediaObs = getIntersectionObserver('viewmedia');
+  if (mediaObs) {
     parent.querySelectorAll('img, video, audio, iframe').forEach((m) => {
       if (!observedMedia.has(m)) {
         observedMedia.add(m);
-        mediaobserver.observe(m);
+        mediaObs.observe(m);
       }
     });
   }
@@ -349,7 +349,7 @@ function blocksMCB(mutations) {
     .filter((m) => m.type === 'attributes' && m.attributeName === 'data-block-status')
     .filter((m) => m.target.dataset.blockStatus === 'loaded')
     .forEach((m) => {
-      addObserver('form', (el) => loadPlugins((p) => p.isBlockDependent, { ...PLUGIN_PARAMETERS, context: el }), m.target);
+      addObserver('form', (el) => loadPlugins((p) => p.isBlockDependent, { ...PLUGIN_PARAMS, context: el }), m.target);
       addObserver('viewblock', addViewBlockTracking, m.target);
     });
 }
