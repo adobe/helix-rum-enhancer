@@ -23,6 +23,7 @@ export default function addWebComponentTracking({
   sampleRUM,
   sourceSelector,
   targetSelector,
+  untrustedClickPayload,
   createMO,
 }) {
   /**
@@ -90,7 +91,8 @@ export default function addWebComponentTracking({
           }
           // eslint-disable-next-line no-param-reassign
           event.optelHandled = true;
-          sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
+          // eslint-disable-next-line max-len
+          sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target), ...untrustedClickPayload(event) });
         });
       }
       // look for web components below this element

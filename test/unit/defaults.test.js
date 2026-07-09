@@ -24,6 +24,10 @@ describe('test defaults', () => {
     });
   });
 
+  it('KNOWN_PROPERTIES includes ua', () => {
+    expect(KNOWN_PROPERTIES).to.include('ua');
+  });
+
   it('DEFAULT_TRACKING_EVENTS is an array of string', () => {
     // eslint-disable-next-line no-unused-expressions
     expect(Array.isArray(DEFAULT_TRACKING_EVENTS)).to.be.true;

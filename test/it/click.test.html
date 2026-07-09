@@ -96,6 +96,17 @@
           });
           assert(window.called.length === 4, 'checkpoint for click on late added link missing');
           assert(window.called[3].source === 'a#alatelink', 'invalid target for alatelink checkpoint');
+
+          // trusted clicks (sendMouse) must not carry a ua field
+          assert(window.called[0].ua === undefined, 'trusted click should not have a ua field');
+          assert(window.called[1].ua === undefined, 'trusted click should not have a ua field');
+          // synthetic clicks (element.click()) are untrusted and must carry a ua marker
+          assert(typeof window.called[2].ua === 'string', 'untrusted click missing ua field');
+          assert(window.called[2].ua.endsWith('+http://event.untrusted'),
+            `ua ${window.called[2].ua} does not end with untrusted marker`);
+          assert(window.called[3].ua.endsWith('+http://event.untrusted'),
+            `ua ${window.called[3].ua} does not end with untrusted marker`);
+
           // Test max events
           const maxEvents = 1026 - window.events.length;
           for (let i = 0; i < maxEvents; i++) {
