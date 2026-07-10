@@ -1,3 +1,10 @@
+# [2.49.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.48.0...v2.49.0) (2026-07-10)
+
+
+### Features
+
+* flag untrusted (synthetic) clicks as bots ([94b2893](https://github.com/adobe/helix-rum-enhancer/commit/94b289333d0c8a33435752c8f48f080b5dfa203d))
+
 # [2.48.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.47.3...v2.48.0) (2026-07-08)
 
 
