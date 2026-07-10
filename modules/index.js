@@ -13,7 +13,7 @@
 
 import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { urlSanitizers } from './utils.js';
-import { targetSelector, sourceSelector } from './dom.js';
+import { targetSelector, sourceSelector, untrustedClickPayload } from './dom.js';
 import { fflags } from './fflags.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
@@ -127,6 +127,7 @@ const PLUGIN_PARAMS = {
   sampleRUM,
   sourceSelector,
   targetSelector,
+  untrustedClickPayload,
   getIntersectionObserver,
   createMO,
 };
@@ -371,7 +372,8 @@ function addTrackingFromConfig() {
     if (event.optelHandled) {
       return;
     }
-    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target) });
+    // eslint-disable-next-line max-len
+    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target), ...untrustedClickPayload(event) });
   });
 
   // Core tracking

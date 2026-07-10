@@ -32,6 +32,14 @@ export const targetSelector = (el) => {
   }
 };
 
+export const untrustedClickPayload = (event) => {
+  if (event && event.isTrusted === false) {
+    const ua = navigator.userAgent;
+    return { ua: ua.includes('+http') ? ua : `${ua} +http://event.untrusted` };
+  }
+  return {};
+};
+
 function walk(el, check) {
   if (!el || el === document.body || el === document.documentElement) {
     return undefined;

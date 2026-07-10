@@ -13,7 +13,9 @@
 /* eslint-env mocha */
 
 import { expect } from '@esm-bundle/chai';
-import { getTargetValue, targetSelector, sourceSelector } from '../../modules/dom.js';
+import {
+  getTargetValue, targetSelector, sourceSelector, untrustedClickPayload,
+} from '../../modules/dom.js';
 
 describe('test dom#getTargetValue', () => {
   it('getTargetValue - basics', () => {
@@ -143,5 +145,53 @@ describe('test dom#sourceSelector', () => {
     expect(sourceSelector(form1)).to.be.equal('#contentcontainer-9065752e10 form#\\33 89');
     expect(sourceSelector(form2)).to.be.equal('form.\\31 23abc');
     expect(sourceSelector(form3)).to.be.equal('form#eec6b0d9-bd39-42aa-9f96-29a7aced9765\\/root\\/container\\/modal');
+  });
+});
+
+describe('test dom#untrustedClickPayload', () => {
+  it('untrustedClickPayload - basics', () => {
+    expect(untrustedClickPayload).to.be.a('function');
+  });
+
+  it('untrustedClickPayload - trusted event returns empty object', () => {
+    expect(untrustedClickPayload({ isTrusted: true })).to.deep.equal({});
+  });
+
+  it('untrustedClickPayload - missing event returns empty object', () => {
+    expect(untrustedClickPayload()).to.deep.equal({});
+  });
+
+  it('untrustedClickPayload - untrusted event returns ua with marker', () => {
+    const { ua } = untrustedClickPayload({ isTrusted: false });
+    expect(ua).to.be.a('string');
+    // eslint-disable-next-line no-unused-expressions
+    expect(ua.endsWith('+http://event.untrusted')).to.be.true;
+  });
+
+  it('untrustedClickPayload - does not double append when ua already has +http', function test() {
+    const original = navigator.userAgent;
+    let overridden = false;
+    try {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: 'TestBot +http://bot.example',
+        configurable: true,
+      });
+      overridden = navigator.userAgent === 'TestBot +http://bot.example';
+    } catch (e) {
+      overridden = false;
+    }
+    if (!overridden) {
+      this.skip();
+      return;
+    }
+    try {
+      const { ua } = untrustedClickPayload({ isTrusted: false });
+      expect(ua).to.be.equal('TestBot +http://bot.example');
+    } finally {
+      Object.defineProperty(window.navigator, 'userAgent', {
+        value: original,
+        configurable: true,
+      });
+    }
   });
 });
