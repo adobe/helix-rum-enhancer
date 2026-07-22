@@ -19,7 +19,7 @@ function addAdsParametersTracking(usp, { sampleRUM }) {
     linkedin: /li_fat_id/,
     pinterest: /epik/,
     tiktok: /ttclid/,
-    openai: /oppref|olref/,
+    openai: /o(pp|l)ref/,
   };
   const params = Array.from(usp.keys());
   Object.entries(networks).forEach(([network, regex]) => {
