@@ -1,3 +1,15 @@
+# [2.50.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.49.0...v2.50.0) (2026-07-26)
+
+
+### Bug Fixes
+
+* enabling allresources for customer ([#594](https://github.com/adobe/helix-rum-enhancer/issues/594)) ([e7113e5](https://github.com/adobe/helix-rum-enhancer/commit/e7113e5d832471c55d6f47cf2cbc5afac4d77411))
+
+
+### Features
+
+* track OpenAI (ChatGPT) ad click IDs ([#593](https://github.com/adobe/helix-rum-enhancer/issues/593)) ([dd5ee1f](https://github.com/adobe/helix-rum-enhancer/commit/dd5ee1f65bea911d4cddd827305cf64308aa9dc5))
+
 # [2.49.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.48.0...v2.49.0) (2026-07-10)
 
 
