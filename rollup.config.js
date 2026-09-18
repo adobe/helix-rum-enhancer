@@ -56,12 +56,17 @@ const indexMapConfig = {
   ],
 };
 
-// Core library - index.js without sourcemap, with MD5 and SRI
+// Core library - index.js without sourcemap, with MD5 and SRI.
+// `compact` strips generated indentation and inter-statement whitespace only: no
+// renaming, no mangling, no reordering, so the parsed program is unchanged and the
+// bundle stays auditable. It buys ~930 bytes against the 16KB budget asserted in
+// test/it/size.test.html. The debuggable build above keeps its formatting.
 const indexConfig = {
   input: 'modules/index.js',
   output: {
     file: 'src/index.js',
     format: 'iife',
+    compact: true,
     sourcemap: false,
     exports: 'auto',
     banner,
