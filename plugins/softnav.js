@@ -28,7 +28,11 @@ const INTERACTION_EVENTS = ['pointerdown', 'keydown'];
 export default function addSoftNavTracking({ sampleRUM }) {
   try {
     let lastInteraction = 0;
-    const touch = (e) => { if (e.isTrusted) lastInteraction = Date.now(); };
+    const touch = (e) => {
+      if (e.isTrusted) {
+        lastInteraction = Date.now();
+      }
+    };
     INTERACTION_EVENTS.forEach((type) => {
       window.addEventListener(type, touch, { capture: true, passive: true });
     });
@@ -44,8 +48,12 @@ export default function addSoftNavTracking({ sampleRUM }) {
       } catch (e) {
         return;
       }
-      if (to.origin !== window.location.origin) return; // outbound, i.e. a hard navigation
-      if (to.pathname === from) return; // shallow routing or a query/hash-only change
+      if (to.origin !== window.location.origin) {
+        return; // outbound, i.e. a hard navigation
+      }
+      if (to.pathname === from) {
+        return; // shallow routing, or a query/hash-only change
+      }
       // Same shape as a hard internal navigation, which reports urlSanitizers.path(source),
       // i.e. origin + pathname. Inlined rather than imported to keep the plugin
       // self-contained like its siblings; same-origin is guaranteed by the check above.
@@ -54,7 +62,9 @@ export default function addSoftNavTracking({ sampleRUM }) {
       // route change still moves the user, so the next reported navigation must not cite a
       // path they have already left.
       from = to.pathname;
-      if (Date.now() - lastInteraction > INTERACTION_WINDOW_MS) return;
+      if (Date.now() - lastInteraction > INTERACTION_WINDOW_MS) {
+        return;
+      }
       // `navigate` means internal navigation and `enter` means arrival from outside, so a
       // soft navigation is a `navigate`. The RUM id is deliberately preserved: one page view
       // can carry several navigate checkpoints, and reporting aggregates them.
@@ -65,20 +75,26 @@ export default function addSoftNavTracking({ sampleRUM }) {
       // Preferred: one event covers push, replace and traverse (back/forward), which a
       // pushState patch cannot see without also patching replaceState and popstate.
       window.navigation.addEventListener('navigate', (e) => {
-        if (e.hashChange || e.downloadRequest !== null) return;
-        if (e.navigationType === 'reload') return; // the reload checkpoint owns this
+        if (e.hashChange || e.downloadRequest !== null) {
+          return;
+        }
+        if (e.navigationType === 'reload') {
+          return; // the reload checkpoint owns this
+        }
         report(e.destination && e.destination.url, `soft:${e.navigationType}`);
       });
       return;
     }
 
     // Fallback for browsers without the Navigation API (Safari and Firefox at time of
-    // writing). Chrome's soft-navigation PerformanceObserver entry type would be the
-    // natural replacement for all of this, but it produced no entries even for a trusted
-    // click during testing, so it is not yet dependable.
+    // writing). Chrome's soft-navigation PerformanceObserver entry type would be the natural
+    // replacement for all of this, but it produced no entries even for a trusted click during
+    // testing, so it is not yet dependable.
     const wrap = (method, kind) => {
       const original = window.history[method];
-      if (typeof original !== 'function') return;
+      if (typeof original !== 'function') {
+        return;
+      }
       window.history[method] = function patched(...args) {
         const result = original.apply(this, args);
         try {
