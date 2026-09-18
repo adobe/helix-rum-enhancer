@@ -75,17 +75,18 @@ const PLUGINS = {
     when: () => [...document.querySelectorAll('*')].some((el) => el.tagName && el.tagName.includes('-')),
     isBlockDependent: true,
   },
-  // Client-side routing. Gated on a cheap global probe so the plugin is never fetched
-  // for a site without a framework router.
+  // Client-side routing. Gated on a cheap global probe so the plugin is never fetched for a
+  // site without a framework router. Globals are probed by name to stay clear of
+  // no-underscore-dangle.
   softnav: {
     url: `${pluginBase}/softnav.js`,
-    when: ({ fflags: ff }) => ff.has('softnav') && !!(
-      window.next // Next.js, both pages and app router
-      || window.__NEXT_DATA__ // Next.js pages router, inlined in the SSR payload
-      || window.__remixContext // Remix / React Router framework mode
-      || window.__reactRouterContext
-      || window.__staticRouterHydrationData // React Router SSR hydration
-    ),
+    when: ({ fflags: ff }) => ff.has('softnav') && !!(window.next // Next.js, pages and app router
+      || [
+        '__NEXT_DATA__', // Next.js pages router, inlined in the SSR payload
+        '__remixContext', // Remix / React Router framework mode
+        '__reactRouterContext',
+        '__staticRouterHydrationData', // React Router SSR hydration
+      ].some((global) => global in window)),
   },
   // Martech
   martech: { url: `${pluginBase}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
