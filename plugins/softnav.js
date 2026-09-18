@@ -25,8 +25,23 @@ const INTERACTION_WINDOW_MS = 1000;
 // would let those whitelist genuinely programmatic navigations.
 const INTERACTION_EVENTS = ['pointerdown', 'keydown'];
 
+// Cheap probe for a framework router. Lives here rather than in the core PLUGINS registry
+// because the core bundle is capped at 16KB and has ~50 bytes of headroom, while a plugin
+// bundle is unconstrained. Costs one fetch on a flagged origin that turns out to have no
+// router, which is acceptable while the flag is scoped to a single origin.
+const ROUTER_GLOBALS = [
+  'next', // Next.js, pages and app router
+  '__NEXT_DATA__', // Next.js pages router, inlined in the SSR payload
+  '__remixContext', // Remix / React Router framework mode
+  '__reactRouterContext',
+  '__staticRouterHydrationData', // React Router SSR hydration
+];
+
 export default function addSoftNavTracking({ sampleRUM }) {
   try {
+    if (!ROUTER_GLOBALS.some((global) => global in window)) {
+      return; // no client-side router on this page
+    }
     let lastInteraction = 0;
     const touch = (e) => {
       if (e.isTrusted) {
