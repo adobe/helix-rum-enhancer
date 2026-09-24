@@ -33,7 +33,7 @@ export default function addFormTracking({
   function trackForm(form) {
     form.addEventListener('submit', (e) => {
       // Check for form validation errors before submitting
-      const invalidFields = form.querySelectorAll(':invalid');
+      const invalidFields = form.querySelectorAll(':invalid, .mktoInvalid');
       // Send error checkpoints for each invalid field
       invalidFields.forEach((field) => {
         if (field && field.validity) {
