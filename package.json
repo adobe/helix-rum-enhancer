@@ -37,7 +37,7 @@
     "@playwright/test": "1.63.0",
     "@semantic-release/changelog": "6.0.3",
     "@semantic-release/git": "10.0.1",
-    "@semantic-release/npm": "13.1.5",
+    "@semantic-release/npm": "13.2.0",
     "@web/test-runner": "0.20.2",
     "@web/test-runner-core": "0.13.4",
     "@web/test-runner-mocha": "0.9.0",
