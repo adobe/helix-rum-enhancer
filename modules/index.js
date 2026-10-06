@@ -373,7 +373,7 @@ function addTrackingFromConfig() {
       return;
     }
     // eslint-disable-next-line max-len
-    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target), ...untrustedClickPayload(event) });
+    sampleRUM('click', { target: targetSelector(event.target), source: sourceSelector(event.target), ...untrustedClickPayload(event, document.hidden) });
   });
 
   // Core tracking
