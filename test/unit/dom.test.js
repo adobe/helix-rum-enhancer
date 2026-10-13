@@ -194,4 +194,29 @@ describe('test dom#untrustedClickPayload', () => {
       });
     }
   });
+
+  it('untrustedClickPayload - hidden document returns ua with hidden marker', () => {
+    const { ua } = untrustedClickPayload({ isTrusted: true }, true);
+    expect(ua).to.be.a('string');
+    // eslint-disable-next-line no-unused-expressions
+    expect(ua.endsWith('+http://event.hidden')).to.be.true;
+  });
+
+  it('untrustedClickPayload - untrusted takes precedence over hidden', () => {
+    const { ua } = untrustedClickPayload({ isTrusted: false }, true);
+    // eslint-disable-next-line no-unused-expressions
+    expect(ua.endsWith('+http://event.untrusted')).to.be.true;
+  });
+
+  it('untrustedClickPayload - visible document with a trusted event stays empty', () => {
+    expect(untrustedClickPayload({ isTrusted: true }, false)).to.deep.equal({});
+  });
+
+  it('untrustedClickPayload - reads visibility only from its argument', () => {
+    // the builder must stay pure: it never touches document.hidden itself, so a
+    // backgrounded test page (web-test-runner routinely hides pages) cannot make
+    // the trusted-click cases above flaky
+    expect(untrustedClickPayload({ isTrusted: true })).to.deep.equal({});
+    expect(untrustedClickPayload()).to.deep.equal({});
+  });
 });
