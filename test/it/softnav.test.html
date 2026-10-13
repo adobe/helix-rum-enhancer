@@ -1,0 +1,84 @@
+<html>
+<head>
+  <title>Soft Navigation Test</title>
+  <script>
+    window.RUM_BASE = window.origin;
+    window.hlx = {
+      RUM_MASK_URL: 'origin',
+    };
+    // Satisfies the cheap router probe that gates the softnav plugin. The plugin itself
+    // never touches the router, so a marker is enough to stand in for a framework here.
+    window.__NEXT_DATA__ = { page: '/' };
+    window.events = [];
+    window.fakeSendBeacon = function (url, payload) {
+      if (typeof payload === 'string') {
+        window.events.push(JSON.parse(payload));
+      } else {
+        payload.text().then((text) => {
+          window.events.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+<body>
+  <button id="go">navigate</button>
+
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { sendMouse } from '@web/test-runner-commands';
+    import { expect } from '@esm-bundle/chai';
+
+    const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+    const softNavs = () => window.events
+      .filter((e) => e.checkpoint === 'navigate' && String(e.target).startsWith('soft:'));
+
+    // Chromium takes the Navigation API branch and WebKit/Firefox the history-patching
+    // fallback, so both paths are covered by running this file across the browser matrix.
+    runTests(async () => {
+      describe('Soft navigation', () => {
+        it('ignores a route change with no preceding user interaction', async () => {
+          await wait(500); // let the enhancer boot and the plugin load
+          history.pushState({}, '', '/programmatic');
+          await wait(300);
+          expect(softNavs().length).to.equal(0);
+        });
+
+        it('reports navigate after a trusted user interaction', async () => {
+          const btn = document.getElementById('go');
+          const r = btn.getBoundingClientRect();
+          await sendMouse({
+            type: 'click',
+            position: [Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2)],
+          });
+          await wait(50);
+          history.pushState({}, '', '/after-click');
+          await wait(300);
+
+          const navs = softNavs();
+          expect(navs.length).to.equal(1);
+          expect(navs[0].target).to.match(/^soft:(push|replace|traverse)$/);
+          // The dropped programmatic navigation above still advanced the cursor, so the
+          // source is the path the user actually came from.
+          expect(navs[0].source).to.equal(`${window.location.origin}/programmatic`);
+        });
+
+        it('ignores a repeat navigation to the same path', async () => {
+          const before = softNavs().length;
+          const btn = document.getElementById('go');
+          const r = btn.getBoundingClientRect();
+          await sendMouse({
+            type: 'click',
+            position: [Math.round(r.left + r.width / 2), Math.round(r.top + r.height / 2)],
+          });
+          await wait(50);
+          history.pushState({}, '', '/after-click');
+          await wait(300);
+          expect(softNavs().length).to.equal(before);
+        });
+      });
+    });
+  </script>
+</body>
+</html>
