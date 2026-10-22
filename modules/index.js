@@ -75,6 +75,7 @@ const PLUGINS = {
     when: () => [...document.querySelectorAll('*')].some((el) => el.tagName && el.tagName.includes('-')),
     isBlockDependent: true,
   },
+  softnav: { url: `${pluginBase}/softnav.js`, when: ({ fflags: f }) => f.has('softnav') },
   // Martech
   martech: { url: `${pluginBase}/martech.js`, when: ({ urlParameters }) => urlParameters.size > 0 },
   consent: {
