@@ -18,7 +18,11 @@
 // Next.js 12.1.6 with a trusted click). Tracking the last trusted interaction ourselves is
 // the only signal that survives the indirection, and it works identically for the
 // Navigation API and the history-patching fallback.
-const INTERACTION_WINDOW_MS = 1000;
+// The window has to cover the router's data fetch, not just the click handler: Next.js 12
+// changes the URL only after the destination route's data has loaded, which took 959 ms
+// from pointerdown to the navigate event on a desktop connection to bjsrestaurants.com.
+// 3s leaves headroom for slower networks while still excluding unrelated later route changes.
+const INTERACTION_WINDOW_MS = 3000;
 
 // Only trusted events open the window. Sites replay their own synthetic clicks (measured:
 // one trusted click produced a second click with isTrusted false), and an ungated version
@@ -56,7 +60,13 @@ export default function addSoftNavTracking({ sampleRUM }) {
     // and document.referrer is only populated for hard navigations.
     let from = window.location.pathname;
 
-    const report = (toURL, kind) => {
+    // `traverse` bypasses the interaction gate: browser-UI back/forward (toolbar button,
+    // edge gesture) delivers no pointerdown/keydown to the page, and routers do not
+    // traverse history on their own, so a traversal is effectively always user-driven.
+    const report = (toURL, kind, traverse = false) => {
+      if (!toURL) {
+        return;
+      }
       let to;
       try {
         to = new URL(toURL, window.location.href);
@@ -77,7 +87,7 @@ export default function addSoftNavTracking({ sampleRUM }) {
       // route change still moves the user, so the next reported navigation must not cite a
       // path they have already left.
       from = to.pathname;
-      if (Date.now() - lastInteraction > INTERACTION_WINDOW_MS) {
+      if (!traverse && Date.now() - lastInteraction > INTERACTION_WINDOW_MS) {
         return;
       }
       // `navigate` means internal navigation and `enter` means arrival from outside, so a
@@ -96,7 +106,10 @@ export default function addSoftNavTracking({ sampleRUM }) {
         if (e.navigationType === 'reload') {
           return; // the reload checkpoint owns this
         }
-        report(e.destination && e.destination.url, `soft:${e.navigationType}`);
+        if (!e.destination || !e.destination.sameDocument) {
+          return; // cross-document: the next page reports its own hard navigate
+        }
+        report(e.destination.url, `soft:${e.navigationType}`, e.navigationType === 'traverse');
       });
       return;
     }
@@ -120,6 +133,6 @@ export default function addSoftNavTracking({ sampleRUM }) {
     };
     wrap('pushState', 'soft:push');
     wrap('replaceState', 'soft:replace');
-    window.addEventListener('popstate', () => report(window.location.href, 'soft:traverse'));
+    window.addEventListener('popstate', () => report(window.location.href, 'soft:traverse', true));
   } catch (e) { /* silent plugin error catching, consistent with the other plugins */ }
 }

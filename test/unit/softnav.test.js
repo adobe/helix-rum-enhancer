@@ -34,12 +34,24 @@ const fakeNavigation = () => {
     Object.assign(e, {
       hashChange: false, downloadRequest: null, navigationType: 'push', ...props,
     });
+    if (e.destination && !('sameDocument' in e.destination)) {
+      e.destination = { sameDocument: true, ...e.destination };
+    }
     target.dispatchEvent(e);
   };
   return target;
 };
 
 const interact = () => sendKeys({ press: 'Shift' });
+
+// The interaction window is measured with Date.now(), so the clock is pinned per test to
+// assert both edges of the window without real waits.
+const realNow = Date.now;
+let now;
+const setClock = (t) => {
+  now = t;
+  Date.now = () => now;
+};
 
 describe('softnav plugin', () => {
   let calls;
@@ -52,6 +64,7 @@ describe('softnav plugin', () => {
   });
 
   afterEach(() => {
+    Date.now = realNow;
     delete window.navigation;
     delete window[ROUTER_GLOBAL];
     delete window.history.pushState;
@@ -116,8 +129,32 @@ describe('softnav plugin', () => {
     it('tolerates a missing destination', async () => {
       await interact();
       nav.fire({ navigationType: 'traverse' });
-      expect(calls).to.have.length(1);
-      expect(calls[0].target).to.equal('soft:traverse');
+      expect(calls).to.have.length(0);
+    });
+
+    it('skips cross-document navigations', async () => {
+      await interact();
+      nav.fire({ destination: { url: `${origin}/a`, sameDocument: false } });
+      expect(calls).to.have.length(0);
+    });
+
+    it('reports within 3s of an interaction and drops past it', async () => {
+      setClock(1000000);
+      await interact();
+      setClock(1000000 + 2500);
+      nav.fire({ destination: { url: `${origin}/a` } });
+      setClock(1000000 + 3001);
+      nav.fire({ destination: { url: `${origin}/b` } });
+      expect(calls).to.deep.equal([
+        { checkpoint: 'navigate', source: `${origin}${pathname}`, target: 'soft:push' },
+      ]);
+    });
+
+    it('reports traversals without a preceding interaction', () => {
+      nav.fire({ navigationType: 'traverse', destination: { url: `${origin}/a` } });
+      expect(calls).to.deep.equal([
+        { checkpoint: 'navigate', source: `${origin}${pathname}`, target: 'soft:traverse' },
+      ]);
     });
   });
 
@@ -147,6 +184,52 @@ describe('softnav plugin', () => {
       expect(calls.map((c) => c.target)).to.deep.equal(['soft:push', 'soft:replace', 'soft:traverse']);
       expect(calls.map((c) => c.source)).to.deep.equal([
         `${origin}${pathname}`, `${origin}/p`, `${origin}/r`,
+      ]);
+    });
+
+    it('reports an untouched back (popstate) without a preceding interaction', () => {
+      addSoftNavTracking({ sampleRUM });
+      // a programmatic push is dropped, but moves the cursor to /p
+      window.history.pushState({}, '', '/p');
+      expect(calls).to.have.length(0);
+      // browser-UI back: no pointerdown/keydown reaches the page, only popstate
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      expect(calls).to.deep.equal([
+        { checkpoint: 'navigate', source: `${origin}/p`, target: 'soft:traverse' },
+      ]);
+    });
+
+    it('does not report a cross-document navigation', async () => {
+      addSoftNavTracking({ sampleRUM });
+      await interact();
+      // A same-origin document navigation calls no history method and fires no popstate in
+      // the old document, only pagehide, so the fallback cannot double-count it.
+      window.dispatchEvent(new PageTransitionEvent('pagehide', { persisted: false }));
+      expect(calls).to.have.length(0);
+    });
+
+    it('reports within 3s of an interaction and drops past it', async () => {
+      addSoftNavTracking({ sampleRUM });
+      setClock(1000000);
+      await interact();
+      setClock(1000000 + 2500);
+      window.history.pushState({}, '', '/a');
+      setClock(1000000 + 3001);
+      window.history.pushState({}, '', '/b');
+      expect(calls).to.deep.equal([
+        { checkpoint: 'navigate', source: `${origin}${pathname}`, target: 'soft:push' },
+      ]);
+    });
+
+    it('ignores a history entry pushed without a URL', async () => {
+      addSoftNavTracking({ sampleRUM });
+      await interact();
+      // pushState(state, title) keeps the current URL; it must neither be reported nor move
+      // the cursor (resolving undefined against the page URL would yield ".../undefined")
+      window.history.pushState({}, '');
+      window.history.pushState({}, '', '/a');
+      expect(calls).to.deep.equal([
+        { checkpoint: 'navigate', source: `${origin}${pathname}`, target: 'soft:push' },
       ]);
     });
 
