@@ -1,0 +1,25 @@
+name: AI Review
+
+on:
+  pull_request:
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  ai-review:
+    # TODO: pin to a release once adobe/helix-shared's ai-review workflow is merged
+    uses: adobe/helix-shared/.github/workflows/ai-review.yml@ai-review-workflow
+    secrets:
+      AWS_BEARER_TOKEN_BEDROCK: ${{ secrets.AWS_BEARER_TOKEN_BEDROCK }}
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
+      statuses: write
+    with:
+      # builds the bundle, installs Playwright and writes test-results.xml and coverage/
+      test: npm run test:ci
+      test-timeout-minutes: 30
+      browsers: true
