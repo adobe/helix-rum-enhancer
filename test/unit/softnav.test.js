@@ -27,9 +27,12 @@ const setNavigationGetter = (get) => {
   Object.defineProperty(window, 'navigation', { get, configurable: true });
 };
 
+// fire() dispatches `navigate` and then, unless `cancel` is set, commits the entry and
+// dispatches `currententrychange`, the order the Navigation API uses.
 const fakeNavigation = () => {
   const target = new EventTarget();
-  target.fire = (props) => {
+  target.currentEntry = { url: window.location.href };
+  target.fire = ({ cancel = false, ...props } = {}) => {
     const e = new Event('navigate');
     Object.assign(e, {
       hashChange: false, downloadRequest: null, navigationType: 'push', ...props,
@@ -38,6 +41,10 @@ const fakeNavigation = () => {
       e.destination = { sameDocument: true, ...e.destination };
     }
     target.dispatchEvent(e);
+    if (!cancel && e.destination) {
+      target.currentEntry = { url: e.destination.url };
+      target.dispatchEvent(new Event('currententrychange'));
+    }
   };
   return target;
 };
@@ -80,6 +87,31 @@ describe('softnav plugin', () => {
     setNavigation(nav);
     addSoftNavTracking({ sampleRUM });
     nav.fire({ destination: { url: `${origin}/elsewhere` } });
+    expect(calls).to.have.length(0);
+  });
+
+  it('opens the interaction window on trusted clicks too (assistive tech, voice input)', () => {
+    const types = [];
+    const realAdd = window.addEventListener;
+    window.addEventListener = function spy(type, ...rest) {
+      types.push(type);
+      return realAdd.call(this, type, ...rest);
+    };
+    try {
+      setNavigation(fakeNavigation());
+      addSoftNavTracking({ sampleRUM });
+    } finally {
+      window.addEventListener = realAdd;
+    }
+    expect(types).to.include.members(['pointerdown', 'keydown', 'click']);
+  });
+
+  it('does not open the window on an untrusted click', () => {
+    const nav = fakeNavigation();
+    setNavigation(nav);
+    addSoftNavTracking({ sampleRUM });
+    window.dispatchEvent(new MouseEvent('click'));
+    nav.fire({ destination: { url: `${origin}/a` } });
     expect(calls).to.have.length(0);
   });
 
@@ -171,6 +203,24 @@ describe('softnav plugin', () => {
       ]);
     });
 
+    it('reports only committed navigations, so a cancelled one neither reports nor moves the cursor', async () => {
+      await interact();
+      nav.fire({ cancel: true, destination: { url: `${origin}/guarded` } });
+      expect(calls).to.have.length(0);
+      nav.fire({ destination: { url: `${origin}/a` } });
+      expect(calls).to.deep.equal([
+        { checkpoint: 'navigate', source: `${origin}${pathname}`, target: 'soft:push' },
+      ]);
+    });
+
+    it('ignores an entry change that is not the pending navigation', async () => {
+      await interact();
+      nav.fire({ cancel: true, destination: { url: `${origin}/a` } });
+      nav.currentEntry = { url: `${origin}/other` };
+      nav.dispatchEvent(new Event('currententrychange'));
+      expect(calls).to.have.length(0);
+    });
+
     it('does not let userInitiated bypass the gate for a push', () => {
       nav.fire({ userInitiated: true, destination: { url: `${origin}/a` } });
       expect(calls).to.have.length(0);
@@ -239,6 +289,20 @@ describe('softnav plugin', () => {
       window.history.back();
       window.dispatchEvent(new PopStateEvent('popstate'));
       expect(calls.map((c) => c.source)).to.deep.equal([`${origin}/q`, `${origin}/r`]);
+    });
+
+    it('expires the stamp of a scripted traversal that produced no popstate', () => {
+      window.history.back = () => {}; // e.g. already at the oldest entry: nothing happens
+      addSoftNavTracking({ sampleRUM });
+      setClock(1000000);
+      window.history.pushState({}, '', '/p'); // programmatic: dropped, moves the cursor
+      window.history.back();
+      // a genuine browser-UI Forward shortly after must still be reported
+      setClock(1000000 + 600);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      expect(calls).to.deep.equal([
+        { checkpoint: 'navigate', source: `${origin}/p`, target: 'soft:traverse' },
+      ]);
     });
 
     it('stamps history.forward() and history.go() as scripted too', () => {

@@ -27,7 +27,14 @@ const INTERACTION_WINDOW_MS = 3000;
 // Only trusted events open the window. Sites replay their own synthetic clicks (measured:
 // one trusted click produced a second click with isTrusted false), and an ungated version
 // would let those whitelist genuinely programmatic navigations.
-const INTERACTION_EVENTS = ['pointerdown', 'keydown'];
+// `click` is included for activations that produce no pointerdown/keydown, such as
+// assistive technology and voice or switch input.
+const INTERACTION_EVENTS = ['pointerdown', 'keydown', 'click'];
+
+// A same-document traversal started by history.back()/forward()/go() fires popstate within
+// milliseconds. A call that cannot traverse (already at the oldest entry) fires nothing, so
+// its stamp must expire quickly or it would swallow a later genuine browser-UI traversal.
+const SCRIPTED_TRAVERSE_MS = 500;
 
 // Cheap probe for a framework router. Lives here rather than in the core PLUGINS registry
 // because the core bundle is capped at 16KB and has ~50 bytes of headroom, while a plugin
@@ -100,7 +107,12 @@ export default function addSoftNavTracking({ sampleRUM }) {
     if (window.navigation && typeof window.navigation.addEventListener === 'function') {
       // Preferred: one event covers push, replace and traverse (back/forward), which a
       // pushState patch cannot see without also patching replaceState and popstate.
+      // `navigate` fires before the change commits, and another listener (a route guard) can
+      // still cancel it, so it only records what is pending; `currententrychange` fires once
+      // the entry has actually changed and is where the navigation is reported.
+      let pending = null;
       window.navigation.addEventListener('navigate', (e) => {
+        pending = null;
         if (e.hashChange || e.downloadRequest !== null) {
           return;
         }
@@ -113,11 +125,20 @@ export default function addSoftNavTracking({ sampleRUM }) {
         // userInitiated is true for browser-UI back/forward and false for history.back() and
         // friends. It cannot gate pushes (a Next.js <Link> click reads false, see above), but
         // for a traversal it is exactly the browser-UI signal.
-        report(
-          e.destination.url,
-          `soft:${e.navigationType}`,
-          e.navigationType === 'traverse' && e.userInitiated === true,
-        );
+        pending = {
+          url: e.destination.url,
+          kind: `soft:${e.navigationType}`,
+          browserUI: e.navigationType === 'traverse' && e.userInitiated === true,
+        };
+      });
+      window.navigation.addEventListener('currententrychange', () => {
+        const p = pending;
+        pending = null;
+        const entry = window.navigation.currentEntry;
+        if (!p || !entry || entry.url !== p.url) {
+          return; // not the navigation we saw start, or it was replaced before committing
+        }
+        report(entry.url, p.kind, p.browserUI);
       });
       return;
     }
@@ -159,7 +180,7 @@ export default function addSoftNavTracking({ sampleRUM }) {
     };
     ['back', 'forward', 'go'].forEach((method) => wrap(method, stamp, () => {}));
     window.addEventListener('popstate', () => {
-      const scripted = Date.now() - scriptedTraverse <= INTERACTION_WINDOW_MS;
+      const scripted = Date.now() - scriptedTraverse <= SCRIPTED_TRAVERSE_MS;
       scriptedTraverse = 0;
       report(window.location.href, 'soft:traverse', !scripted);
     });
