@@ -60,10 +60,11 @@ export default function addSoftNavTracking({ sampleRUM }) {
     // and document.referrer is only populated for hard navigations.
     let from = window.location.pathname;
 
-    // `traverse` bypasses the interaction gate: browser-UI back/forward (toolbar button,
-    // edge gesture) delivers no pointerdown/keydown to the page, and routers do not
-    // traverse history on their own, so a traversal is effectively always user-driven.
-    const report = (toURL, kind, traverse = false) => {
+    // `browserUI` bypasses the interaction gate: back/forward from the toolbar button or an
+    // edge gesture delivers no pointerdown/keydown to the page. Callers pass it only for a
+    // traversal that did not come from script (history.back/forward/go), so a programmatic
+    // traversal stays behind the gate like any other programmatic navigation.
+    const report = (toURL, kind, browserUI = false) => {
       if (!toURL) {
         return;
       }
@@ -87,7 +88,7 @@ export default function addSoftNavTracking({ sampleRUM }) {
       // route change still moves the user, so the next reported navigation must not cite a
       // path they have already left.
       from = to.pathname;
-      if (!traverse && Date.now() - lastInteraction > INTERACTION_WINDOW_MS) {
+      if (!browserUI && Date.now() - lastInteraction > INTERACTION_WINDOW_MS) {
         return;
       }
       // `navigate` means internal navigation and `enter` means arrival from outside, so a
@@ -109,7 +110,14 @@ export default function addSoftNavTracking({ sampleRUM }) {
         if (!e.destination || !e.destination.sameDocument) {
           return; // cross-document: the next page reports its own hard navigate
         }
-        report(e.destination.url, `soft:${e.navigationType}`, e.navigationType === 'traverse');
+        // userInitiated is true for browser-UI back/forward and false for history.back() and
+        // friends. It cannot gate pushes (a Next.js <Link> click reads false, see above), but
+        // for a traversal it is exactly the browser-UI signal.
+        report(
+          e.destination.url,
+          `soft:${e.navigationType}`,
+          e.navigationType === 'traverse' && e.userInitiated === true,
+        );
       });
       return;
     }
@@ -118,21 +126,42 @@ export default function addSoftNavTracking({ sampleRUM }) {
     // writing). Chrome's soft-navigation PerformanceObserver entry type would be the natural
     // replacement for all of this, but it produced no entries even for a trusted click during
     // testing, so it is not yet dependable.
-    const wrap = (method, kind) => {
+    const wrap = (method, before, after) => {
       const original = window.history[method];
       if (typeof original !== 'function') {
         return;
       }
       window.history[method] = function patched(...args) {
+        let ctx;
+        try {
+          ctx = before(args);
+        } catch (err) { /* never break the host router */ }
         const result = original.apply(this, args);
         try {
-          report(args[2], kind);
+          after(ctx);
         } catch (err) { /* never break the host router */ }
         return result;
       };
     };
-    wrap('pushState', 'soft:push');
-    wrap('replaceState', 'soft:replace');
-    window.addEventListener('popstate', () => report(window.location.href, 'soft:traverse', true));
+    // Resolve against the location BEFORE the history entry changes: a parent-relative URL
+    // such as '../b' resolves differently once window.location has moved.
+    const resolve = (args) => (args[2] == null
+      ? null
+      : new URL(args[2], window.location.href).href);
+    wrap('pushState', resolve, (url) => report(url, 'soft:push'));
+    wrap('replaceState', resolve, (url) => report(url, 'soft:replace'));
+
+    // popstate cannot tell browser UI from script, so script-driven traversals are stamped
+    // and the next popstate within the window is treated as programmatic.
+    let scriptedTraverse = 0;
+    const stamp = () => {
+      scriptedTraverse = Date.now();
+    };
+    ['back', 'forward', 'go'].forEach((method) => wrap(method, stamp, () => {}));
+    window.addEventListener('popstate', () => {
+      const scripted = Date.now() - scriptedTraverse <= INTERACTION_WINDOW_MS;
+      scriptedTraverse = 0;
+      report(window.location.href, 'soft:traverse', !scripted);
+    });
   } catch (e) { /* silent plugin error catching, consistent with the other plugins */ }
 }

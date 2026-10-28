@@ -69,6 +69,9 @@ describe('softnav plugin', () => {
     delete window[ROUTER_GLOBAL];
     delete window.history.pushState;
     delete window.history.replaceState;
+    delete window.history.back;
+    delete window.history.forward;
+    delete window.history.go;
   });
 
   it('does nothing without a client-side router', () => {
@@ -150,11 +153,27 @@ describe('softnav plugin', () => {
       ]);
     });
 
-    it('reports traversals without a preceding interaction', () => {
-      nav.fire({ navigationType: 'traverse', destination: { url: `${origin}/a` } });
+    it('reports a browser-UI traversal without a preceding interaction', () => {
+      nav.fire({ navigationType: 'traverse', userInitiated: true, destination: { url: `${origin}/a` } });
       expect(calls).to.deep.equal([
         { checkpoint: 'navigate', source: `${origin}${pathname}`, target: 'soft:traverse' },
       ]);
+    });
+
+    it('keeps a programmatic traversal behind the interaction gate', async () => {
+      // history.back() and friends read userInitiated false
+      nav.fire({ navigationType: 'traverse', userInitiated: false, destination: { url: `${origin}/a` } });
+      expect(calls).to.have.length(0);
+      await interact();
+      nav.fire({ navigationType: 'traverse', userInitiated: false, destination: { url: `${origin}/b` } });
+      expect(calls).to.deep.equal([
+        { checkpoint: 'navigate', source: `${origin}/a`, target: 'soft:traverse' },
+      ]);
+    });
+
+    it('does not let userInitiated bypass the gate for a push', () => {
+      nav.fire({ userInitiated: true, destination: { url: `${origin}/a` } });
+      expect(calls).to.have.length(0);
     });
   });
 
@@ -197,6 +216,61 @@ describe('softnav plugin', () => {
       expect(calls).to.deep.equal([
         { checkpoint: 'navigate', source: `${origin}/p`, target: 'soft:traverse' },
       ]);
+    });
+
+    it('keeps a scripted history.back() behind the interaction gate', async () => {
+      window.history.back = () => {};
+      addSoftNavTracking({ sampleRUM });
+      window.history.pushState({}, '', '/p'); // programmatic: dropped, moves the cursor
+      window.history.back();
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      expect(calls).to.have.length(0);
+
+      // the stamp is consumed by that popstate: a later browser-UI back is reported
+      window.history.pushState({}, '', '/q');
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      expect(calls).to.deep.equal([
+        { checkpoint: 'navigate', source: `${origin}/q`, target: 'soft:traverse' },
+      ]);
+
+      // and a scripted back right after a trusted interaction is reported
+      window.history.pushState({}, '', '/r');
+      await interact();
+      window.history.back();
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      expect(calls.map((c) => c.source)).to.deep.equal([`${origin}/q`, `${origin}/r`]);
+    });
+
+    it('stamps history.forward() and history.go() as scripted too', () => {
+      window.history.forward = () => {};
+      window.history.go = () => {};
+      addSoftNavTracking({ sampleRUM });
+      window.history.pushState({}, '', '/p');
+      window.history.forward();
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      window.history.pushState({}, '', '/q');
+      window.history.go(-1);
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      expect(calls).to.have.length(0);
+    });
+
+    it('resolves a relative URL against the location before the entry changes', async () => {
+      const realPush = History.prototype.pushState;
+      const start = window.location.href;
+      // keep the query string: the test runner identifies its session from it
+      const { search } = window.location;
+      window.history.pushState = (...args) => realPush.apply(window.history, args);
+      try {
+        addSoftNavTracking({ sampleRUM });
+        window.history.pushState({}, '', `/x/y/a${search}`); // programmatic: dropped
+        await interact();
+        // from /x/y/a, '../b' is /x/b; resolved after the change it would wrongly be /b
+        window.history.pushState({}, '', `../b${search}`);
+        window.history.pushState({}, '', `/c${search}`);
+        expect(calls.map((c) => c.source)).to.deep.equal([`${origin}/x/y/a`, `${origin}/x/b`]);
+      } finally {
+        History.prototype.replaceState.call(window.history, null, '', start);
+      }
     });
 
     it('does not report a cross-document navigation', async () => {

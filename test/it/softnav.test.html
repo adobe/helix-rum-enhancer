@@ -78,18 +78,17 @@
           expect(softNavs().length).to.equal(before);
         });
 
-        it('reports a back navigation with no recent user interaction', async () => {
-          // Let the interaction window from the clicks above expire: a browser-UI back
-          // (toolbar button, edge gesture) delivers no pointerdown/keydown to the page.
+        it('ignores a scripted traversal with no recent user interaction', async () => {
+          // Let the interaction window from the clicks above expire. A script-driven
+          // history.go() is programmatic (userInitiated false on the Navigation API, stamped
+          // by the history wrapper on the fallback), so it stays behind the gate. Browser-UI
+          // back/forward cannot be driven from a test page; the unit tests cover it.
           await wait(3100);
           const before = softNavs().length;
-          // two entries back: /after-click (same path, skipped) -> /programmatic
           history.go(-2);
           await wait(500);
-          const navs = softNavs().slice(before);
-          expect(navs.length).to.equal(1);
-          expect(navs[0].target).to.equal('soft:traverse');
-          expect(navs[0].source).to.equal(`${window.location.origin}/after-click`);
+          expect(window.location.pathname).to.equal('/programmatic');
+          expect(softNavs().length).to.equal(before);
         });
       });
     });
