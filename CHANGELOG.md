@@ -1,3 +1,10 @@
+## [2.50.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.50.0...v2.50.1) (2026-10-27)
+
+
+### Performance Improvements
+
+* **build:** emit the core bundle with compact output ([814792d](https://github.com/adobe/helix-rum-enhancer/commit/814792d3a75f00817b113691743e9a10062b4528)), closes [#610](https://github.com/adobe/helix-rum-enhancer/issues/610) [#610](https://github.com/adobe/helix-rum-enhancer/issues/610)
+
 # [2.50.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.49.0...v2.50.0) (2026-07-26)
 
 
