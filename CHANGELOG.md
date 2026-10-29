@@ -1,3 +1,21 @@
+# [2.51.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.50.1...v2.51.0) (2026-10-29)
+
+
+### Bug Fixes
+
+* **softnav:** count only same-document navigations, report back/forward, widen window to 3s ([2defe4f](https://github.com/adobe/helix-rum-enhancer/commit/2defe4fccee042dc9e9d9c418674eed57431216e))
+* **softnav:** gate scripted traversals, resolve relative URLs before the history change ([138626b](https://github.com/adobe/helix-rum-enhancer/commit/138626b8935c267fb77c32d5c8e23180dbefb52d))
+* **softnav:** probe router globals by name to satisfy no-underscore-dangle ([f830f84](https://github.com/adobe/helix-rum-enhancer/commit/f830f84596ceb1ab533e84d614a01a3548465e0f))
+* **softnav:** report on commit, expire traversal stamps, count trusted clicks ([0a00635](https://github.com/adobe/helix-rum-enhancer/commit/0a00635b7a5d5f51d5dd6076e76c4e333f49944e))
+* **softnav:** satisfy curly and max-statements-per-line ([9690bbc](https://github.com/adobe/helix-rum-enhancer/commit/9690bbcf847fb4b1bc0d0f69ab3700a4fc03423c))
+
+
+### Features
+
+* **softnav:** add softnav feature flag ([a7c75d9](https://github.com/adobe/helix-rum-enhancer/commit/a7c75d9a09f2db27ca13af6024d6e68706aff522))
+* **softnav:** load the softnav plugin behind a router probe ([b77744c](https://github.com/adobe/helix-rum-enhancer/commit/b77744c1e8e6e466e1d3a3586892f13f32fefb1e))
+* **softnav:** report navigate checkpoints for client-side route changes ([670bf24](https://github.com/adobe/helix-rum-enhancer/commit/670bf2491a67975bbb66b136cd11b5457d8c1930))
+
 ## [2.50.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.50.0...v2.50.1) (2026-10-27)
 
 
