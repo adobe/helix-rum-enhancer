@@ -32,10 +32,11 @@ export const targetSelector = (el) => {
   }
 };
 
-export const untrustedClickPayload = (event) => {
-  if (event && event.isTrusted === false) {
+export const untrustedClickPayload = (event, hidden) => {
+  const m = event && event.isTrusted === false ? 'untrusted' : hidden && 'hidden';
+  if (m) {
     const ua = navigator.userAgent;
-    return { ua: ua.includes('+http') ? ua : `${ua} +http://event.untrusted` };
+    return { ua: ua.includes('+http') ? ua : `${ua} +http://event.${m}` };
   }
   return {};
 };
