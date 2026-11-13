@@ -49,7 +49,7 @@ In the disposable context, the following sequence was verified using the real co
 | Enable Performance only, Save settings | `C0001:1,C0002:1,C0004:0` | `2` | present |
 | Accept All | `C0001:1,C0002:1,C0004:1` | `3` | present |
 
-Rejecting all optional categories leaves the group bits identical to the unanswered defaults. A state-change fingerprint therefore must not consist only of `groups`.
+Rejecting all optional categories leaves the group bits identical to the unanswered defaults. Both are classified as `rejected`: this checkpoint describes the stored consent level, not whether a rejection interaction occurred.
 
 Both `OneTrustGroupsUpdated` and `OTConsentApplied` were observed after Reject All. The cookie had already changed when those listeners ran in this SDK version. `OTConsentApplied` arrived later than the immediate post-click read, so a single early read would have missed it. Listen to both and deduplicate; do not overwrite the site's `OptanonWrapper`.
 
@@ -78,7 +78,7 @@ Do not discard `C0011` or assume there are exactly four categories. Do not subst
 - The observed regional preference center uses `1` for Essential Website Cookies and `4` for Advertising (Targeting) Cookies, not `C0001` and `C0004`.
 - Its wider domain configuration labels `2` as Performance and Functionality, `3` as Analytics and Customization, and includes additional IDs such as `41`, `42`, `C0018`, and `C0024`. These were not all in the observed cookie.
 
-Both observed bits were enabled while the interaction count was zero and the dismissal cookie was absent. Labeling this `accept-all` or "visitor granted advertising consent" would overstate the evidence. Report the enabled state separately from whether an interaction has been recorded. Numeric IDs must not be normalized to `C000x` by assumption.
+Both observed bits were enabled while the interaction count was zero and the dismissal cookie was absent. The stored consent level is therefore `granted`, without claiming that the visitor clicked accept-all. Interaction evidence is not required for a sampled consent-level snapshot. Numeric IDs must not be normalized to `C000x` by assumption.
 
 ### Canadian Tire: enabled defaults without an interaction counter
 
@@ -88,7 +88,7 @@ The live [Canadian Tire homepage](https://www.canadiantire.ca/en.html), selected
 - No `OptanonAlertBoxClosed` cookie and no `interactionCount` field.
 - No banner; the preference-center markup existed.
 
-All applicable groups were enabled, but there was no cookie evidence of an explicit choice in this clean context. Missing `interactionCount` must be supported, not treated as malformed or fabricated as zero. The existing plugin would report `suppressed` here while a category-state reader could still return useful data.
+All applicable groups were enabled, so the stored consent level is `granted` even without evidence of an explicit choice. Missing `interactionCount` must not block classification. The old banner-only plugin reported `suppressed` here; the cookie reader can report the level directly.
 
 T-Mobile was also selected from RUM. Its homepage loaded RUM but did not expose the OneTrust cookie or SDK in this browser observation. This does not establish why other pageviews had OneTrust events, nor prove absence across its routes or regional configurations.
 
@@ -156,21 +156,22 @@ The requested contract is three new **target values on the existing `consent` ch
 - `rejected`: all supported optional categories/signals disabled.
 - `customized`: a mix of enabled and disabled optional categories/signals.
 
-Provider sources remain unchanged. A recognized stored choice replaces the old banner-only target for that page; otherwise `show`, `hidden`, and `suppressed` remain fallback values. No cookie contents, IDs, counters, timestamps, or per-category bits are sent.
+Provider sources remain unchanged. A recognized stored level replaces the old banner-only target for that page; otherwise `show`, `hidden`, and `suppressed` remain fallback values. No cookie contents, IDs, counters, timestamps, or per-category bits are sent. Since the enhancer runs on sampled pageviews, classification does not require observation of a consent interaction or an interaction-evidence marker.
 
 The implementation retains the existing once-per-page snapshot. `OptanonConsent`-only and supported Usercentrics category-cookie-only discovery work before SDK initialization. Change-event listeners are not part of this change.
 
 Classification remains provider-specific:
 
-- OneTrust requires a nonempty dismissal cookie or a positive interaction count and no pending reconsent. It excludes the necessary `C0001` or numeric `1` group and requires at least one optional category. Other necessary-category schemes remain unsupported.
+- OneTrust reads `groups` without requiring a dismissal cookie or consulting `interactionCount`. Pending reconsent remains unclassified. It excludes the necessary `C0001` or numeric `1` group and requires at least one optional category. Other necessary-category schemes remain unsupported.
 - TrustArc supports the standard three-bucket schema, preferring the granular list over the legacy slider. Custom bucket values are left unclassified; the cookie does not enumerate all denied custom buckets, so this is not a general custom-schema decoder.
-- Usercentrics uses complete GCM signals, or the explicitly supported category-cookie integration observed at Hamleys when GCM storage is absent. It does not read full `uc_settings` or infer arbitrary cookie-prefix semantics. GCM results describe those four signals, not every service configured in the CMP.
+- Usercentrics uses complete GCM signals, or the explicitly supported category-cookie integration observed at Hamleys when GCM storage is absent. It ignores `uc_user_interaction`, does not read full `uc_settings`, and does not infer arbitrary cookie-prefix semantics. GCM results describe those four signals, not every service configured in the CMP.
 
 Malformed or incomplete values, duplicate category IDs/cookies, blocked storage, and unsupported formats fall back rather than inventing a grant or rejection. Inputs are bounded and only fixed target strings leave the parsers. The existing collector checkpoint and payload-field schemas remain unchanged.
 
 ### Regression coverage
 
-- PartsASIST unanswered vs rejected: same groups, different decision evidence.
+- PartsASIST unanswered vs rejected: identical groups produce the same `rejected` level regardless of interaction evidence.
+- All three levels are reported without a dismissal cookie, with absent/zero/invalid interaction counters, and with `uc_user_interaction=false`.
 - Stored partial and all-enabled state before the SDK exists.
 - Intuit numeric IDs, enabled defaults, no dismissal cookie.
 - CME custom `C0011` and differences between domain configuration, active globals, and cookie categories.

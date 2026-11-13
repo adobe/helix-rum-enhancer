@@ -11,7 +11,7 @@
       }
     });
     localStorage.removeItem('uc_gcm');
-    localStorage.removeItem('uc_user_interaction');
+    localStorage.setItem('uc_user_interaction', 'false');
 
     const params = new URLSearchParams(location.search);
     const provider = params.get('provider');
@@ -19,10 +19,10 @@
     const allowed = choice === 'granted' ? [true, true] : choice === 'rejected' ? [false, false] : [true, false];
     const setCookie = (key, value) => { document.cookie = `${key}=${value}; path=/`; };
     if (provider === 'onetrust') {
-      // No dismissal cookie or SDK DOM: discovery must work from OptanonConsent alone.
+      // No dismissal cookie, interaction evidence or SDK DOM: read the stored groups alone.
       setCookie('OptanonConsent', new URLSearchParams({
         groups: `C0001:1,C0002:${Number(allowed[0])},C0004:${Number(allowed[1])}`,
-        interactionCount: choice === 'unanswered' ? '0' : '1',
+        ...(params.has('interactionCount') ? { interactionCount: params.get('interactionCount') } : {}),
         consentId: 'DO-NOT-TRANSMIT',
       }));
     } else if (provider === 'trustarc') {

@@ -24,23 +24,14 @@ function readConsent() {
   }
 }
 
-function getChoice(consent, closed) {
+function getChoice(consent) {
   if (!consent || consent.getAll('groups').length !== 1
     || consent.getAll('AwaitingReconsent').length > 1
     || ![null, 'false'].includes(consent.get('AwaitingReconsent'))) {
     return undefined;
   }
 
-  const interactions = consent.get('interactionCount');
-  if (consent.getAll('interactionCount').length > 1
-    || (interactions !== null && !/^(0|[1-9]\d*)$/.test(interactions))) {
-    return undefined;
-  }
-  // OneTrust writes defaults before any decision, sometimes with every group enabled.
-  if (!closed && (interactions === null || interactions === '0')) {
-    return undefined;
-  }
-
+  // Report the stored level, not evidence of an interaction on a sampled page.
   const entries = consent.get('groups').split(',');
   if (entries.length > 65 || entries.some((entry) => !/^(C\d{4}|\d{1,3}):[01]$/.test(entry))) {
     return undefined;
@@ -60,12 +51,12 @@ function getChoice(consent, closed) {
 
 export function getConsentTarget() {
   const consent = readConsent();
-  const closed = getCookie('OptanonAlertBoxClosed');
-  const choice = getChoice(consent, !!closed);
+  const choice = getChoice(consent);
   if (choice) {
     return choice;
   }
 
+  const closed = getCookie('OptanonAlertBoxClosed');
   if (closed !== undefined && consent?.get('AwaitingReconsent') !== 'true') {
     return 'hidden';
   }

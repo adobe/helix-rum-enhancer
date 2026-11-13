@@ -117,8 +117,10 @@ describe('Stored consent choices', () => {
       ['C0001:1,C0002:1,C0011:0', 'customized'],
       ['C0001:1,C0002:0,C0011:0', 'rejected'],
     ].forEach(([groups, expected]) => {
-      it(`reports ${expected} for ${groups}`, () => {
+      it(`reports ${expected} for ${groups} with or without a dismissal cookie`, () => {
         setOneTrust(groups);
+        expect(oneTrustTarget()).to.equal(expected);
+        setOneTrust(groups, {}, false);
         expect(oneTrustTarget()).to.equal(expected);
       });
     });
@@ -129,17 +131,23 @@ describe('Stored consent choices', () => {
       expect(oneTrustTarget()).to.equal('granted');
     });
 
-    it('recognizes an interaction before the dismissal cookie exists', () => {
+    it('reads the stored level when an interaction counter is present', () => {
       setOneTrust('C0001:1,C0002:0', { interactionCount: '1' }, false);
       expect(oneTrustTarget()).to.equal('rejected');
     });
 
     [undefined, '0', '-1', '1x', 'NaN', 'Infinity', '0.5'].forEach((count) => {
-      it(`does not treat default groups as a choice with interactionCount=${count}`, () => {
-        setOneTrust('1:1,4:1', count === undefined ? {} : { interactionCount: count }, false);
-        expect(oneTrustTarget()).to.equal('suppressed');
-        banner('onetrust-banner-sdk');
-        expect(oneTrustTarget()).to.equal('show');
+      [
+        ['1:1,4:1', 'granted'],
+        ['C0001:1,C0002:0,C0004:0', 'rejected'],
+        ['C0001:1,C0002:1,C0004:0', 'customized'],
+      ].forEach(([groups, expected]) => {
+        it(`reports ${expected} independently of interactionCount=${count}`, () => {
+          setOneTrust(groups, count === undefined ? {} : { interactionCount: count }, false);
+          expect(oneTrustTarget()).to.equal(expected);
+          banner('onetrust-banner-sdk');
+          expect(oneTrustTarget()).to.equal(expected);
+        });
       });
     });
 
@@ -148,10 +156,10 @@ describe('Stored consent choices', () => {
       expect(oneTrustTarget()).to.equal('hidden');
     });
 
-    it('distinguishes unanswered defaults from a recorded rejection', () => {
+    it('reports the same level before and after interaction when groups are unchanged', () => {
       setOneTrust('C0001:1,C0002:0,C0004:0', { interactionCount: '0' }, false);
       banner('onetrust-banner-sdk');
-      expect(oneTrustTarget()).to.equal('show');
+      expect(oneTrustTarget()).to.equal('rejected');
       setOneTrust('C0001:1,C0002:0,C0004:0', { interactionCount: '1' });
       expect(oneTrustTarget()).to.equal('rejected');
     });
@@ -195,24 +203,24 @@ describe('Stored consent choices', () => {
       });
     });
 
-    it('does not trust duplicate interaction counters without a dismissal cookie', () => {
+    it('ignores duplicate interaction counters without a dismissal cookie', () => {
       setOneTrust('C0001:1,C0002:1', { interactionCount: '1' }, false);
       cookies[0] += '&interactionCount=0';
-      expect(oneTrustTarget()).to.equal('suppressed');
+      expect(oneTrustTarget()).to.equal('granted');
     });
 
-    it('does not classify invalid interaction counters even with a dismissal cookie', () => {
+    it('ignores invalid interaction counters with a dismissal cookie too', () => {
       setOneTrust('C0001:1,C0002:1', { interactionCount: 'invalid' });
-      expect(oneTrustTarget()).to.equal('hidden');
+      expect(oneTrustTarget()).to.equal('granted');
       setOneTrust('C0001:1,C0002:1', { interactionCount: '1' });
       cookies[0] += '&interactionCount=0';
-      expect(oneTrustTarget()).to.equal('hidden');
+      expect(oneTrustTarget()).to.equal('granted');
     });
 
-    it('retains hidden for an empty dismissal cookie without treating it as a choice', () => {
+    it('classifies a valid level even when the dismissal cookie is empty', () => {
       setOneTrust('C0001:1,C0002:1', {}, false);
       cookies.push('OptanonAlertBoxClosed=');
-      expect(oneTrustTarget()).to.equal('hidden');
+      expect(oneTrustTarget()).to.equal('granted');
     });
 
     it('tolerates missing or broken cookie payloads', () => {
@@ -297,12 +305,25 @@ describe('Stored consent choices', () => {
       });
     });
 
-    it('does not classify data explicitly marked as not interacted with', () => {
-      setGCM(signals.map(() => 'granted'));
-      localStorage.setItem('uc_user_interaction', 'false');
-      expect(usercentricsTarget()).to.equal('hidden');
-      localStorage.setItem('uc_user_interaction', 'true');
-      expect(usercentricsTarget()).to.equal('granted');
+    ['granted', 'rejected', 'customized'].forEach((expected) => {
+      it(`reports ${expected} GCM signals regardless of the interaction marker`, () => {
+        const values = expected === 'customized'
+          ? ['granted', 'denied', 'denied', 'denied']
+          : signals.map(() => (expected === 'granted' ? 'granted' : 'denied'));
+        setGCM(values);
+        localStorage.setItem('uc_user_interaction', 'false');
+        expect(usercentricsTarget()).to.equal(expected);
+        localStorage.setItem('uc_user_interaction', 'true');
+        expect(usercentricsTarget()).to.equal(expected);
+      });
+
+      it(`reports ${expected} category cookies without interaction evidence`, () => {
+        const values = expected === 'customized' ? [true, false, false, false]
+          : categories.map(() => expected === 'granted');
+        setCategoryCookies(values);
+        localStorage.setItem('uc_user_interaction', 'false');
+        expect(usercentricsTarget()).to.equal(expected);
+      });
     });
 
     ['1', 'null', '[]', '{}', 'bad JSON', '{', 'x'.repeat(4097)].forEach((value, i) => {

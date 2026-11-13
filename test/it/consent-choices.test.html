@@ -15,9 +15,9 @@
         frame?.remove();
       });
 
-      function loadChoice(provider, choice) {
+      function loadChoice(provider, choice, fields = {}) {
         frame = document.createElement('iframe');
-        frame.src = `/test/fixtures/consent-choice.html?${new URLSearchParams({ provider, choice })}`;
+        frame.src = `/test/fixtures/consent-choice.html?${new URLSearchParams({ provider, choice, ...fields })}`;
         const result = new Promise((resolve) => {
           receive = (event) => {
             if (event.source === frame.contentWindow && event.origin === location.origin
@@ -31,7 +31,7 @@
 
       ['onetrust', 'trustarc', 'usercentrics', 'usercentrics-cookies'].forEach((provider) => {
         ['granted', 'rejected', 'customized'].forEach((target) => {
-          it(`${provider}: emits ${target} without an SDK or banner`, async () => {
+          it(`${provider}: emits ${target} without an SDK, banner or interaction evidence`, async () => {
             const data = await loadChoice(provider, target);
             expect(data.checkpoint).to.equal('consent');
             expect(data.source).to.equal(provider.replace('-cookies', ''));
@@ -44,9 +44,11 @@
         });
       });
 
-      it('does not classify OneTrust defaults as a recorded choice', async () => {
-        const data = await loadChoice('onetrust', 'unanswered');
-        expect(data.target).to.equal('suppressed');
+      ['granted', 'rejected', 'customized'].forEach((target) => {
+        it(`reports OneTrust ${target} with a zero interaction count`, async () => {
+          const data = await loadChoice('onetrust', target, { interactionCount: '0' });
+          expect(data.target).to.equal(target);
+        });
       });
     });
   });

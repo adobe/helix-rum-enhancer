@@ -12,9 +12,6 @@
 import { getCookie, getLocalStorage, classifyConsent } from '../modules/consent.js';
 
 function getChoice(gcm) {
-  if (getLocalStorage('uc_user_interaction') === 'false') {
-    return undefined;
-  }
   if (gcm) {
     if (gcm.length > 4096) {
       return undefined;

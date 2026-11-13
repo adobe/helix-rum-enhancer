@@ -27,7 +27,7 @@ It will add following new checkpoints:
 ### Consent checkpoint
 
 Consent plugins emit `sampleRUM('consent', { source, target })`, where `source` is
-`onetrust`, `trustarc`, or `usercentrics`. A recognized stored choice produces:
+`onetrust`, `trustarc`, or `usercentrics`. A recognized stored consent level produces:
 
 | `target` | Meaning |
 | --- | --- |
@@ -35,17 +35,18 @@ Consent plugins emit `sampleRUM('consent', { source, target })`, where `source` 
 | `rejected` | All supported optional categories/signals are disabled. |
 | `customized` | Some supported optional categories/signals are enabled and others disabled. |
 
-Required cookies do not count as optional consent. If the stored choice cannot be
+Required cookies do not count as optional consent. If the stored level cannot be
 classified, the existing `show`, `hidden`, or `suppressed` banner-state fallback
-is retained. In particular, `hidden` does not mean `granted`.
+is retained. In particular, `hidden` does not mean `granted`. Classification uses
+the level readable from storage, without requiring interaction evidence: the
+enhancer runs on sampled pageviews and need not observe a consent interaction.
 
 Supported formats:
 
 - **OneTrust:** `OptanonConsent.groups`, including standard `Cdddd` and numeric IDs.
   `C0001` or `1` identifies the necessary group; at least one optional group is required.
-  A nonempty `OptanonAlertBoxClosed` cookie or a positive `interactionCount` is required
-  to distinguish a recorded choice from defaults. Pending reconsent and malformed
-  values are not classified as a choice.
+  No dismissal cookie or interaction counter is required; these do not affect the
+  classification. Pending reconsent and malformed category data remain unclassified.
 - **TrustArc:** standard three-bucket `notice_gdpr_prefs` (required `0`, optional `1`
   and `2`), with the inclusive `notice_preferences` slider as a fallback only when
   granular preferences are absent. Custom buckets/levels are not interpreted.
@@ -54,7 +55,7 @@ Supported formats:
   supported `uc_consent_status_*` category-cookie integration is read: essential
   must be `true` and functional, marketing, analytics, and personalisation must all
   contain boolean strings. This integration is not present on every Usercentrics site.
-  An explicit `uc_user_interaction=false` prevents choice classification.
+  The `uc_user_interaction` marker does not affect classification.
 
 The plugins retain their **once-per-page snapshot** behavior; they do not listen
 for subsequent consent changes on that page. No raw cookie values, category IDs,
