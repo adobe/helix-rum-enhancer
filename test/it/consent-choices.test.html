@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head><title>Stored consent checkpoint integration tests</title></head>
+<body>
+<script type="module">
+  import { runTests } from '@web/test-runner-mocha';
+  import { expect } from '@esm-bundle/chai';
+
+  runTests(() => {
+    describe('Stored consent through provider discovery and beacon serialization', () => {
+      let frame;
+      let receive;
+      afterEach(() => {
+        window.removeEventListener('message', receive);
+        frame?.remove();
+      });
+
+      function loadChoice(provider, choice) {
+        frame = document.createElement('iframe');
+        frame.src = `/test/fixtures/consent-choice.html?${new URLSearchParams({ provider, choice })}`;
+        const result = new Promise((resolve) => {
+          receive = (event) => {
+            if (event.source === frame.contentWindow && event.origin === location.origin
+              && event.data.type === 'consent-choice-test') resolve(event.data.data);
+          };
+          window.addEventListener('message', receive);
+        });
+        document.body.append(frame);
+        return result;
+      }
+
+      ['onetrust', 'trustarc', 'usercentrics', 'usercentrics-cookies'].forEach((provider) => {
+        ['granted', 'rejected', 'customized'].forEach((target) => {
+          it(`${provider}: emits ${target} without an SDK or banner`, async () => {
+            const data = await loadChoice(provider, target);
+            expect(data.checkpoint).to.equal('consent');
+            expect(data.source).to.equal(provider.replace('-cookies', ''));
+            expect(data.target).to.equal(target);
+            expect(data.weight).to.equal(1);
+            expect(data.id).to.equal('consent-fixture');
+            expect(JSON.stringify(data)).not.to.include('DO-NOT-TRANSMIT');
+            expect(data).to.have.all.keys('weight', 'id', 'referer', 'checkpoint', 't', 'source', 'target');
+          });
+        });
+      });
+
+      it('does not classify OneTrust defaults as a recorded choice', async () => {
+        const data = await loadChoice('onetrust', 'unanswered');
+        expect(data.target).to.equal('suppressed');
+      });
+    });
+  });
+</script>
+</body>
+</html>

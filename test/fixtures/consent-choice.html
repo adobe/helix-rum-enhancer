@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stored consent beacon fixture</title>
+  <script>
+    // Each iframe is a new module realm, but its cookies/storage are shared with the test.
+    document.cookie.split(';').forEach((cookie) => {
+      const name = cookie.trim().split('=')[0];
+      if (/^(Optanon|notice_|uc_consent_status_)/.test(name)) {
+        document.cookie = `${name}=; Max-Age=0; path=/`;
+      }
+    });
+    localStorage.removeItem('uc_gcm');
+    localStorage.removeItem('uc_user_interaction');
+
+    const params = new URLSearchParams(location.search);
+    const provider = params.get('provider');
+    const choice = params.get('choice');
+    const allowed = choice === 'granted' ? [true, true] : choice === 'rejected' ? [false, false] : [true, false];
+    const setCookie = (key, value) => { document.cookie = `${key}=${value}; path=/`; };
+    if (provider === 'onetrust') {
+      // No dismissal cookie or SDK DOM: discovery must work from OptanonConsent alone.
+      setCookie('OptanonConsent', new URLSearchParams({
+        groups: `C0001:1,C0002:${Number(allowed[0])},C0004:${Number(allowed[1])}`,
+        interactionCount: choice === 'unanswered' ? '0' : '1',
+        consentId: 'DO-NOT-TRANSMIT',
+      }));
+    } else if (provider === 'trustarc') {
+      const groups = ['0', ...(allowed[0] ? ['1'] : []), ...(allowed[1] ? ['2'] : [])];
+      setCookie('notice_gdpr_prefs', `${groups.join(',')}:DO-NOT-TRANSMIT`);
+    } else if (provider === 'usercentrics') {
+      const signals = ['adStorage', 'analyticsStorage', 'adPersonalization', 'adUserData'];
+      localStorage.setItem('uc_gcm', JSON.stringify({
+        ...Object.fromEntries(signals.map((key, i) => [key, allowed[i % 2] ? 'granted' : 'denied'])),
+        controllerId: 'DO-NOT-TRANSMIT',
+      }));
+    } else if (provider === 'usercentrics-cookies') {
+      setCookie('uc_consent_status_essential', 'true');
+      ['functional', 'marketing', 'analytics', 'personalisation'].forEach((key, i) => {
+        setCookie(`uc_consent_status_${key}`, String(allowed[i % 2]));
+      });
+    }
+
+    window.fakeSendBeacon = async (url, payload) => {
+      const text = typeof payload === 'string' ? payload : await payload.text();
+      const data = JSON.parse(text);
+      if (data.checkpoint === 'consent') {
+        parent.postMessage({ type: 'consent-choice-test', data }, location.origin);
+      }
+      return true;
+    };
+    const queue = [];
+    function sampleRUM(checkpoint, data) {
+      if (window.hlx.rum.collector) {
+        window.hlx.rum.collector(checkpoint, data, 0);
+      } else {
+        queue.push([checkpoint, data, 0]);
+      }
+    }
+    sampleRUM.collectBaseURL = location.origin;
+    window.hlx = { rum: { sampleRUM, queue, isSelected: true, weight: 1, id: 'consent-fixture' } };
+  </script>
+  <script defer src="/src/index.map.js"></script>
+</head>
+<body>Stored consent fixture without a CMP SDK or banner.</body>
+</html>
