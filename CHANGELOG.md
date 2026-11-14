@@ -1,3 +1,10 @@
+## [2.51.1](https://github.com/adobe/helix-rum-enhancer/compare/v2.51.0...v2.51.1) (2026-11-14)
+
+
+### Bug Fixes
+
+* **deps:** update playwright to 1.65.0, which supports Ubuntu 26.04 ([4d91539](https://github.com/adobe/helix-rum-enhancer/commit/4d91539736c4cbc72fca44f5407edb68139ec868))
+
 # [2.51.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.50.1...v2.51.0) (2026-10-29)
 
 
