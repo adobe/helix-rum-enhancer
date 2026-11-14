@@ -15,6 +15,7 @@ import { KNOWN_PROPERTIES, DEFAULT_TRACKING_EVENTS } from './defaults.js';
 import { urlSanitizers } from './utils.js';
 import { targetSelector, sourceSelector, untrustedClickPayload } from './dom.js';
 import { fflags } from './fflags.js';
+import { getCookie, getLocalStorage } from './consent.js';
 
 const { sampleRUM, queue, isSelected } = (window.hlx && window.hlx.rum) ? window.hlx.rum
   /* c8 ignore next */ : {};
@@ -27,7 +28,7 @@ const createMO = (cb) => (window.MutationObserver ? new MutationObserver(cb)
 const [blocksMO, mediaMO] = [blocksMCB, mediaMCB].map(createMO);
 
 // Check for the presence of a given cookie
-const hasCookie = (key) => document.cookie.split(';').some((c) => c.trim().startsWith(`${key}=`));
+const hasCookie = (key) => getCookie(key) !== undefined;
 
 // Set the base path for the plugins
 const pluginBase = new URL(document.currentScript.src).href.replace(/index(\.map)?\.js/, 'plugins');
@@ -35,7 +36,7 @@ const pluginBase = new URL(document.currentScript.src).href.replace(/index(\.map
 const CONSENT_PROVIDERS = [
   {
     name: 'onetrust',
-    detect: () => hasCookie('OptanonAlertBoxClosed') || document.querySelector('#onetrust-banner-sdk, #onetrust-pc-sdk'),
+    detect: () => ['OptanonAlertBoxClosed', 'OptanonConsent'].some(hasCookie) || document.querySelector('#onetrust-banner-sdk, #onetrust-pc-sdk'),
   },
   {
     name: 'trustarc',
@@ -43,7 +44,7 @@ const CONSENT_PROVIDERS = [
   },
   {
     name: 'usercentrics',
-    detect: () => window.localStorage.getItem('uc_gcm') || document.querySelector('#usercentrics-root'),
+    detect: () => getLocalStorage('uc_gcm') || hasCookie('uc_consent_status_essential') || document.querySelector('#usercentrics-root'),
   },
 ];
 

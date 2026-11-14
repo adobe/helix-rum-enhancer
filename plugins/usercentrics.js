@@ -9,13 +9,61 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
-function trackConsent() {
-  if (localStorage.getItem('uc_gcm')) {
+import { getCookie, getLocalStorage, classifyConsent } from '../modules/consent.js';
+
+function getChoice(gcm) {
+  if (gcm) {
+    if (gcm.length > 4096) {
+      return undefined;
+    }
+    try {
+      const data = JSON.parse(gcm);
+      const signals = ['adStorage', 'analyticsStorage', 'adPersonalization', 'adUserData'];
+      return classifyConsent(signals.map((key) => {
+        if (data?.[key] === 'granted') {
+          return true;
+        }
+        if (data?.[key] === 'denied') {
+          return false;
+        }
+        return undefined;
+      }));
+    } catch {
+      return undefined;
+    }
+  }
+
+  // Explicitly supported category-cookie integration observed on Hamleys.
+  // Do not inspect arbitrary uc_* cookies or expose uc_settings / controller IDs.
+  if (getCookie('uc_consent_status_essential') !== 'true') {
+    return undefined;
+  }
+  const categories = ['functional', 'marketing', 'analytics', 'personalisation'];
+  return classifyConsent(categories.map((category) => {
+    const value = getCookie(`uc_consent_status_${category}`);
+    if (value === 'true') {
+      return true;
+    }
+    if (value === 'false') {
+      return false;
+    }
+    return undefined;
+  }));
+}
+
+export function getConsentTarget() {
+  const gcm = getLocalStorage('uc_gcm');
+  const choice = getChoice(gcm);
+  if (choice) {
+    return choice;
+  }
+
+  if (gcm || getCookie('uc_consent_status_essential') !== undefined) {
     return 'hidden';
   }
 
-  const { shadowRoot } = document.querySelector('#usercentrics-root');
-  const banner = shadowRoot.querySelector('#uc-center-container') || shadowRoot.querySelector('#uc-fading-wrapper');
+  const shadowRoot = document.querySelector('#usercentrics-root')?.shadowRoot;
+  const banner = shadowRoot?.querySelector('#uc-center-container') || shadowRoot?.querySelector('#uc-fading-wrapper');
 
   if (banner && banner.offsetHeight > 0) {
     return 'show';
@@ -30,6 +78,6 @@ export default function addCookieConsentTracking({ sampleRUM }) {
     return;
   }
 
-  sampleRUM('consent', { source: 'usercentrics', target: trackConsent() });
+  sampleRUM('consent', { source: 'usercentrics', target: getConsentTarget() });
   hasSentData = true;
 }

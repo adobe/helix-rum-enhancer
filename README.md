@@ -22,6 +22,47 @@ It will add following new checkpoints:
 - `viewmedia`: An image or video hosted by Helix Media Bus has been scrolled into the viewport
 - `reload`, `navigate`, `enter`: depending on how the current page was accessed
 - `formsubmit`: when a form is submitted
+- `consent`: stored consent choice, or consent-banner state when the choice is unknown
+
+### Consent checkpoint
+
+Consent plugins emit `sampleRUM('consent', { source, target })`, where `source` is
+`onetrust`, `trustarc`, or `usercentrics`. A recognized stored consent level produces:
+
+| `target` | Meaning |
+| --- | --- |
+| `granted` | All supported optional categories/signals are enabled. |
+| `rejected` | All supported optional categories/signals are disabled. |
+| `customized` | Some supported optional categories/signals are enabled and others disabled. |
+
+Required cookies do not count as optional consent. If the stored level cannot be
+classified, the existing `show`, `hidden`, or `suppressed` banner-state fallback
+is retained. In particular, `hidden` does not mean `granted`. Classification uses
+the level readable from storage, without requiring interaction evidence: the
+enhancer runs on sampled pageviews and need not observe a consent interaction.
+
+Supported formats:
+
+- **OneTrust:** `OptanonConsent.groups`, including standard `Cdddd` and numeric IDs.
+  `C0001` or `1` identifies the necessary group; at least one optional group is required.
+  No dismissal cookie or interaction counter is required; these do not affect the
+  classification. Pending reconsent and malformed category data remain unclassified.
+- **TrustArc:** standard three-bucket `notice_gdpr_prefs` (required `0`, optional `1`
+  and `2`), with the inclusive `notice_preferences` slider as a fallback only when
+  granular preferences are absent. Custom buckets/levels are not interpreted.
+- **Usercentrics:** the four `uc_gcm` localStorage signals (`adStorage`,
+  `analyticsStorage`, `adPersonalization`, `adUserData`). If absent, the explicitly
+  supported `uc_consent_status_*` category-cookie integration is read: essential
+  must be `true` and functional, marketing, analytics, and personalisation must all
+  contain boolean strings. This integration is not present on every Usercentrics site.
+  The `uc_user_interaction` marker does not affect classification.
+
+The plugins retain their **once-per-page snapshot** behavior; they do not listen
+for subsequent consent changes on that page. No raw cookie values, category IDs,
+controller IDs, or interaction timestamps are transmitted. These values describe
+supported stored preferences, not individual button clicks or legal consent validity.
+See the [customer-site investigation](docs/consent-cookie-research.md) for examples
+and limitations.
 
 ### The `source` parameter and the `sourceSelector`
 
