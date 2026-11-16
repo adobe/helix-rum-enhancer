@@ -1,3 +1,15 @@
+# [2.52.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.51.1...v2.52.0) (2026-11-16)
+
+
+### Bug Fixes
+
+* **consent:** classify stored levels without interaction evidence ([cfe1afc](https://github.com/adobe/helix-rum-enhancer/commit/cfe1afc4550a960902aed2824e7164731d27d692))
+
+
+### Features
+
+* **consent:** report stored consent choices ([f380ab9](https://github.com/adobe/helix-rum-enhancer/commit/f380ab951b79275ecc3c4d32246a3475d6984783)), closes [#407](https://github.com/adobe/helix-rum-enhancer/issues/407)
+
 ## Unreleased
 
 ### Consent reporting compatibility
