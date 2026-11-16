@@ -64,6 +64,21 @@ supported stored preferences, not individual button clicks or legal consent vali
 See the [customer-site investigation](docs/consent-cookie-research.md) for examples
 and limitations.
 
+#### Dashboard compatibility
+
+Stored CMP defaults are classified too: a first-time visitor can produce
+`rejected` with all optional categories disabled (an opt-in default), or `granted`
+with all enabled (an opt-out default), before interacting and even while the
+banner is visible. This applies to OneTrust groups and to readable Usercentrics
+GCM defaults.
+
+Because recognized levels replace banner-state targets, and cookie-only detection
+can report a level before the CMP renders, `show`/`hidden` ratios and
+banner-visibility counts are not directly comparable to older releases. Update
+dashboards to separate consent-level targets from fallback banner states. Do not
+use `granted`/`rejected` counts as accept/reject button-click rates or infer banner
+visibility from them. See the [changelog](CHANGELOG.md#unreleased).
+
 ### The `source` parameter and the `sourceSelector`
 
 The `source` parameter is a string that can be used to identify the source of the event. It can be used to identify the source of the event, e.g. a button, a link, a form, etc.

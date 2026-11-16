@@ -1,3 +1,24 @@
+## Unreleased
+
+### Consent reporting compatibility
+
+The `consent` checkpoint now reports `granted`, `rejected`, or `customized` when
+supported stored preferences are readable. These values describe the stored
+consent level, including CMP defaults, **not an explicit visitor decision**.
+For example, OneTrust can report `rejected` for an opt-in default with all
+optional categories disabled, or `granted` for an opt-out default with all
+optional categories enabled, before the visitor interacts and even while the
+banner is visible. Usercentrics stored Google Consent Mode defaults can have the
+same effect.
+
+`show`, `hidden`, and `suppressed` remain fallback values only when the stored
+level cannot be classified. Cookie-only provider detection can also report a
+level before the CMP renders. Consequently, historical `show`/`hidden` ratios
+and banner-visibility counts are not directly comparable across this release.
+Update dashboards to separate stored consent levels from fallback banner states;
+do not interpret `granted`/`rejected` counts as accept/reject button-click rates
+or map them back to banner visibility.
+
 # [2.51.0](https://github.com/adobe/helix-rum-enhancer/compare/v2.50.1...v2.51.0) (2026-10-29)
 
 
