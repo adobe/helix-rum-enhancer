@@ -11,8 +11,8 @@
     "test:watch": "web-test-runner --node-resolve --coverage --watch",
     "lint": "eslint .",
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
+    "test-release": "node --test .github/tests/*.test.mjs",
     "semantic-release": "semantic-release",
-    "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH 1.x main",
     "prepare": "husky install"
   },
   "repository": {
@@ -36,7 +36,6 @@
     "@esm-bundle/chai": "4.3.4-fix.0",
     "@playwright/test": "1.64.1",
     "@semantic-release/changelog": "6.0.3",
-    "@semantic-release/git": "10.0.1",
     "@semantic-release/npm": "13.2.0",
     "@web/test-runner": "0.20.2",
     "@web/test-runner-core": "0.13.4",
