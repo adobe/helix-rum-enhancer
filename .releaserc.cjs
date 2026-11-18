@@ -9,6 +9,7 @@ module.exports = {
     ["@semantic-release/github", {
       "assets": [
         { "path": "release-notes.md", "label": "Release notes" },
+        { "path": "release-manifest.json", "label": "Release manifest (SHA-384 of every served file)" },
         {
           "path": "src/index.js",
           "label": "RUM Enhancer JS"
@@ -24,7 +25,7 @@ module.exports = {
       ]
     }],
     ["@semantic-release/exec", {
-      "publishCmd": "./tagger.sh ${nextRelease.version} src/index.js src/plugins/cwv.js src/plugins/form.js src/plugins/martech.js src/plugins/onetrust.js src/plugins/video.js src/plugins/webcomponent.js package.json package-lock.json release-notes.md --push"
+      "publishCmd": "./tagger.sh ${nextRelease.version} --manifest release-manifest.json package.json package-lock.json release-notes.md --push"
     }],
     ["semantic-release-slack-bot", {
       notifyOnSuccess: true,
