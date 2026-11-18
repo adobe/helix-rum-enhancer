@@ -13,8 +13,8 @@
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
     "build-bundle": "rollup --config",
     "prepack": "npm run build-bundle",
+    "test-release": "node --test .github/tests/*.test.mjs",
     "semantic-release": "semantic-release",
-    "semantic-release-dry": "semantic-release --dry-run --branches $CI_BRANCH",
     "prepare": "husky"
   },
   "repository": {
@@ -41,7 +41,6 @@
     "@rollup/plugin-babel": "7.1.0",
     "@semantic-release/changelog": "7.0.0",
     "@semantic-release/exec": "7.1.0",
-    "@semantic-release/git": "11.0.1",
     "@semantic-release/npm": "13.2.0",
     "@web/test-runner": "1.0.0",
     "@web/test-runner-commands": "1.0.1",

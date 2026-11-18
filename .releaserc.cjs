@@ -3,15 +3,12 @@ module.exports = {
     "@semantic-release/commit-analyzer",
     "@semantic-release/release-notes-generator",
     ["@semantic-release/changelog", {
-      "changelogFile": "CHANGELOG.md",
+      "changelogFile": "release-notes.md",
     }],
     "@semantic-release/npm",
-    ["@semantic-release/git", {
-      "assets": ["package.json", "package-lock.json", "CHANGELOG.md"],
-      "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
-    }],
     ["@semantic-release/github", {
       "assets": [
+        { "path": "release-notes.md", "label": "Release notes" },
         {
           "path": "src/index.js",
           "label": "RUM Enhancer JS"
@@ -27,7 +24,7 @@ module.exports = {
       ]
     }],
     ["@semantic-release/exec", {
-      "publishCmd": "./tagger.sh ${nextRelease.version} src/index.js src/plugins/cwv.js src/plugins/form.js src/plugins/martech.js src/plugins/onetrust.js src/plugins/video.js src/plugins/webcomponent.js --push"
+      "publishCmd": "./tagger.sh ${nextRelease.version} src/index.js src/plugins/cwv.js src/plugins/form.js src/plugins/martech.js src/plugins/onetrust.js src/plugins/video.js src/plugins/webcomponent.js package.json package-lock.json release-notes.md --push"
     }],
     ["semantic-release-slack-bot", {
       notifyOnSuccess: true,
