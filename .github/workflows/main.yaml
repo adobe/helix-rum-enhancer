@@ -29,6 +29,9 @@ jobs:
   release:
     name: Release
     environment: release
+    permissions:
+      contents: read
+      id-token: write
     runs-on: ubuntu-latest
     needs: test
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/1.x'
@@ -44,5 +47,4 @@ jobs:
       - run: npm run semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_GITHUB_TOKEN }}
-          # Legacy publisher: keep this token in the release environment only.
-          NPM_TOKEN: ${{ secrets.LEGACY_NPM_TOKEN }}
+          # npm authenticates through OIDC for the protected release environment.
