@@ -63,6 +63,8 @@
           assert(window.called.some((call) => call.checkpoint === 'enter'), 'enter checkpoint missing');
           assert(window.called.some((call) => call.checkpoint === 'viewmedia'), 'viewmedia checkpoint missing');
           assert(window.called.some((call) => call.checkpoint === 'cwv'), 'cwv checkpoint missing');
+          // web-vitals is bundled into the CWV plugin: no runtime fetch of the library.
+          assert(!performance.getEntriesByType('resource').some((e) => e.name.includes('/.rum/web-vitals/')), 'unexpected runtime web-vitals request');
           assert(window.called.some((call) => call.checkpoint === 'click'), 'click checkpoint missing');
         });
 
