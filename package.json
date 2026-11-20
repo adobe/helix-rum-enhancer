@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "docs": "npx jsdoc2md -c .jsdoc.json --files 'src/*.js'  > docs/API.md",
     "build-bundle": "rollup --config",
-    "prepack": "npm run build-bundle",
+    "prepack": "npm run build-bundle && node release-manifest.mjs write",
     "test-release": "node --test .github/tests/*.test.mjs",
     "semantic-release": "semantic-release",
     "prepare": "husky"
