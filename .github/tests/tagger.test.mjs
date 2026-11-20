@@ -21,6 +21,7 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 const script = fileURLToPath(new URL('../../tagger.sh', import.meta.url));
+const manifestTool = fileURLToPath(new URL('../../release-manifest.mjs', import.meta.url));
 const realGit = '/usr/bin/git';
 
 function fixture(t) {
@@ -50,9 +51,10 @@ function fixture(t) {
   git('init', '--bare', remote);
   git('init', '-b', 'main');
   writeFileSync(join(work, '.gitignore'), 'dist/\nrelease-notes.md\n');
-  writeFileSync(join(work, 'package.json'), '{"version":"1.0.0"}\n');
+  writeFileSync(join(work, 'package.json'), '{"name":"@adobe/helix-rum-js","version":"1.0.0"}\n');
   writeFileSync(join(work, 'README.md'), 'committed source\n');
   copyFileSync(script, join(work, 'tagger.sh'));
+  copyFileSync(manifestTool, join(work, 'release-manifest.mjs'));
   git('add', '.');
   git('commit', '-m', 'initial source');
   git('remote', 'add', 'origin', remote);
@@ -62,7 +64,7 @@ function fixture(t) {
   const artifacts = ['dist/client.js', 'package.json', 'release-notes.md'];
   const generate = (version) => {
     writeFileSync(join(work, 'dist/client.js'), `// generated ${version}\n`);
-    writeFileSync(join(work, 'package.json'), `${JSON.stringify({ version })}\n`);
+    writeFileSync(join(work, 'package.json'), `${JSON.stringify({ name: '@adobe/helix-rum-js', version })}\n`);
     writeFileSync(join(work, 'release-notes.md'), `Notes for ${version}\n`);
   };
   const publish = (version, push = false, paths = artifacts, extraEnv = {}) => run('/bin/bash', ['tagger.sh', version, ...paths, ...(push ? ['--push'] : [])], extraEnv);
@@ -89,7 +91,7 @@ test('local artifact refs preserve HEAD, dirty source files and the caller index
   assert.equal(f.git('write-tree'), index);
   assert.equal(f.git('status', '--porcelain'), status);
   assert.equal(f.git('show', 'release-2-x:README.md'), 'committed source');
-  assert.equal(f.git('show', 'release-2-x:package.json'), '{"version":"2.3.4"}');
+  assert.equal(JSON.parse(f.git('show', 'release-2-x:package.json')).version, '2.3.4');
   assert.equal(f.git('show', 'release-2-x:dist/client.js'), '// generated 2.3.4');
   assert.equal(f.remoteGit('rev-parse', 'main'), f.source);
 });
@@ -205,4 +207,149 @@ fi
   assert.equal(f.remoteGit('rev-parse', 'release-2-3-x'), oldMinor);
   assert.notEqual(f.run(realGit, [`--git-dir=${f.remote}`, 'show-ref', '--verify', 'refs/heads/release-2-3-5']).status, 0);
   assert.equal(readFileSync(join(f.work, 'dist/client.js'), 'utf8'), '// generated 2.3.5\n');
+});
+
+test('an existing exact release branch is write-once, remotely and locally', (t) => {
+  const f = fixture(t);
+  f.generate('2.3.4');
+  assert.equal(f.publish('2.3.4', true).status, 0);
+  const remote = f.git('ls-remote', '--heads', 'origin');
+  writeFileSync(join(f.work, 'dist/client.js'), '// tampered\n');
+  const again = f.publish('2.3.4', true);
+  assert.notEqual(again.status, 0);
+  assert.match(again.stderr, /write-once/);
+  assert.equal(f.git('ls-remote', '--heads', 'origin'), remote);
+
+  assert.equal(f.publish('2.3.4').status, 0);
+  const local = f.git('show-ref');
+  const localAgain = f.publish('2.3.4');
+  assert.notEqual(localAgain.status, 0);
+  assert.match(localAgain.stderr, /write-once/);
+  assert.equal(f.git('show-ref'), local);
+});
+
+test('--manifest publishes every built file listed in a verified manifest', (t) => {
+  const f = fixture(t);
+  f.generate('2.3.4');
+  writeFileSync(join(f.work, 'dist/extra.js'), '// another built file\n');
+  const write = f.run('node', ['release-manifest.mjs', 'write']);
+  assert.equal(write.status, 0, write.stderr);
+  const result = f.publish('2.3.4', true, ['--manifest', 'release-manifest.json', 'package.json']);
+  assert.equal(result.status, 0, result.stderr);
+  const tree = f.remoteGit('ls-tree', '-r', '--name-only', 'release-2-3-4').split('\n');
+  ['dist/client.js', 'dist/extra.js', 'release-manifest.json', 'package.json']
+    .forEach((file) => assert.ok(tree.includes(file), file));
+  const manifest = JSON.parse(f.remoteGit('show', 'release-2-x:release-manifest.json'));
+  assert.equal(manifest.version, '2.3.4');
+  assert.deepEqual(Object.keys(manifest.files), ['dist/client.js', 'dist/extra.js']);
+  assert.match(manifest.files['dist/client.js'].integrity, /^sha384-[A-Za-z0-9+/]{64}$/);
+  assert.equal(manifest.source.commit, f.source);
+});
+
+test('a stale, incomplete or mismatched manifest fails before any ref changes', (t) => {
+  const f = fixture(t);
+  f.generate('2.3.4');
+  assert.equal(f.run('node', ['release-manifest.mjs', 'write']).status, 0);
+  const before = f.git('ls-remote', '--heads', 'origin');
+  const args = ['--manifest', 'release-manifest.json'];
+
+  writeFileSync(join(f.work, 'dist/client.js'), '// changed after the manifest was written\n');
+  const changed = f.publish('2.3.4', true, args);
+  assert.notEqual(changed.status, 0);
+  assert.match(changed.stderr, /digest mismatch: dist\/client\.js/);
+
+  f.generate('2.3.4');
+  writeFileSync(join(f.work, 'dist/new-plugin.js'), '// built but not listed\n');
+  const incomplete = f.publish('2.3.4', true, args);
+  assert.notEqual(incomplete.status, 0);
+  assert.match(incomplete.stderr, /built but not in manifest: dist\/new-plugin\.js/);
+
+  rmSync(join(f.work, 'dist/new-plugin.js'));
+  const wrongVersion = f.publish('2.3.5', true, args);
+  assert.notEqual(wrongVersion.status, 0);
+  assert.match(wrongVersion.stderr, /version 2\.3\.4 does not match 2\.3\.5/);
+
+  assert.equal(f.git('ls-remote', '--heads', 'origin'), before);
+});
+
+test('versions whose branch name would be ambiguous are rejected before any ref changes', (t) => {
+  const f = fixture(t);
+  f.generate('2.4.0');
+  const before = f.git('show-ref');
+  ['2.4.0-rc-1', '2.4.0+build.1', '2.4.0-rc.1+build', '2.4.0-rc.1-x'].forEach((version) => {
+    const result = f.publish(version);
+    assert.notEqual(result.status, 0, version);
+    assert.match(result.stderr, /Unsupported version/, version);
+  });
+  assert.equal(f.git('show-ref'), before);
+  assert.equal(f.publish('2.4.0-rc.1').status, 0);
+});
+
+test('--check passes for a new version and fails once its exact branch exists', (t) => {
+  const f = fixture(t);
+  const check = (version) => f.run('/bin/bash', ['tagger.sh', version, '--check']);
+  const ok = check('2.3.4');
+  assert.equal(ok.status, 0, ok.stderr);
+  assert.match(ok.stdout, /release-2-3-4 is available/);
+  f.generate('2.3.4');
+  assert.equal(f.publish('2.3.4', true).status, 0);
+  const remote = f.git('ls-remote', '--heads', 'origin');
+  const taken = check('2.3.4');
+  assert.notEqual(taken.status, 0);
+  assert.match(taken.stderr, /write-once/);
+  assert.equal(check('2.3.5').status, 0);
+  assert.notEqual(f.run('/bin/bash', ['tagger.sh', '2.3.5', '--check', 'package.json']).status, 0);
+  assert.notEqual(f.run('/bin/bash', ['tagger.sh', '2.3.5', '--check', '--push']).status, 0);
+  f.git('remote', 'set-url', 'origin', join(f.dir, 'missing.git'));
+  const offline = check('2.3.5');
+  assert.notEqual(offline.status, 0);
+  assert.match(offline.stderr, /Cannot check/);
+  f.git('remote', 'set-url', 'origin', f.remote);
+  assert.equal(f.git('ls-remote', '--heads', 'origin'), remote);
+});
+
+test('release-manifest.mjs accepts an absolute manifest path', (t) => {
+  const f = fixture(t);
+  f.generate('2.3.4');
+  const path = join(f.dir, 'elsewhere.json');
+  const write = f.run('node', ['release-manifest.mjs', 'write', path]);
+  assert.equal(write.status, 0, write.stderr);
+  assert.equal(JSON.parse(readFileSync(path, 'utf8')).version, '2.3.4');
+  const verify = f.run('node', ['release-manifest.mjs', 'verify', path, '2.3.4']);
+  assert.equal(verify.status, 0, verify.stderr);
+});
+
+test('a manifest with a missing, edited or stale source commit fails before any ref changes', (t) => {
+  const f = fixture(t);
+  f.generate('2.3.4');
+  const write = () => assert.equal(f.run('node', ['release-manifest.mjs', 'write']).status, 0);
+  const manifestPath = join(f.work, 'release-manifest.json');
+  const edit = (change) => {
+    const manifest = change(JSON.parse(readFileSync(manifestPath, 'utf8')));
+    writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
+  };
+  const before = f.git('ls-remote', '--heads', 'origin');
+  const publish = () => f.publish('2.3.4', true, ['--manifest', 'release-manifest.json']);
+
+  write();
+  edit((m) => ({ ...m, source: { commit: '0'.repeat(40) } }));
+  const edited = publish();
+  assert.notEqual(edited.status, 0);
+  assert.match(edited.stderr, /source commit 0{40} does not match HEAD/);
+
+  write();
+  edit((m) => ({ ...m, source: undefined }));
+  const missing = publish();
+  assert.notEqual(missing.status, 0);
+  assert.match(missing.stderr, /source commit \(missing\) does not match HEAD/);
+
+  write();
+  f.git('commit', '--allow-empty', '-m', 'a later source commit');
+  const stale = publish();
+  assert.notEqual(stale.status, 0);
+  assert.match(stale.stderr, /does not match HEAD/);
+
+  assert.equal(f.git('ls-remote', '--heads', 'origin'), before);
+  write();
+  assert.equal(publish().status, 0);
 });
