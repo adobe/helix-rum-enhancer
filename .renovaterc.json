@@ -3,8 +3,7 @@
     "github>adobe/helix-shared"
   ],
   "baseBranches": [
-    "main",
-    "1.x"
+    "main"
   ],
   "packageRules": [{
     "matchDepTypes": ["devDependencies"],
