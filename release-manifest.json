@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "package": "@adobe/helix-rum-enhancer",
+  "version": "2.53.0",
+  "source": {
+    "commit": "87b7ec070caaa095432be0384ab875b7f89945b6"
+  },
+  "files": {
+    "src/index.js": {
+      "integrity": "sha384-zoEXfXJ6U6Zbnao59dApLcpEYsT50jfDbMYYZ2dPJCdPcXl6doTyKRJW+RLJcplc",
+      "size": 15982
+    },
+    "src/index.map.js": {
+      "integrity": "sha384-xoUHRbXNs2A7fa776FyS8iQczYOu7QopdE9oR5Ch5HrEwx1O4EFw9Xg92E4R5zoz",
+      "size": 80735
+    },
+    "src/plugins/a11y.js": {
+      "integrity": "sha384-2RWhCFDrrIACD3dJFrB3zYkQeQkddRnn55SklGqDIe9qdWc+QFaXSI8KUOVKeQzL",
+      "size": 7385
+    },
+    "src/plugins/a11y.map.js": {
+      "integrity": "sha384-jzH75+jWwn/kUg/xz7B5+9ftjXfIH1XJbAZ5Y8G9TOmE/+9hAO/R9qQKb5r50xGU",
+      "size": 31606
+    },
+    "src/plugins/cwv.js": {
+      "integrity": "sha384-2RLWDWANtyU3cKnrO7OG/j1/v/S/2MVb+UV55PbbIFmEnn6t7s3r/9/x0Zzc983l",
+      "size": 15393
+    },
+    "src/plugins/cwv.map.js": {
+      "integrity": "sha384-8Beryvtjg8EqrcJZd5LwWjCLR3LCFa3dmnYLq4BvDh5aESXKOSJHKENGfNHJ1w36",
+      "size": 36702
+    },
+    "src/plugins/form.js": {
+      "integrity": "sha384-D2kpQFeuFT9w15uEqYf1aRulQotD9Z4bi+lx+UnW8drBmp3ax5iwaAjVzlPEbv5x",
+      "size": 3313
+    },
+    "src/plugins/form.map.js": {
+      "integrity": "sha384-/dRR2V+bfrT/fZdCYnjtXvWnbiEpE+qO/s66UFVjGy8XIHpgwg/nQCouylum7Kqt",
+      "size": 13730
+    },
+    "src/plugins/martech.js": {
+      "integrity": "sha384-bjSMPledoGxb/e4BNSwHzyeyb8Y/yGkOrhDcp287OQ8zzO6OYjmfD6unHFbuRpAB",
+      "size": 2183
+    },
+    "src/plugins/martech.map.js": {
+      "integrity": "sha384-R3c0RQVteXkwkI1giSIIsL9w2oGTOhixYWdYWkh2nVNcY1ORvf2fkMOv7MTGi1tQ",
+      "size": 8692
+    },
+    "src/plugins/onetrust.js": {
+      "integrity": "sha384-aTd37I2f3FvZ4VU+XK2b0cgdRjXlgVUVR1SdNY5gbrCJcM7beeoOJnYbyaXwS82W",
+      "size": 3065
+    },
+    "src/plugins/onetrust.map.js": {
+      "integrity": "sha384-SFs3IRkAIgc+4n2zrSk/c89EUXMlbe9kO2BMXGUGIA9y3F0wKYgI9o4f4YPKMXa2",
+      "size": 14582
+    },
+    "src/plugins/redirect.js": {
+      "integrity": "sha384-t7RPT7rYvH/T2yenaKr8e/f0NHD80Unb0SNwY9zV1auqa73N70WdxFv3jQeSD38H",
+      "size": 1680
+    },
+    "src/plugins/redirect.map.js": {
+      "integrity": "sha384-28yYguicbHnBJzYqr3sV42DK76knLMR7nQ97qCSBN45EITpNCRlCrWeNGMnHRqVm",
+      "size": 6649
+    },
+    "src/plugins/softnav.js": {
+      "integrity": "sha384-Lg5CdmI+5HyvMzi1yaJ+g/lECMjk7ERQyAIawsFPEZGGjmRkHpzx7yMcTG/XL0XA",
+      "size": 4098
+    },
+    "src/plugins/softnav.map.js": {
+      "integrity": "sha384-MTglqjtjtacvfVIwqRm1emkj2S7nOt06ESvyezF51If7xl2a9gFj76Yl3S/hrQWr",
+      "size": 23331
+    },
+    "src/plugins/trustarc.js": {
+      "integrity": "sha384-taZbjtJGEslKmH7k+EBOcs6CEd3ndt2MMDZSjJwEvwbVGtiMRVmafWM/vBYl23ZW",
+      "size": 2775
+    },
+    "src/plugins/trustarc.map.js": {
+      "integrity": "sha384-j/F0QWIcb9XH8VYJkbaG8oKl43b6p+FT13Qwc4thz0fCMxCBJVnpIFAj5eQLuXpK",
+      "size": 13168
+    },
+    "src/plugins/usercentrics.js": {
+      "integrity": "sha384-A08HPM+M4zeEoFtN0hFoW0KeY+P8NODz/GgBmTqRDq3admynYarw2x2xny82w5tM",
+      "size": 3119
+    },
+    "src/plugins/usercentrics.map.js": {
+      "integrity": "sha384-Sbo4wkupk+4/aQsnmASV3pk6WVDk5dgcBU+3UUhzPz6SNOvEoZ2XTYCfqlElFQe2",
+      "size": 13944
+    },
+    "src/plugins/video.js": {
+      "integrity": "sha384-X22EqiA6/F0gvyKQeAspj/c11tI8FUO1HgzycoK7gLhi/WXbwR5SVFe/en4zGKUn",
+      "size": 761
+    },
+    "src/plugins/video.map.js": {
+      "integrity": "sha384-BmiwAJ8Pr+JiNXgshH1+pcqBlGc95BfqOhgMU07DcxWvQlyKeCFxz159tWJZCvRl",
+      "size": 2310
+    },
+    "src/plugins/webcomponent.js": {
+      "integrity": "sha384-pKsfDE3NwfW+vmc+77M78UJyclkkLmBZZX4ARjZJJeyNAokJKW1hKgB0v8D9mgfs",
+      "size": 2734
+    },
+    "src/plugins/webcomponent.map.js": {
+      "integrity": "sha384-mY561D6ivOrQJX4/r45Dq7eCmhqhWSbrjcj4b7ksLuf/WlvflDMr7XuMExyklZBa",
+      "size": 12079
+    },
+    "src/vendor/web-vitals.iife.js": {
+      "integrity": "sha384-sKh//42d8+X4ztiyB4ChMShr0tmbWDWrkHfy9pLz9napB81dM74xVylUQVmZ94PE",
+      "size": 8991
+    }
+  }
+}
