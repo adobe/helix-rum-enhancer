@@ -101,3 +101,18 @@ test('releases publish a manifest of every built file', async (t) => {
   assert.ok(github.assets.some((asset) => asset.path === 'release-manifest.json'));
   assert.ok(readFileSync(new URL('.gitignore', root), 'utf8').split('\n').includes('/release-manifest.json'));
 });
+
+test('the vendored web-vitals copy is published with every release', async () => {
+  // The collector serves /.rum/web-vitals/dist/web-vitals.iife.js from this file of the
+  // enhancer release, verified against the release manifest. It must reach the release-*
+  // branches, not just the npm package.
+  const vendored = 'src/vendor/web-vitals.iife.js';
+  assert.ok(readFileSync(new URL('rollup.config.js', root), 'utf8').includes(`'${vendored}'`));
+  const [, exec] = plugins.find(([name]) => name === '@semantic-release/exec');
+  const listed = exec.publishCmd.split(/\s+/).includes(vendored);
+  const pkg = JSON.parse(readFileSync(new URL('package.json', root), 'utf8'));
+  const { BUILD_ROOTS } = await import(new URL('release-manifest.mjs', root).href);
+  const viaManifest = exec.publishCmd.includes('--manifest release-manifest.json')
+    && BUILD_ROOTS[pkg.name].some((dir) => vendored.startsWith(`${dir}/`));
+  assert.ok(listed || viaManifest, `${vendored} is not published to the release branches`);
+});
