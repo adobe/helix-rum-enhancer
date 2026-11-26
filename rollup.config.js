@@ -49,10 +49,6 @@ const indexMapConfig = {
       babelHelpers: 'bundled',
       comments: false,
     }),
-    checksum({
-      filename: 'index.md5',
-      includeAssets: false,
-    }),
   ],
 };
 
@@ -88,36 +84,46 @@ const indexConfig = {
   ],
 };
 
-// Plugins
-const pluginBundles = plugins.map((plugin) => ({
-  input: `plugins/${plugin}.js`,
-  output: [
-    {
+// Plugins: build debuggable (.map.js) and production (.js) in separate configs so
+// checksum runs only on the production bundle and never races across outputs.
+const pluginBundles = plugins.flatMap((plugin) => [
+  {
+    input: `plugins/${plugin}.js`,
+    output: {
       file: `src/plugins/${plugin}.map.js`,
       format: 'es',
       sourcemap: 'inline',
       exports: 'auto',
       banner,
     },
-    {
+    plugins: [
+      babel({
+        babelHelpers: 'bundled',
+        comments: false,
+      }),
+    ],
+  },
+  {
+    input: `plugins/${plugin}.js`,
+    output: {
       file: `src/plugins/${plugin}.js`,
       format: 'es',
       sourcemap: false,
       exports: 'auto',
       banner,
     },
-  ],
-  plugins: [
-    babel({
-      babelHelpers: 'bundled',
-      comments: false,
-    }),
-    checksum({
-      filename: `${plugin}.md5`,
-      includeAssets: false,
-    }),
-  ],
-}));
+    plugins: [
+      babel({
+        babelHelpers: 'bundled',
+        comments: false,
+      }),
+      checksum({
+        filename: `${plugin}.md5`,
+        includeAssets: false,
+      }),
+    ],
+  },
+]);
 
 export default [
   indexMapConfig,

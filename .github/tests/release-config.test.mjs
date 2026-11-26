@@ -101,3 +101,19 @@ test('releases publish a manifest of every built file', async (t) => {
   assert.ok(github.assets.some((asset) => asset.path === 'release-manifest.json'));
   assert.ok(readFileSync(new URL('.gitignore', root), 'utf8').split('\n').includes('/release-manifest.json'));
 });
+
+test('rollup configs emit unique deterministic checksum filenames without racing .map.js builds', async () => {
+  const { default: configs } = await import(new URL('rollup.config.js', root).href);
+  const checksumTargets = [];
+  for (const cfg of configs) {
+    const outputs = Array.isArray(cfg.output) ? cfg.output : [cfg.output];
+    const hasChecksum = (cfg.plugins || []).some((p) => p && p.name === 'checksum');
+    if (hasChecksum) {
+      assert.equal(outputs.length, 1, 'checksum plugin must not be shared across multiple outputs');
+      assert.ok(!outputs[0].file.endsWith('.map.js'), `sourcemap bundle ${outputs[0].file} must not write production checksum`);
+      checksumTargets.push(outputs[0].file);
+    }
+  }
+  assert.ok(checksumTargets.includes('src/index.js'));
+  assert.equal(new Set(checksumTargets).size, checksumTargets.length);
+});
