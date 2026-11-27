@@ -31,8 +31,9 @@ export default function addFormTracking({
   // Track existing forms
 
   function trackForm(form) {
-    form.addEventListener('submit', (e) => {
-      // Check for form validation errors before submitting
+    let submitted = false;
+    const checkSubmit = () => {
+      // Check for form validation errors before counting the submission
       const invalidFields = form.querySelectorAll(':invalid, .mktoInvalid');
       // Send error checkpoints for each invalid field
       invalidFields.forEach((field) => {
@@ -52,12 +53,28 @@ export default function addFormTracking({
       });
       // Only send formsubmit event if there are no validation errors
       if (invalidFields.length === 0) {
-        sampleRUM(getSubmitType(e.target), {
-          target: targetSelector(e.target),
-          source: sourceSelector(e.target),
+        submitted = true;
+        sampleRUM(getSubmitType(form), {
+          target: targetSelector(form),
+          source: sourceSelector(form),
         });
       }
-    }, { once: true });
+    };
+    // Not `once`: a `novalidate` form (e.g. Marketo) fires `submit` on a failed attempt
+    // too, and the successful retry must still be counted. Count one submission per form.
+    form.addEventListener('submit', () => {
+      if (submitted) {
+        return;
+      }
+      if (form.classList.contains('mktoForm')) {
+        // Marketo validates (and sets .mktoInvalid) in its own submit handler, which may
+        // be registered after this one. Check once the event has been dispatched to all
+        // handlers. Marketo submits via XHR, so the page is still there.
+        setTimeout(checkSubmit, 0);
+      } else {
+        checkSubmit();
+      }
+    });
 
     getIntersectionObserver('viewblock').observe(form);
     let lastSource;
