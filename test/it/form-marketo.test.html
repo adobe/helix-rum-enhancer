@@ -93,6 +93,12 @@
           await wait(1000);
           assert.equal(submits('mkto-retry-form').length, 0, 'no formsubmit for a failed attempt');
           assert(errors().some((call) => call.target === 'custom'), 'error checkpoint for the .mktoInvalid field');
+          const firstErrors = errors().length;
+
+          form.querySelector('input[type="submit"]').click();
+          await wait(1000);
+          assert.equal(submits('mkto-retry-form').length, 0, 'no formsubmit for a second failed attempt');
+          assert.equal(errors().length, firstErrors, 'the same field error is not reported again');
 
           form.querySelector('#mkto-retry-email').classList.remove('mktoInvalid');
           form.querySelector('input[type="submit"]').click();

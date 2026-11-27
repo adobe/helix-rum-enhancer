@@ -32,6 +32,8 @@ export default function addFormTracking({
 
   function trackForm(form) {
     let submitted = false;
+    // Each field error is reported once per form, however often a failed submit is retried.
+    const reportedErrors = new Set();
     const checkSubmit = () => {
       // Check for form validation errors before counting the submission
       const invalidFields = form.querySelectorAll(':invalid, .mktoInvalid');
@@ -45,10 +47,15 @@ export default function addFormTracking({
               .find((key) => field.validity[key]) || 'custom'
             : 'custom';
 
-          sampleRUM('error', {
-            target: errorType,
-            source: sourceSelector(field),
-          });
+          const source = sourceSelector(field);
+          const key = `${source} ${errorType}`;
+          if (!reportedErrors.has(key)) {
+            reportedErrors.add(key);
+            sampleRUM('error', {
+              target: errorType,
+              source,
+            });
+          }
         }
       });
       // Only send formsubmit event if there are no validation errors
