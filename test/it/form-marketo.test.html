@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marketo Form Validation Integration Test</title>
+  <script>
+    // Load RUM from localhost with ability to change scripts being served
+    // Check web-test-runner.config.js file for details
+    window.RUM_BASE = window.origin;
+    
+    // Log what's being sent to the "server" for testing
+    window.called = [];
+    
+    // Replace navigator.sendBeacon with fakeSendBeacon for testing
+    window.fakeSendBeacon = function (url, payload) {
+      // If payload is a string, assume it's a JSON string
+      if (typeof payload === 'string') {
+        window.called.push(JSON.parse(payload));
+      } else {
+        // It's a blob, extract text and parse
+        payload.text().then((text) => {
+          window.called.push(JSON.parse(text));
+        });
+      }
+    };
+  </script>
+  <script defer type="text/javascript" src="/.rum/@adobe/helix-rum-js@^2/dist/rum-standalone.js"></script>
+</head>
+
+<body>
+  <div class="block" data-block-status="loaded">
+    <h2>Marketo Form Validation Integration Tests</h2>
+    <img src="/test/fixtures/fire.jpg" height="200" width="200" alt="Test image for viewmedia tracking">
+  </div>
+
+  <!-- Marketo Forms 2.0 sets novalidate and marks failed fields with .mktoInvalid.
+       The value is natively valid, so only .mktoInvalid makes this attempt fail. -->
+  <div class="block" data-block-status="loaded">
+    <form id="mkto-retry-form" class="mktoForm" novalidate action="javascript:false;" method="POST">
+      <input type="text" id="mkto-retry-email" name="email" value="not checked natively" class="mktoInvalid">
+      <input type="submit" value="Submit">
+    </form>
+    <script>
+      document.querySelector('#mkto-retry-form').addEventListener('submit', (e) => e.preventDefault());
+    </script>
+  </div>
+
+  <!-- Marketo's own handler is attached later (see the test), after the enhancer's. -->
+  <div class="block" data-block-status="loaded">
+    <form id="mkto-late-form" class="mktoForm" novalidate action="javascript:false;" method="POST">
+      <input type="text" id="mkto-late-email" name="email" value="">
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+
+  <!-- A plain, valid form without Marketo classes. -->
+  <div class="block" data-block-status="loaded">
+    <form id="plain-form" action="javascript:false;" method="POST">
+      <input type="text" id="plain-name" name="name" value="Jane">
+      <input type="submit" value="Submit">
+    </form>
+    <script>
+      document.querySelector('#plain-form').addEventListener('submit', (e) => e.preventDefault());
+    </script>
+  </div>
+
+  <script type="module">
+    import { runTests } from '@web/test-runner-mocha';
+    import { assert } from '@esm-bundle/chai';
+
+    const wait = (ms) => new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+    const submits = (id) => window.called.filter((call) => call.checkpoint === 'formsubmit' && call.source === `form#${id}`);
+    const errors = () => window.called.filter((call) => call.checkpoint === 'error');
+
+    runTests(async () => {
+      describe('Marketo form validation tracking', () => {
+        before(async () => {
+          // Wait for the enhancer and its form plugin to attach their listeners.
+          await wait(2000);
+        });
+
+        beforeEach(() => {
+          window.called = [];
+        });
+
+        it('does not count a failed Marketo attempt, but counts the successful retry', async () => {
+          const form = document.querySelector('#mkto-retry-form');
+          form.querySelector('input[type="submit"]').click();
+          await wait(1000);
+          assert.equal(submits('mkto-retry-form').length, 0, 'no formsubmit for a failed attempt');
+          assert(errors().some((call) => call.target === 'custom'), 'error checkpoint for the .mktoInvalid field');
+          const firstErrors = errors().length;
+
+          form.querySelector('input[type="submit"]').click();
+          await wait(1000);
+          assert.equal(submits('mkto-retry-form').length, 0, 'no formsubmit for a second failed attempt');
+          assert.equal(errors().length, firstErrors, 'the same field error is not reported again');
+
+          form.querySelector('#mkto-retry-email').classList.remove('mktoInvalid');
+          form.querySelector('input[type="submit"]').click();
+          await wait(1000);
+          assert.equal(submits('mkto-retry-form').length, 1, 'formsubmit for the successful retry');
+
+          form.querySelector('input[type="submit"]').click();
+          await wait(1000);
+          assert.equal(submits('mkto-retry-form').length, 1, 'a form counts at most one submission');
+        });
+
+        it('waits for a Marketo handler that runs after its own', async () => {
+          const form = document.querySelector('#mkto-late-form');
+          // Simulate Marketo Forms2 initializing after the enhancer: it validates in its
+          // own submit handler and marks the empty field.
+          form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const field = form.querySelector('#mkto-late-email');
+            field.classList.toggle('mktoInvalid', field.value === '');
+          });
+          form.querySelector('input[type="submit"]').click();
+          await wait(1000);
+          assert.equal(submits('mkto-late-form').length, 0, 'no formsubmit while Marketo reports invalid fields');
+          assert(errors().length > 0, 'error checkpoint for the field Marketo marked');
+        });
+
+        it('still counts a valid form without Marketo classes', async () => {
+          document.querySelector('#plain-form input[type="submit"]').click();
+          await wait(1000);
+          assert.equal(submits('plain-form').length, 1);
+          assert.equal(errors().length, 0);
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>
